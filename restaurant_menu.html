@@ -224,7 +224,7 @@
     <span id="cartCountText" class="text-sm font-semibold">0</span>
   </button>
 
-  <!-- Cart Drawer -->
+  <!-- Cart Drawer (kept but not toggled) -->
   <div id="cartDrawer" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="bg-white w-full sm:w-96 absolute top-0 right-0 h-full overflow-y-auto p-6 drawer-enter">
       <button id="closeCartBtn" class="text-2xl text-gray-600 mb-4">×</button>
@@ -492,7 +492,6 @@
       if (storedCart) {
         cart = storedCart.filter(item => item.restaurantId === restaurantId);
         updateCartCount();
-        renderCartItems();
       }
     }
 
@@ -502,6 +501,35 @@
       cartNavCount.textContent = count;
       cartCountBtn.classList.toggle('bg-orange-600', count > 0);
     }
+
+    // Redirect to Checkout
+    function goToCheckout(e) {
+      e.preventDefault();
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
+    }
+
+    cartCountBtn.addEventListener('click', goToCheckout);
+    document.querySelector('#cartNavBtn').addEventListener('click', goToCheckout);
+
+    // Cart Drawer (not used but retained for potential future use)
+    closeCartBtn.addEventListener('click', () => {
+      cartDrawer.querySelector('.drawer-enter').classList.remove('drawer-enter-active');
+      setTimeout(() => cartDrawer.classList.add('hidden'), 300);
+    });
+
+    clearCartBtn.addEventListener('click', () => {
+      cart = [];
+      saveCart();
+      renderCartItems();
+      updateCartCount();
+      showToast('Cart cleared.');
+    });
+
+    proceedBtn.addEventListener('click', goToCheckout);
 
     function renderCartItems() {
       cartItemsContainer.innerHTML = '';
@@ -529,41 +557,6 @@
       });
       totalAmountEl.textContent = `R${totalAmount.toFixed(2)}`;
     }
-
-    // Cart Drawer Toggle
-    cartCountBtn.addEventListener('click', () => {
-      cartDrawer.classList.remove('hidden');
-      renderCartItems();
-      setTimeout(() => cartDrawer.querySelector('.drawer-enter').classList.add('drawer-enter-active'), 10);
-    });
-
-    document.querySelector('#cartNavBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      cartDrawer.classList.remove('hidden');
-      renderCartItems();
-      setTimeout(() => cartDrawer.querySelector('.drawer-enter').classList.add('drawer-enter-active'), 10);
-    });
-
-    closeCartBtn.addEventListener('click', () => {
-      cartDrawer.querySelector('.drawer-enter').classList.remove('drawer-enter-active');
-      setTimeout(() => cartDrawer.classList.add('hidden'), 300);
-    });
-
-    clearCartBtn.addEventListener('click', () => {
-      cart = [];
-      saveCart();
-      renderCartItems();
-      updateCartCount();
-      showToast('Cart cleared.');
-    });
-
-    proceedBtn.addEventListener('click', () => {
-      if (cart.length === 0) {
-        showToast('Your cart is empty.');
-        return;
-      }
-      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
-    });
 
     addToCartBtn.addEventListener('click', () => addToCart(currentItem));
 
