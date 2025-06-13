@@ -18,7 +18,7 @@
     /* Toast Notification */
     .toast {
       position: fixed;
-      bottom: 20px;
+      bottom: 80px; /* Adjusted to avoid overlap with bottom nav bar */
       left: 50%;
       transform: translateX(-50%);
       background-color: #333;
@@ -66,12 +66,68 @@
     .tag {
       @apply inline-block bg-gray-200 text-gray-700 text-xs font-semibold px-2 py-1 rounded-full mr-1;
     }
+    /* Bottom Nav Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #ffffff;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0;
+      z-index: 50;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .bottom-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #6b7280;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .bottom-nav a.active {
+      color: #f97316;
+    }
+    .bottom-nav a:hover {
+      color: #f97316;
+    }
+    .bottom-nav i {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .bottom-nav .cart-icon {
+      position: relative;
+    }
+    .bottom-nav .cart-icon .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #ef4444;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      border-radius: 50%;
+      padding: 2px 6px;
+    }
+    @media (min-width: 640px) {
+      .bottom-nav {
+        display: none; /* Hide on larger screens */
+      }
+      .toast {
+        bottom: 20px; /* Revert toast position on larger screens */
+      }
+    }
   </style>
 </head>
 <body class="bg-gray-50 font-sans">
   <!-- Header -->
   <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
-    <button id="menuBtn" class="text-gray-600 focus:outline-none">
+    <button id="menuBtn" class="text-gray-600 focus:outline-none sm:hidden"> <!-- Hidden on sm and above -->
       <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
@@ -80,7 +136,7 @@
       <img src="https://i.postimg.cc/Pf13fPPM/Whats-App-Image-2025-05-05-at-11-16-46-1-removebg-preview.png" alt="Logo" class="h-8 object-contain">
     </div>
     <div class="flex items-center space-x-4">
-      <button id="cartBtn" class="relative btn-orange p-2 rounded-full">
+      <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden"> <!-- Hidden on mobile -->
         <i class="fas fa-shopping-cart text-lg"></i>
         <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
       </button>
@@ -93,16 +149,16 @@
   </header>
 
   <!-- Drawer Menu -->
-  <div id="drawer" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72">
+  <div id="drawer" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72 hidden sm:block"> <!-- Hidden on mobile, always visible on sm and above -->
     <div class="p-6">
       <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
       <ul class="space-y-4">
-        <li><a href="#" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
+        <li><a href="#" class="flex items-center text-gray-700 hover:text-orange-500 transition active"><i class="fas fa-home mr-2"></i>Home</a></li>
         <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
         <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-user mr-2"></i>Profile</a></li>
         <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
         <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
-        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition sm:hidden"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
+        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
       </ul>
     </div>
   </div>
@@ -131,7 +187,7 @@
         <button id="clearSearchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
           <i class="fas fa-times"></i>
         </button>
-        </div>
+      </div>
       <div class="flex space-x-4 mt-2 sm:mt-0">
         <select id="sortSelect" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
           <option value="name">Sort by Name</option>
@@ -154,7 +210,7 @@
   </div>
 
   <!-- Restaurant List -->
-  <section class="container mx-auto px-4 sm:px-6 py-8">
+  <section class="container mx-auto px-4 sm:px-6 py-8 pb-20 sm:pb-8"> <!-- Added padding-bottom for mobile to avoid nav bar overlap -->
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Restaurants</h2>
     <div id="spinner" class="spinner hidden">
       <svg class="animate-spin h-10 w-10 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -164,6 +220,31 @@
     </div>
     <div id="restaurantMenuList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </section>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav sm:hidden"> <!-- Hidden on sm and above -->
+    <a href="#" class="active">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="status.html">
+      <i class="fas fa-clipboard-list"></i>
+      <span>Orders</span>
+    </a>
+    <a href="profile.html">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+    <a href="#" id="cartNavBtn" class="cart-icon">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-count" id="cartNavCount">0</span>
+      <span>Cart</span>
+    </a>
+    <a href="#" id="menuNavBtn">
+      <i class="fas fa-bars"></i>
+      <span>Menu</span>
+    </a>
+  </nav>
 
   <!-- Firebase Script -->
   <script type="module">
@@ -198,6 +279,9 @@
     const signOutDrawer = document.getElementById('signOutDrawer');
     const cartBtn = document.getElementById('cartBtn');
     const cartCount = document.getElementById('cartCount');
+    const cartNavBtn = document.getElementById('cartNavBtn');
+    const cartNavCount = document.getElementById('cartNavCount');
+    const menuNavBtn = document.getElementById('menuNavBtn');
     const spinner = document.getElementById('spinner');
     const menuBtn = document.getElementById('menuBtn');
     const drawer = document.getElementById('drawer');
@@ -248,7 +332,7 @@
         btn.innerHTML = `<i class="fas ${categoryIcons[category] || 'fa-utensils'} mr-2"></i>${category}`;
         btn.onclick = () => {
           activeCategory = category;
-          isInitialLoad = false; // Disable initial load flag on user interaction
+          isInitialLoad = false;
           filterRestaurants();
           createCategoryButtons();
         };
@@ -327,20 +411,17 @@
     function filterRestaurants() {
       let filtered = allRestaurants;
 
-      // Skip filtering on initial load to show all restaurants
       if (!isInitialLoad) {
         const keyword = searchInput.value.toLowerCase().trim();
         const sortBy = sortSelect.value;
         const distance = distanceFilter.value;
 
-        // Category Filter
         if (activeCategory !== "All") {
           filtered = filtered.filter(item =>
             (item.restaurant.category || "").toLowerCase().includes(activeCategory.toLowerCase())
           );
         }
 
-        // Search Filter
         if (keyword) {
           filtered = filtered.filter(item =>
             (item.restaurant.name || "").toLowerCase().includes(keyword) ||
@@ -348,15 +429,13 @@
           );
         }
 
-        // Distance Filter (Mock - assumes distance in km is available)
         if (distance !== "all") {
           filtered = filtered.filter(item => {
-            const dist = item.restaurant.distance || 0; // Replace with actual distance calculation if available
+            const dist = item.restaurant.distance || 0;
             return dist <= parseInt(distance);
           });
         }
 
-        // Sorting
         filtered.sort((a, b) => {
           if (sortBy === "rating") {
             return (b.restaurant.rating || 0) - (a.restaurant.rating || 0);
@@ -402,7 +481,9 @@
     function updateCartCount() {
       const count = cart.reduce((total, c) => total + c.quantity, 0);
       cartCount.textContent = count;
+      cartNavCount.textContent = count;
       cartBtn.classList.toggle('bg-orange-600', count > 0);
+      cartNavBtn.classList.toggle('active', count > 0);
     }
 
     // Authentication
@@ -452,6 +533,13 @@
       backdrop.classList.toggle('hidden');
     });
 
+    menuNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      drawer.classList.toggle('drawer-enter');
+      drawer.classList.toggle('drawer-enter-active');
+      backdrop.classList.toggle('hidden');
+    });
+
     backdrop.addEventListener('click', () => {
       drawer.classList.remove('drawer-enter-active');
       drawer.classList.add('drawer-enter');
@@ -468,11 +556,21 @@
       window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
     });
 
+    cartNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      const restaurantId = cart[0].restaurantId;
+      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
+    });
+
     // Search with Debounce
     let debounceTimeout;
     searchInput.addEventListener('input', () => {
       clearTimeout(debounceTimeout);
-      isInitialLoad = false; // Disable initial load flag on user interaction
+      isInitialLoad = false;
       debounceTimeout = setTimeout(() => {
         filterRestaurants();
       }, 300);
@@ -484,18 +582,18 @@
       activeCategory = "All";
       sortSelect.value = "name";
       distanceFilter.value = "all";
-      isInitialLoad = false; // Reset filters but don't trigger initial load
+      isInitialLoad = false;
       createCategoryButtons();
       filterRestaurants();
     });
 
     // Sort and Distance Filter
     sortSelect.addEventListener('change', () => {
-      isInitialLoad = false; // Disable initial load flag on user interaction
+      isInitialLoad = false;
       filterRestaurants();
     });
     distanceFilter.addEventListener('change', () => {
-      isInitialLoad = false; // Disable initial load flag on user interaction
+      isInitialLoad = false;
       filterRestaurants();
     });
 
