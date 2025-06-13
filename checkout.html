@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Hide Scrollbar */
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    /* Smooth transitions for drawers */
+    .drawer-enter {
+      transform: translateX(100%);
+      opacity: 0;
+      transition: all 0.3s ease-in-out;
+    }
+    .drawer-enter-active {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    /* Custom button hover effect */
+    .btn-orange {
+      @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out;
+    }
+    /* Disabled button */
+    .btn-disabled {
+      @apply bg-gray-300 text-gray-500 cursor-not-allowed;
+    }
+    /* Bottom Nav Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #ffffff;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0;
+      z-index: 50;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .bottom-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #6b7280;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .bottom-nav a.active {
+      color: #f97316;
+    }
+    .bottom-nav a:hover {
+      color: #f97316;
+    }
+    .bottom-nav i {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .bottom-nav .cart-icon {
+      position: relative;
+    }
+    .bottom-nav .cart-icon .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #ef4444;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      border-radius: 50%;
+      padding: 2px 6px;
+    }
+    .bottom-nav .home-icon {
+      background-color: #f97316;
+      color: white;
+      border-radius: 8px;
+      padding: 8px 16px;
+      transform: translateY(-4px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    .bottom-nav .home-icon i {
+      font-size: 20px;
+      margin-bottom: 0;
+      color: white;
+    }
+    .bottom-nav .home-icon span {
+      color: white;
+      margin-top: 4px;
+    }
+    /* Sidebar Drawer */
+    .sidebar-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 64;
+      height: 100%;
+      background-color: white;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      z-index: 60;
+    }
+    .sidebar-drawer.active {
+      transform: translateX(0);
+    }
+    /* Backdrop */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 55;
+      display: none;
+    }
+    .backdrop.active {
+      display: block;
+    }
+    /* Content Container */
+    .content-container {
+      padding-bottom: 80px; /* Space for nav bar */
+    }
+    @media (min-width: 640px) {
+      .bottom-nav {
+        display: none;
+      }
+      .sidebar-drawer {
+        width: 72;
+        transform: translateX(0);
+        display: block;
+      }
+      .backdrop {
+        display: none;
+      }
+      .content-container {
+        padding-bottom: 0; /* No nav bar on desktop */
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+  <!-- Header -->
+  <div class="bg-white shadow-sm py-4 px-6">
+    <div class="container mx-auto flex items-center justify-between">
+      <div>
+        <h1 id="restaurantName" class="text-2xl font-bold text-gray-800">Restaurant Name</h1>
+        <p id="restaurantLocation" class="text-sm text-gray-600 flex items-center gap-2">
+          <i class="fas fa-map-marker-alt"></i>
+          <span id="locationText">Restaurant Location</span>
+        </p>
+      </div>
+      <a href="index.html" class="text-orange-500 hover:text-orange-600">
+        <i class="fas fa-arrow-left text-xl"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Checkout Content -->
+  <div class="container mx-auto px-4 sm:px-6 py-8 content-container">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Checkout</h2>
+
+    <!-- Cart Items -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Order Summary</h3>
+      <div id="cartItems" class="space-y-4"></div>
+      <div class="border-t mt-4 pt-4">
+        <div class="flex justify-between text-gray-600">
+          <span>Subtotal</span>
+          <span id="subtotal">R0.00</span>
+        </div>
+        <div class="flex justify-between text-gray-600 mt-2">
+          <span>Delivery Fee</span>
+          <span id="deliveryFee">R20.00</span>
+        </div>
+        <div class="flex justify-between font-bold text-gray-800 mt-2">
+          <span>Total</span>
+          <span id="total">R0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery Details -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Delivery Details</h3>
+      <form id="deliveryForm">
+        <div class="mb-4">
+          <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+          <input type="text" id="name" class="mt-1 block w-full border-gray-300 rounded-lg p-2 focus:ring-orange-500 focus:border-orange-500" required>
+        </div>
+        <div class="mb-4">
+          <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+          <input type="tel" id="phone" class="mt-1 block w-full border-gray-300 rounded-lg p-2 focus:ring-orange-500 focus:border-orange-500" required>
+        </div>
+        <div class="mb-4">
+          <label for="address" class="block text-sm font-medium text-gray-700">Delivery Address</label>
+          <textarea id="address" class="mt-1 block w-full border-gray-300 rounded-lg p-2 focus:ring-orange-500 focus:border-orange-500" rows="4" required></textarea>
+        </div>
+        <button type="submit" id="placeOrderBtn" class="btn-orange w-full py-3 rounded-lg font-semibold">Place Order</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sidebar Drawer Menu -->
+  <div id="sidebarDrawer" class="sidebar-drawer">
+    <div class="p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
+      <ul class="space-y-4">
+        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
+        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
+        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-user mr-2"></i>Profile</a></li>
+        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
+        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
+        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Backdrop -->
+  <div id="backdrop" class="backdrop"></div>
+
+  <!-- Firebase + Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.appspot.com",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
+      measurementId: "G-V4W97VMSKL"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth();
+
+    const restaurantName = document.getElementById('restaurantName');
+    const restaurantLocation = document.getElementById('locationText');
+    const cartItemsContainer = document.getElementById('cartItems');
+    const subtotalEl = document.getElementById('subtotal');
+    const deliveryFeeEl = document.getElementById('deliveryFee');
+    const totalEl = document.getElementById('total');
+    const deliveryForm = document.getElementById('deliveryForm');
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const sidebarDrawer = document.getElementById('sidebarDrawer');
+    const backdrop = document.getElementById('backdrop');
+    const signOutDrawer = document.getElementById('signOutDrawer');
+    const cartNavCount = document.getElementById('cartNavCount');
+
+    let userId = null;
+    let cart = [];
+    const deliveryFee = 20.00;
+    const urlParams = new URLSearchParams(window.location.search);
+    const restaurantId = urlParams.get('restaurantId');
+    const cartParam = urlParams.get('cart');
+
+    // Authentication
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        userId = user.uid;
+        loadRestaurantDetails();
+        loadCart();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Sign Out
+    signOutDrawer.addEventListener('click', (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error('Sign Out Error', error);
+        showToast('Failed to sign out.');
+      });
+    });
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    function loadRestaurantDetails() {
+      const restaurantRef = ref(db, `restaurants/${restaurantId}`);
+      onValue(restaurantRef, (snapshot) => {
+        const restaurant = snapshot.val();
+        if (!restaurant) {
+          showToast('Restaurant not found.');
+          window.location.href = 'index.html';
+          return;
+        }
+        restaurantName.textContent = restaurant.name;
+        restaurantLocation.textContent = restaurant.location || 'Location not available';
+      }, (error) => {
+        console.error('Error loading restaurant:', error);
+        showToast('Failed to load restaurant details.');
+      });
+    }
+
+    function loadCart() {
+      try {
+        if (cartParam) {
+          cart = JSON.parse(decodeURIComponent(cartParam));
+        } else {
+          const storedCart = JSON.parse(localStorage.getItem(`cart-${userId}`));
+          if (storedCart) {
+            cart = storedCart.filter(item => item.restaurantId === restaurantId);
+          }
+        }
+        if (cart.length === 0) {
+          showToast('Your cart is empty.');
+          window.location.href = `restaurant_menu.html?restaurantId=${restaurantId}`;
+          return;
+        }
+        renderCartItems();
+        updateCartCount();
+      } catch (error) {
+        console.error('Error parsing cart:', error);
+        showToast('Invalid cart data.');
+        window.location.href = `restaurant_menu.html?restaurantId=${restaurantId}`;
+      }
+    }
+
+    function renderCartItems() {
+      cartItemsContainer.innerHTML = '';
+      let subtotal = 0;
+      cart.forEach((c, index) => {
+        const itemTotal = c.item.price * c.quantity;
+        subtotal += itemTotal;
+        const el = document.createElement('div');
+        el.className = 'flex justify-between items-center mb-4';
+        el.innerHTML = `
+          <div>
+            <h4 class="text-md font-semibold text-gray-800">${c.item.name} (x${c.quantity})</h4>
+            <p class="text-orange-500 text-sm">R${itemTotal.toFixed(2)}</p>
+          </div>
+          <button class="text-red-500 hover:text-red-600" data-index="${index}">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        el.querySelector('button').addEventListener('click', () => {
+          cart.splice(index, 1);
+          saveCart();
+          renderCartItems();
+          updateCartCount();
+          if (cart.length === 0) {
+            showToast('Your cart is empty.');
+            window.location.href = `restaurant_menu.html?restaurantId=${restaurantId}`;
+          }
+        });
+        cartItemsContainer.appendChild(el);
+      });
+      subtotalEl.textContent = `R${subtotal.toFixed(2)}`;
+      deliveryFeeEl.textContent = `R${deliveryFee.toFixed(2)}`;
+      totalEl.textContent = `R${(subtotal + deliveryFee).toFixed(2)}`;
+    }
+
+    function saveCart() {
+      if (userId) {
+        localStorage.setItem(`cart-${userId}`, JSON.stringify(cart));
+      }
+    }
+
+    function updateCartCount() {
+      const count = cart.reduce((total, c) => total + c.quantity, 0);
+      cartNavCount.textContent = count;
+    }
+
+    deliveryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = document.getElementById('address').value.trim();
+
+      if (!name || !phone || !address) {
+        showToast('Please fill in all fields.');
+        return;
+      }
+
+      placeOrderBtn.disabled = true;
+      placeOrderBtn.classList.add('btn-disabled');
+
+      try {
+        const subtotal = cart.reduce((total, c) => total + c.item.price * c.quantity, 0);
+        const total = subtotal + deliveryFee;
+        const order = {
+          restaurantId,
+          restaurantName: restaurantName.textContent,
+          items: cart.map(c => ({
+            name: c.item.name,
+            quantity: c.quantity,
+            price: c.item.price,
+            total: c.item.price * c.quantity
+          })),
+          subtotal,
+          deliveryFee,
+          total,
+          userDetails: {
+            name,
+            phone,
+            address,
+            email: auth.currentUser.email
+          },
+          timestamp: Date.now(),
+          status: 'Pending'
+        };
+
+        const ordersRef = ref(db, `orders/${userId}`);
+        const newOrderRef = push(ordersRef);
+        await set(newOrderRef, order);
+
+        // Clear cart
+        cart = [];
+        saveCart();
+        updateCartCount();
+
+        showToast('Order placed successfully!');
+        window.location.href = 'status.html';
+      } catch (error) {
+        console.error('Error placing order:', error);
+        showToast('Failed to place order.');
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.classList.remove('btn-disabled');
+      }
+    });
+
+    // Sidebar Drawer Toggle
+    function toggleSidebarDrawer(e) {
+      e.preventDefault();
+      sidebarDrawer.classList.toggle('active');
+      backdrop.classList.toggle('active');
+    }
+
+    document.querySelector('#rideNavBtn').addEventListener('click', toggleSidebarDrawer);
+    backdrop.addEventListener('click', () => {
+      sidebarDrawer.classList.remove('active');
+      backdrop.classList.remove('active');
+    });
+  </script>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav sm:hidden">
+    <a href="status.html">
+      <i class="fas fa-clipboard-list"></i>
+      <span>Orders</span>
+    </a>
+    <a href="profile.html">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+    <a href="index.html" class="home-icon">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" id="cartNavBtn" class="cart-icon">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-count" id="cartNavCount">0</span>
+      <span>Cart</span>
+    </a>
+    <a href="#" id="rideNavBtn">
+      <i class="fas fa-car"></i>
+      <span>Ride</span>
+    </a>
+  </nav>
+</body>
+</html>
