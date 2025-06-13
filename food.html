@@ -18,7 +18,7 @@
     /* Toast Notification */
     .toast {
       position: fixed;
-      bottom: 80px; /* Adjusted to avoid overlap with bottom nav bar */
+      bottom: 80px;
       left: 50%;
       transform: translateX(-50%);
       background-color: #333;
@@ -125,17 +125,33 @@
     .bottom-nav .home-icon i {
       font-size: 20px;
       margin-bottom: 0;
+      color: white; /* Explicitly set to white */
     }
     .bottom-nav .home-icon span {
       color: white;
       margin-top: 4px;
     }
+    /* Horizontal Restaurant List */
+    .restaurant-list {
+      display: flex;
+      overflow-x: auto;
+      gap: 1.5rem;
+      padding-bottom: 1rem;
+      scroll-snap-type: x mandatory;
+    }
+    .restaurant-card {
+      flex: 0 0 250px;
+      scroll-snap-align: start;
+    }
     @media (min-width: 640px) {
       .bottom-nav {
-        display: none; /* Hide on larger screens */
+        display: none;
       }
       .toast {
-        bottom: 20px; /* Revert toast position on larger screens */
+        bottom: 20px;
+      }
+      .restaurant-card {
+        flex: 0 0 300px;
       }
     }
   </style>
@@ -220,16 +236,26 @@
     <div id="categoryList" class="flex space-x-3 overflow-x-auto scrollbar-hide"></div>
   </div>
 
-  <!-- Restaurant List -->
+  <!-- Restaurant Sections -->
   <section class="container mx-auto px-4 sm:px-6 py-8 pb-20 sm:pb-8">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Restaurants</h2>
     <div id="spinner" class="spinner hidden">
       <svg class="animate-spin h-10 w-10 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
       </svg>
     </div>
-    <div id="restaurantMenuList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="allRestaurantsSection" class="mb-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">All Restaurants</h2>
+      <div id="allRestaurantsList" class="restaurant-list scrollbar-hide"></div>
+    </div>
+    <div id="favouriteRestaurantsSection" class="mb-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Favourite Restaurants</h2>
+      <div id="favouriteRestaurantsList" class="restaurant-list scrollbar-hide"></div>
+    </div>
+    <div id="popularRestaurantsSection">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Popular Restaurants</h2>
+      <div id="popularRestaurantsList" class="restaurant-list scrollbar-hide"></div>
+    </div>
   </section>
 
   <!-- Bottom Navigation Bar -->
@@ -278,7 +304,9 @@
     const db = getDatabase(app);
     const auth = getAuth();
 
-    const restaurantMenuList = document.getElementById('restaurantMenuList');
+    const allRestaurantsList = document.getElementById('allRestaurantsList');
+    const favouriteRestaurantsList = document.getElementById('favouriteRestaurantsList');
+    const popularRestaurantsList = document.getElementById('popularRestaurantsList');
     const categoryList = document.getElementById('categoryList');
     const searchInput = document.getElementById('searchInput');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
@@ -298,15 +326,17 @@
     const backdrop = document.getElementById('drawerBackdrop');
 
     const categories = [
-      "All", "Hot Deals", "Chicken", "Pizza", "Sushi", "Burgers",
-      "Asian", "Seafood", "African", "Health", "Grilled", "Kotas"
+      { name: "All Restaurants", icon: "fa-utensils" },
+      { name: "Favourite", icon: "fa-heart" },
+      { name: "Popular", icon: "fa-fire" }
     ];
 
     let allRestaurants = [];
     let cart = [];
-    let activeCategory = "All";
+    let activeCategory = "All Restaurants";
     let userId = null;
     let isInitialLoad = true;
+    let userFavorites = [];
 
     function showToast(message) {
       const toast = document.createElement('div');
@@ -317,61 +347,60 @@
     }
 
     function createCategoryButtons() {
-      const categoryIcons = {
-        "All": "fa-utensils",
-        "Hot Deals": "fa-fire",
-        "Chicken": "fa-drumstick-bite",
-        "Pizza": "fa-pizza-slice",
-        "Sushi": "fa-fish",
-        "Burgers": "fa-hamburger",
-        "Asian": "fa-bowl-rice",
-        "Seafood": "fa-shrimp",
-        "African": "fa-pepper-hot",
-        "Health": "fa-leaf",
-        "Grilled": "fa-hotdog",
-        "Kotas": "fa-bread-slice"
-      };
-
       categoryList.innerHTML = "";
       categories.forEach(category => {
-        const isActive = category === activeCategory;
+        const isActive = category.name === activeCategory;
         const btn = document.createElement('button');
         btn.className = `flex items-center px-4 py-2 rounded-full text-sm font-medium transition duration-200 ${
           isActive ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
         }`;
-        btn.innerHTML = `<i class="fas ${categoryIcons[category] || 'fa-utensils'} mr-2"></i>${category}`;
+        btn.innerHTML = `<i class="fas ${category.icon} mr-2"></i>${category.name}`;
         btn.onclick = () => {
-          activeCategory = category;
+          activeCategory = category.name;
           isInitialLoad = false;
-          filterRestaurants();
+          scrollToCategory(category.name);
           createCategoryButtons();
         };
         categoryList.appendChild(btn);
       });
     }
 
-    function renderRestaurants(data) {
-      restaurantMenuList.innerHTML = '';
+    function scrollToCategory(category) {
+      const sectionId = category === "All Restaurants" ? "allRestaurantsSection" :
+                        category === "Favourite" ? "favouriteRestaurantsSection" :
+                        "popularRestaurantsSection";
+      document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderRestaurants(container, data) {
+      container.innerHTML = '';
+      if (data.length === 0) {
+        const message = document.createElement('p');
+        message.className = 'text-gray-500 text-center w-full py-4';
+        message.textContent = container.id === 'favouriteRestaurantsList' ? 
+          'No favourite restaurants yet.' : 'No restaurants available.';
+        container.appendChild(message);
+        return;
+      }
       data.forEach(({ id, restaurant }) => {
         const card = document.createElement('div');
-        card.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 cursor-pointer';
+        card.className = 'restaurant-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 cursor-pointer';
         card.innerHTML = `
-          <img src="${restaurant.image || 'https://via.placeholder.com/300x200'}" class="w-full h-48 object-cover" alt="${restaurant.name}">
-          <div class="p-4">
-            <h4 class="text-lg font-semibold text-gray-800">${restaurant.name}</h4>
-            <p class="text-gray-600 text-sm mt-1"><i class="fas fa-map-marker-alt mr-1"></i>${restaurant.location || 'Unknown Location'}</p>
-            <p class="text-gray-600 text-sm mt-1 line-clamp-2">${restaurant.description}</p>
-            <div class="flex items-center mt-2">
+          <img src="${restaurant.image || 'https://via.placeholder.com/300x200'}" class="w-full h-32 object-cover" alt="${restaurant.name}">
+          <div class="p-3">
+            <h4 class="text-md font-semibold text-gray-800">${restaurant.name}</h4>
+            <p class="text-gray-600 text-xs mt-1"><i class="fas fa-map-marker-alt mr-1"></i>${restaurant.location || 'Unknown Location'}</p>
+            <div class="flex items-center mt-1">
               <span class="text-yellow-500">${renderStars(restaurant.rating || 0)}</span>
             </div>
-            <div class="flex flex-wrap gap-1 mt-2">
+            <div class="flex flex-wrap gap-1 mt-1">
               ${restaurant.tags ? restaurant.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
             </div>
-            <div class="flex justify-between items-center mt-3">
-              <span class="text-sm text-gray-500"><i class="fas fa-clock mr-1"></i>${restaurant.deliveryTime || 'N/A'}</span>
-              <span class="text-sm text-gray-500">Favorites: <span id="favoriteCount-${id}">${restaurant.favorites || 0}</span></span>
+            <div class="flex justify-between items-center mt-2">
+              <span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>${restaurant.deliveryTime || 'N/A'}</span>
+              <span class="text-xs text-gray-500">Favorites: <span id="favoriteCount-${id}">${restaurant.favorites || 0}</span></span>
               <button id="favoriteBtn-${id}" class="text-red-500 hover:text-red-600 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="${userFavorites.includes(id) ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </button>
@@ -385,7 +414,7 @@
           e.stopPropagation();
           toggleFavorite(id);
         });
-        restaurantMenuList.appendChild(card);
+        container.appendChild(card);
       });
     }
 
@@ -393,7 +422,7 @@
       let stars = '';
       for (let i = 1; i <= 5; i++) {
         stars += `
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block ${i <= rating ? 'text-yellow-400' : 'text-gray-300'}" fill="currentColor" viewBox="0 0 20 20" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline-block ${i <= rating ? 'text-yellow-400' : 'text-gray-300'}" fill="currentColor" viewBox="0 0 20 20" stroke="currentColor">
             <path d="M10 15l-3.6 2.3 1-4.3L3 8.9l4.5-.4L10 4l2.5 4.5 4.5.4-3.4 4.1 1 4.3L10 15z" />
           </svg>
         `;
@@ -403,13 +432,29 @@
 
     function toggleFavorite(id) {
       const restaurantRef = ref(db, `restaurants/${id}`);
+      const userFavoritesRef = ref(db, `users/${userId}/favorites`);
       onValue(restaurantRef, snapshot => {
         const restaurant = snapshot.val();
-        const newFavoritesCount = (restaurant.favorites || 0) + 1;
+        const newFavoritesCount = userFavorites.includes(id) ? 
+          (restaurant.favorites || 0) - 1 : (restaurant.favorites || 0) + 1;
         update(restaurantRef, { favorites: newFavoritesCount })
           .then(() => {
             document.getElementById(`favoriteCount-${id}`).textContent = newFavoritesCount;
-            showToast("Added to favorites!");
+            if (userFavorites.includes(id)) {
+              userFavorites = userFavorites.filter(favId => favId !== id);
+              showToast("Removed from favorites!");
+            } else {
+              userFavorites.push(id);
+              showToast("Added to favorites!");
+            }
+            update(userFavoritesRef, { [id]: !userFavorites.includes(id) })
+              .then(() => {
+                renderRestaurantSections();
+              })
+              .catch(error => {
+                console.error("Error updating user favorites:", error);
+                showToast("Failed to update favorites.");
+              });
           })
           .catch(error => {
             console.error("Error updating favorites:", error);
@@ -418,19 +463,12 @@
       }, { onlyOnce: true });
     }
 
-    function filterRestaurants() {
-      let filtered = allRestaurants;
-
+    function filterRestaurants(data) {
+      let filtered = data;
       if (!isInitialLoad) {
         const keyword = searchInput.value.toLowerCase().trim();
         const sortBy = sortSelect.value;
         const distance = distanceFilter.value;
-
-        if (activeCategory !== "All") {
-          filtered = filtered.filter(item =>
-            (item.restaurant.category || "").toLowerCase().includes(activeCategory.toLowerCase())
-          );
-        }
 
         if (keyword) {
           filtered = filtered.filter(item =>
@@ -456,8 +494,25 @@
           }
         });
       }
+      return filtered;
+    }
 
-      renderRestaurants(filtered);
+    function renderRestaurantSections() {
+      let filteredRestaurants = filterRestaurants(allRestaurants);
+
+      // All Restaurants
+      renderRestaurants(allRestaurantsList, filteredRestaurants);
+
+      // Favourite Restaurants
+      const favouriteRestaurants = filteredRestaurants.filter(item => userFavorites.includes(item.id));
+      renderRestaurants(favouriteRestaurantsList, favouriteRestaurants);
+
+      // Popular Restaurants
+      const popularRestaurants = filteredRestaurants
+        .filter(item => (item.restaurant.favorites || 0) > 0)
+        .sort((a, b) => (b.restaurant.favorites || 0) - (a.restaurant.favorites || 0))
+        .slice(0, 10); // Limit to top 10
+      renderRestaurants(popularRestaurantsList, popularRestaurants);
     }
 
     function loadRestaurants() {
@@ -471,13 +526,27 @@
             allRestaurants.push({ id, restaurant: data[id] });
           }
         }
-        filterRestaurants();
+        renderRestaurantSections();
         spinner.classList.add('hidden');
       }, (error) => {
         console.error("Error loading restaurants:", error);
         spinner.classList.add('hidden');
         showToast("Failed to load restaurants.");
       });
+    }
+
+    function loadUserFavorites() {
+      if (userId) {
+        const userFavoritesRef = ref(db, `users/${userId}/favorites`);
+        onValue(userFavoritesRef, snapshot => {
+          const data = snapshot.val();
+          userFavorites = data ? Object.keys(data).filter(key => data[key]) : [];
+          renderRestaurantSections();
+        }, (error) => {
+          console.error("Error loading user favorites:", error);
+          showToast("Failed to load favorites.");
+        });
+      }
     }
 
     function loadCart() {
@@ -506,6 +575,7 @@
         signOutBtn.style.display = "inline-block";
         signOutDrawer.style.display = "block";
         loadCart();
+        loadUserFavorites();
         loadRestaurants();
         spinner.classList.add('hidden');
       } else {
@@ -576,33 +646,30 @@
       clearTimeout(debounceTimeout);
       isInitialLoad = false;
       debounceTimeout = setTimeout(() => {
-        filterRestaurants();
+        renderRestaurantSections();
       }, 300);
     });
 
     // Clear Search
     clearSearchBtn.addEventListener('click', () => {
       searchInput.value = '';
-      activeCategory = "All";
       sortSelect.value = "name";
       distanceFilter.value = "all";
       isInitialLoad = false;
-      createCategoryButtons();
-      filterRestaurants();
+      renderRestaurantSections();
     });
 
     // Sort and Distance Filter
     sortSelect.addEventListener('change', () => {
       isInitialLoad = false;
-      filterRestaurants();
+      renderRestaurantSections();
     });
     distanceFilter.addEventListener('change', () => {
       isInitialLoad = false;
-      filterRestaurants();
+      renderRestaurantSections();
     });
 
     createCategoryButtons();
-    loadRestaurants();
   </script>
 </body>
 </html>
