@@ -114,6 +114,22 @@
       border-radius: 50%;
       padding: 2px 6px;
     }
+    .bottom-nav .home-icon {
+      background-color: #f97316;
+      color: white;
+      border-radius: 50%;
+      padding: 12px;
+      transform: translateY(-10px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    .bottom-nav .home-icon i {
+      font-size: 24px;
+      margin-bottom: 0;
+    }
+    .bottom-nav .home-icon span {
+      color: #f97316;
+      margin-top: 4px;
+    }
     @media (min-width: 640px) {
       .bottom-nav {
         display: none; /* Hide on larger screens */
@@ -127,7 +143,7 @@
 <body class="bg-gray-50 font-sans">
   <!-- Header -->
   <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
-    <button id="menuBtn" class="text-gray-600 focus:outline-none sm:hidden"> <!-- Hidden on sm and above -->
+    <button id="menuBtn" class="text-gray-600 focus:outline-none sm:hidden">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
@@ -136,7 +152,7 @@
       <img src="https://i.postimg.cc/Pf13fPPM/Whats-App-Image-2025-05-05-at-11-16-46-1-removebg-preview.png" alt="Logo" class="h-8 object-contain">
     </div>
     <div class="flex items-center space-x-4">
-      <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden"> <!-- Hidden on mobile -->
+      <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden">
         <i class="fas fa-shopping-cart text-lg"></i>
         <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
       </button>
@@ -149,7 +165,7 @@
   </header>
 
   <!-- Drawer Menu -->
-  <div id="drawer" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72 hidden sm:block"> <!-- Hidden on mobile, always visible on sm and above -->
+  <div id="drawer" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72 hidden sm:block">
     <div class="p-6">
       <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
       <ul class="space-y-4">
@@ -210,7 +226,7 @@
   </div>
 
   <!-- Restaurant List -->
-  <section class="container mx-auto px-4 sm:px-6 py-8 pb-20 sm:pb-8"> <!-- Added padding-bottom for mobile to avoid nav bar overlap -->
+  <section class="container mx-auto px-4 sm:px-6 py-8 pb-20 sm:pb-8">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Restaurants</h2>
     <div id="spinner" class="spinner hidden">
       <svg class="animate-spin h-10 w-10 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -222,11 +238,7 @@
   </section>
 
   <!-- Bottom Navigation Bar -->
-  <nav class="bottom-nav sm:hidden"> <!-- Hidden on sm and above -->
-    <a href="#" class="active">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
-    </a>
+  <nav class="bottom-nav sm:hidden">
     <a href="status.html">
       <i class="fas fa-clipboard-list"></i>
       <span>Orders</span>
@@ -235,14 +247,18 @@
       <i class="fas fa-user"></i>
       <span>Profile</span>
     </a>
+    <a href="#" class="home-icon active">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
     <a href="#" id="cartNavBtn" class="cart-icon">
       <i class="fas fa-shopping-cart"></i>
       <span class="cart-count" id="cartNavCount">0</span>
       <span>Cart</span>
     </a>
-    <a href="#" id="menuNavBtn">
-      <i class="fas fa-bars"></i>
-      <span>Menu</span>
+    <a href="#" id="rideNavBtn">
+      <i class="fas fa-car"></i>
+      <span>Ride</span>
     </a>
   </nav>
 
@@ -281,7 +297,7 @@
     const cartCount = document.getElementById('cartCount');
     const cartNavBtn = document.getElementById('cartNavBtn');
     const cartNavCount = document.getElementById('cartNavCount');
-    const menuNavBtn = document.getElementById('menuNavBtn');
+    const rideNavBtn = document.getElementById('rideNavBtn');
     const spinner = document.getElementById('spinner');
     const menuBtn = document.getElementById('menuBtn');
     const drawer = document.getElementById('drawer');
@@ -533,7 +549,7 @@
       backdrop.classList.toggle('hidden');
     });
 
-    menuNavBtn.addEventListener('click', (e) => {
+    rideNavBtn.addEventListener('click', (e) => {
       e.preventDefault();
       drawer.classList.toggle('drawer-enter');
       drawer.classList.toggle('drawer-enter-active');
