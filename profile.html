@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Font (Uber Eats-inspired: clean, modern) */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    /* Hide Scrollbar */
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    /* Smooth transitions */
+    .transition-all {
+      transition: all 0.3s ease-in-out;
+    }
+    /* Button styles */
+    .btn-orange {
+      @apply bg-orange-500 text-white hover:bg-orange-600 transition-all font-semibold rounded-full shadow-md;
+    }
+    .btn-secondary {
+      @apply bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all font-semibold rounded-full;
+    }
+    .btn-disabled {
+      @apply bg-gray-300 text-gray-500 cursor-not-allowed rounded-full shadow-none;
+    }
+    /* Bottom Nav Bar (matches checkout.html) */
+    .bottom-nav {
+      @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2.5 z-50 shadow-[0_-2px_4px_rgba(0,0,0,0.05)];
+    }
+    .bottom-nav a {
+      @apply flex flex-col items-center text-gray-600 text-xs font-medium transition-all px-3 py-1;
+    }
+    .bottom-nav a:hover, .bottom-nav a.active {
+      @apply text-orange-500;
+    }
+    .bottom-nav i {
+      @apply text-xl mb-0.5;
+    }
+    .bottom-nav .home-icon {
+      @apply bg-orange-500 text-white rounded-lg px-3 py-1.5 -translate-y-1 shadow-sm;
+    }
+    .bottom-nav .home-icon i, .bottom-nav .home-icon span {
+      @apply text-white;
+    }
+    .bottom-nav .cart-icon {
+      @apply relative;
+    }
+    .bottom-nav .cart-icon .cart-count {
+      @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[16px] text-center;
+    }
+    /* Sidebar Drawer */
+    .sidebar-drawer {
+      @apply fixed top-0 left-0 w-64 h-full bg-white shadow-[2px_0_8px_rgba(0,0,0,0.1)] transform -translate-x-full transition-all z-60;
+    }
+    .sidebar-drawer.active {
+      @apply transform translate-x-0;
+    }
+    /* Backdrop */
+    .backdrop {
+      @apply fixed inset-0 bg-black bg-opacity-50 z-55 hidden;
+    }
+    .backdrop.active {
+      @apply block;
+    }
+    /* Content Container */
+    .content-container {
+      @apply pb-[80px] sm:pb-0; /* Space for nav bar (~56px) */
+    }
+    /* Card Style */
+    .card {
+      @apply bg-white rounded-xl shadow-sm p-5 mb-6;
+    }
+    /* Input Style */
+    .input-field {
+      @apply mt-1 block w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all;
+    }
+    .input-label {
+      @apply block text-sm font-medium text-gray-700 mb-1.5;
+    }
+    /* Header */
+    .header {
+      @apply bg-white shadow-sm py-3 sticky top-0 z-40;
+    }
+    @media (min-width: 640px) {
+      .bottom-nav {
+        @apply hidden;
+      }
+      .sidebar-drawer {
+        @apply w-72 transform translate-x-0 block;
+      }
+      .backdrop {
+        @apply hidden;
+      }
+      .content-container {
+        @apply pb-0;
+      }
+      .card {
+        @apply p-6;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <!-- Header -->
+  <div class="header">
+    <div class="container mx-auto px-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <h1 class="text-lg font-semibold text-gray-800">Profile</h1>
+      </div>
+      <a href="index.html" class="text-orange-500 hover:text-orange-600 transition-all">
+        <i class="fas fa-arrow-left text-base"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Profile Content -->
+  <div class="container mx-auto px-4 py-6 content-container">
+    <!-- User Profile -->
+    <div class="card">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-base font-semibold text-gray-800">Your Details</h2>
+        <button id="editProfileBtn" class="text-orange-500 hover:text-orange-600 text-sm font-medium transition-all">
+          <i class="fas fa-edit mr-1"></i>Edit
+        </button>
+      </div>
+      <div id="profileDisplay" class="space-y-3">
+        <div>
+          <p class="text-xs font-medium text-gray-500">Name</p>
+          <p id="displayName" class="text-sm text-gray-800">Loading...</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-gray-500">Email</p>
+          <p id="displayEmail" class="text-sm text-gray-800">Loading...</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-gray-500">Phone</p>
+          <p id="displayPhone" class="text-sm text-gray-800">Loading...</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-gray-500">Address</p>
+          <p id="displayAddress" class="text-sm text-gray-800">Loading...</p>
+        </div>
+      </div>
+      <form id="profileForm" class="hidden space-y-4">
+        <div>
+          <label for="name" class="input-label">Full Name</label>
+          <input type="text" id="name" class="input-field" required>
+        </div>
+        <div>
+          <label for="phone" class="input-label">Phone Number</label>
+          <input type="tel" id="phone" class="input-field" required>
+        </div>
+        <div>
+          <label for="address" class="input-label">Delivery Address</label>
+          <textarea id="address" class="input-field" rows="3" required></textarea>
+        </div>
+        <div class="flex gap-3">
+          <button type="submit" id="saveProfileBtn" class="btn-orange flex-1 py-3 text-sm">Save</button>
+          <button type="button" id="cancelEditBtn" class="btn-secondary flex-1 py-3 text-sm">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Sign Out -->
+    <div class="card">
+      <button id="signOutBtn" class="w-full btn-orange py-3 text-sm flex items-center justify-center gap-2">
+        <i class="fas fa-sign-out-alt text-sm"></i>
+        Sign Out
+      </button>
+    </div>
+  </div>
+
+  <!-- Sidebar Drawer Menu -->
+  <div id="sidebarDrawer" class="sidebar-drawer">
+    <div class="p-5">
+      <h2 class="text-base font-semibold text-gray-800 mb-5">Menu</h2>
+      <ul class="space-y-3">
+        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-home mr-2 text-sm"></i>Home</a></li>
+        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-clipboard-list mr-2 text-sm"></i>Orders</a></li>
+        <li><a href="profile.html" class="flex items-center text-orange-500 font-medium transition-all text-sm"><i class="fas fa-user mr-2 text-sm"></i>Profile</a></li>
+        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-cog mr-2 text-sm"></i>Settings</a></li>
+        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-car mr-2 text-sm"></i>My Orders</a></li>
+        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition-all text-sm"><i class="fas fa-sign-out-alt mr-2 text-sm"></i>Sign Out</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Backdrop -->
+  <div id="backdrop" class="backdrop"></div>
+
+  <!-- Firebase + Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.appspot.com",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
+      measurementId: "G-V4W97VMSKL"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth();
+
+    const displayName = document.getElementById('displayName');
+    const displayEmail = document.getElementById('displayEmail');
+    const displayPhone = document.getElementById('displayPhone');
+    const displayAddress = document.getElementById('displayAddress');
+    const profileDisplay = document.getElementById('profileDisplay');
+    const profileForm = document.getElementById('profileForm');
+    const nameInput = document.getElementById('name');
+    const phoneInput = document.getElementById('phone');
+    const addressInput = document.getElementById('address');
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const signOutDrawer = document.getElementById('signOutDrawer');
+    const sidebarDrawer = document.getElementById('sidebarDrawer');
+    const backdrop = document.getElementById('backdrop');
+    const cartNavCount = document.getElementById('cartNavCount');
+
+    let userId = null;
+    let userData = {};
+
+    // Authentication
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        userId = user.uid;
+        loadUserProfile();
+        loadCartCount();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Load User Profile
+    function loadUserProfile() {
+      const userRef = ref(db, `users/${userId}`);
+      onValue(userRef, (snapshot) => {
+        userData = snapshot.val() || {};
+        displayName.textContent = userData.name || 'Not set';
+        displayEmail.textContent = auth.currentUser.email || 'Not set';
+        displayPhone.textContent = userData.phone || 'Not set';
+        displayAddress.textContent = userData.address || 'Not set';
+        nameInput.value = userData.name || '';
+        phoneInput.value = userData.phone || '';
+        addressInput.value = userData.address || '';
+      }, (error) => {
+        console.error('Error loading profile:', error);
+        showToast('Failed to load profile.');
+      });
+    }
+
+    // Load Cart Count
+    function loadCartCount() {
+      const storedCart = JSON.parse(localStorage.getItem(`cart-${userId}`)) || [];
+      const count = storedCart.reduce((total, c) => total + c.quantity, 0);
+      cartNavCount.textContent = count;
+    }
+
+    // Edit Profile
+    editProfileBtn.addEventListener('click', () => {
+      profileDisplay.classList.add('hidden');
+      profileForm.classList.remove('hidden');
+      editProfileBtn.classList.add('hidden');
+    });
+
+    // Cancel Edit
+    cancelEditBtn.addEventListener('click', () => {
+      profileDisplay.classList.remove('hidden');
+      profileForm.classList.add('hidden');
+      editProfileBtn.classList.remove('hidden');
+      nameInput.value = userData.name || '';
+      phoneInput.value = userData.phone || '';
+      addressInput.value = userData.address || '';
+    });
+
+    // Save Profile
+    profileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      const phone = phoneInput.value.trim();
+      const address = addressInput.value.trim();
+
+      if (!name || !phone || !address) {
+        showToast('Please fill in all fields.');
+        return;
+      }
+
+      saveProfileBtn.disabled = true;
+      saveProfileBtn.classList.add('btn-disabled');
+
+      try {
+        await set(ref(db, `users/${userId}`), {
+          name,
+          phone,
+          address,
+          email: auth.currentUser.email
+        });
+        showToast('Profile updated successfully!');
+        profileDisplay.classList.remove('hidden');
+        profileForm.classList.add('hidden');
+        editProfileBtn.classList.remove('hidden');
+      } catch (error) {
+        console.error('Error saving profile:', error);
+        showToast('Failed to save profile.');
+      } finally {
+        saveProfileBtn.disabled = false;
+        saveProfileBtn.classList.remove('btn-disabled');
+      }
+    });
+
+    // Sign Out
+    function handleSignOut() {
+      signOut(auth).then(() => {
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error('Sign Out Error', error);
+        showToast('Failed to sign out.');
+      });
+    }
+    signOutBtn.addEventListener('click', handleSignOut);
+    signOutDrawer.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleSignOut();
+    });
+
+    // Show Toast
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-70 transition-all';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Sidebar Drawer Toggle
+    function toggleSidebarDrawer(e) {
+      e.preventDefault();
+      sidebarDrawer.classList.toggle('active');
+      backdrop.classList.toggle('active');
+    }
+
+    document.querySelector('#rideNavBtn').addEventListener('click', toggleSidebarDrawer);
+    backdrop.addEventListener('click', () => {
+      sidebarDrawer.classList.remove('active');
+      backdrop.classList.remove('active');
+    });
+  </script>
+
+  <!-- Bottom Navigation Bar (matches checkout.html) -->
+  <nav class="bottom-nav sm:hidden">
+    <a href="status.html">
+      <i class="fas fa-clipboard-list"></i>
+      <span>Orders</span>
+    </a>
+    <a href="profile.html" class="active">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+    <a href="index.html" class="home-icon">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" id="cartNavBtn" class="cart-icon">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-count" id="cartNavCount">0</span>
+      <span>Cart</span>
+    </a>
+    <a href="#" id="rideNavBtn">
+      <i class="fas fa-car"></i>
+      <span>Ride</span>
+    </a>
+  </nav>
+</body>
+</html>
