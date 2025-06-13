@@ -127,16 +127,17 @@
     }
     /* Content Container */
     .content-container {
-      padding-bottom: 80px; /* Space for nav bar */
+      padding-bottom: 128px; /* Space for nav bar + Place Order button */
     }
     /* Floating Place Order Button */
     .place-order-button {
       position: fixed;
-      bottom: 16px; /* Above nav bar (~64px) */
+      bottom: 16px; /* ~16px above nav bar */
       width: calc(100% - 2rem);
       margin-left: 1rem;
       margin-right: 1rem;
       z-index: 60;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -151,13 +152,14 @@
         display: none;
       }
       .content-container {
-        padding-bottom: 0; /* No nav bar on desktop */
+        padding-bottom: 0; /* No nav bar or floating button on desktop */
       }
       .place-order-button {
         position: static; /* Revert to form flow */
         width: 100%;
         margin-left: 0;
         margin-right: 0;
+        box-shadow: none;
       }
     }
   </style>
@@ -219,7 +221,7 @@
           <label for="address" class="block text-sm font-medium text-gray-700">Delivery Address</label>
           <textarea id="address" class="mt-1 block w-full border-gray-300 rounded-lg p-2 focus:ring-orange-500 focus:border-orange-500" rows="4" required></textarea>
         </div>
-        <!-- Place Order Button moved outside form for mobile -->
+        <!-- Place Order Button -->
         <button type="submit" id="placeOrderBtn" class="place-order-button btn-orange py-3 rounded-lg font-semibold flex items-center justify-center gap-2 sm:static sm:w-full sm:mt-4">
           <i class="fas fa-shopping-bag"></i>
           Place Order
