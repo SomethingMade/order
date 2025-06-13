@@ -29,6 +29,10 @@
     .btn-orange {
       @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out;
     }
+    /* Black button style */
+    .btn-black {
+      @apply bg-black text-white hover:bg-gray-800 transition duration-200 ease-in-out;
+    }
     /* Rounded add button */
     .add-btn {
       @apply rounded-full p-1.5 w-8 h-8 flex items-center justify-center;
@@ -262,7 +266,7 @@
         <span class="text-lg font-semibold">Total:</span>
         <span id="cartModalTotal" class="text-lg font-bold text-orange-500">R0.00</span>
       </div>
-      <button id="clearCartModalBtn" class="w-full bg-gray-200 text-gray-800 py-3 rounded-lg mb-4 hover:bg-gray-300 transition duration-200">Clear Cart</button>
+      <button id="clearCartModalBtn" class="w-full bg-black text-white py-3 rounded-lg btn-black mb-4">Clear Cart</button>
       <button id="proceedToCheckoutBtn" class="w-full bg-orange-500 text-white py-3 rounded-lg btn-orange">Proceed to Checkout</button>
     </div>
   </div>
