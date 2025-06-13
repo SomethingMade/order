@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Menu - My Two Minutes Food</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Hide Scrollbar */
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-size: 14px;
+      z-index: 1000;
+    }
+    /* Spinner */
+    .spinner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .spinner.hidden {
+      display: none;
+    }
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* Button Hover Effect */
+    .btn-orange {
+      @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out;
+    }
+    /* Drawer Animation */
+    .drawer-enter {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    .drawer-enter-active {
+      transform: translateX(0);
+    }
+    /* Bottom Nav Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #ffffff;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0;
+      z-index: 50;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .bottom-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #6b7280;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .bottom-nav a.active {
+      color: #f97316;
+    }
+    .bottom-nav a:hover {
+      color: #f97316;
+    }
+    .bottom-nav i {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .bottom-nav .cart-icon {
+      position: relative;
+    }
+    .bottom-nav .cart-icon .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #ef4444;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      border-radius: 50%;
+      padding: 2px 6px;
+    }
+    .bottom-nav .home-icon {
+      background-color: #f97316;
+      color: white;
+      border-radius: 8px;
+      padding: 8px 16px;
+      transform: translateY(-4px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    .bottom-nav .home-icon i {
+      font-size: 20px;
+      margin-bottom: 0;
+      color: white;
+    }
+    .bottom-nav .home-icon span {
+      color: white;
+      margin-top: 4px;
+    }
+    /* Menu Categories */
+    .menu-categories {
+      position: sticky;
+      top: 0;
+      background-color: white;
+      z-index: 10;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    /* Menu Item */
+    .menu-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .menu-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    /* Floating Cart Button */
+    .floating-cart {
+      position: fixed;
+      bottom: 100px;
+      right: 16px;
+      background-color: #f97316;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 9999px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .floating-cart.hidden {
+      display: none;
+    }
+    .floating-cart .cart-count {
+      background-color: #ef4444;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 50%;
+      padding: 2px 8px;
+      margin-left: 8px;
+    }
+    /* Cart Drawer */
+    .cart-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: white;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      transform: translateY(100%);
+      transition: transform 0.3s ease-in-out;
+      z-index: 100;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .cart-drawer.active {
+      transform: translateY(0);
+    }
+    @media (min-width: 640px) {
+      .bottom-nav, .floating-cart {
+        display: none;
+      }
+      .toast {
+        bottom: 20px;
+      }
+      .cart-drawer {
+        max-width: 400px;
+        right: auto;
+        border-top-right-radius: 8px;
+        border-top-left-radius: 8px;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+  <!-- Header -->
+  <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
+    <div class="flex items-center space-x-4">
+      <img id="restaurantLogo" src="https://i.postimg.cc/Pf13fPPM/Whats-App-Image-2025-05-05-at-11-16-46-1-removebg-preview.png" alt="Restaurant Logo" class="h-8 object-contain">
+      <div>
+        <h1 id="restaurantName" class="text-lg font-bold text-gray-800">Loading...</h1>
+        <div class="flex items-center text-sm text-gray-600">
+          <span id="restaurantRating"></span>
+          <span class="mx-1">•</span>
+          <span id="restaurantCuisine">Cuisine</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center space-x-4">
+      <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden">
+        <i class="fas fa-shopping-cart text-lg"></i>
+        <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
+      </button>
+      <div id="userProfile" class="flex items-center space-x-2">
+        <img id="userProfilePic" src="" alt="Profile" class="w-8 h-8 rounded-full">
+        <button id="signOutBtn" class="text-sm text-red-500 hover:text-red-600 focus:outline-none hidden sm:block">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Drawer Menu -->
+  <div id="drawer" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72 hidden sm:block">
+    <div class="p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
+      <ul class="space-y-4">
+        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
+        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
+        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-user mr-2"></i>Profile</a></li>
+        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
+        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
+        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Backdrop -->
+  <div id="drawerBackdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+
+  <!-- Delivery Info -->
+  <div class="bg-white border-b border-gray-200 p-4">
+    <div class="container mx-auto px-4 sm:px-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="text-sm text-gray-600">Delivering to <span id="deliveryAddress">Your Address</span></p>
+          <p class="text-sm font-semibold text-gray-800">Estimated delivery: <span id="deliveryTime">30-45 min</span></p>
+        </div>
+        <button id="changeDeliveryBtn" class="text-sm text-orange-500 hover:text-orange-600">Change</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="container mx-auto px-4 sm:px-6 py-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+      <div class="relative flex-1">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search menu items..."
+          class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm"
+        />
+        <button id="clearSearchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu Categories -->
+  <div class="menu-categories">
+    <div class="container mx-auto px-4 sm:px-6">
+      <div id="categoryList" class="flex space-x-3 overflow-x-auto scrollbar-hide"></div>
+    </div>
+  </div>
+
+  <!-- Menu Sections -->
+  <section class="container mx-auto px-4 sm:px-6 py-8 pb-20 sm:pb-8">
+    <div id="spinner" class="spinner hidden">
+      <svg class="animate-spin h-10 w-10 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+    </div>
+    <div id="menuSections"></div>
+  </section>
+
+  <!-- Floating Cart Button -->
+  <button id="floatingCartBtn" class="floating-cart hidden sm:hidden">
+    <i class="fas fa-shopping-cart mr-2"></i>
+    View Cart
+    <span id="floatingCartCount" class="cart-count">0</span>
+  </button>
+
+  <!-- Cart Drawer -->
+  <div id="cartDrawer" class="cart-drawer">
+    <div class="p-4 border-b border-gray-200">
+      <h2 class="text-lg font-bold text-gray-800">Your Cart</h2>
+    </div>
+    <div id="cartItems" class="p-4"></div>
+    <div class="p-4 border-t border-gray-200">
+      <div class="flex justify-between text-lg font-semibold">
+        <span>Total</span>
+        <span id="cartTotal">R0.00</span>
+      </div>
+      <button id="checkoutBtn" class="w-full btn-orange py-3 mt-4 rounded-lg">Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav sm:hidden">
+    <a href="status.html">
+      <i class="fas fa-clipboard-list"></i>
+      <span>Orders</span>
+    </a>
+    <a href="profile.html">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+    <a href="index.html" class="home-icon">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" id="cartNavBtn" class="cart-icon">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-count" id="cartNavCount">0</span>
+      <span>Cart</span>
+    </a>
+    <a href="#" id="rideNavBtn">
+      <i class="fas fa-car"></i>
+      <span>Ride</span>
+    </a>
+  </nav>
+
+  <!-- Firebase Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.appspot.com",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
+      measurementId: "G-V4W97VMSKL"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth();
+
+    const restaurantName = document.getElementById('restaurantName');
+    const restaurantLogo = document.getElementById('restaurantLogo');
+    const restaurantRating = document.getElementById('restaurantRating');
+    const restaurantCuisine = document.getElementById('restaurantCuisine');
+    const deliveryAddress = document.getElementById('deliveryAddress');
+    const deliveryTime = document.getElementById('deliveryTime');
+    const changeDeliveryBtn = document.getElementById('changeDeliveryBtn');
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const categoryList = document.getElementById('categoryList');
+    const menuSections = document.getElementById('menuSections');
+    const userProfilePic = document.getElementById('userProfilePic');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const signOutDrawer = document.getElementById('signOutDrawer');
+    const cartBtn = document.getElementById('cartBtn');
+    const cartCount = document.getElementById('cartCount');
+    const cartNavBtn = document.getElementById('cartNavBtn');
+    const cartNavCount = document.getElementById('cartNavCount');
+    const floatingCartBtn = document.getElementById('floatingCartBtn');
+    const floatingCartCount = document.getElementById('floatingCartCount');
+    const cartDrawer = document.getElementById('cartDrawer');
+    const cartItems = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const rideNavBtn = document.getElementById('rideNavBtn');
+    const spinner = document.getElementById('spinner');
+    const drawer = document.getElementById('drawer');
+    const backdrop = document.getElementById('drawerBackdrop');
+
+    let restaurantId = new URLSearchParams(window.location.search).get('restaurantId');
+    let restaurantData = null;
+    let menuItems = [];
+    let cart = [];
+    let userId = null;
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    function renderStars(rating) {
+      let stars = '';
+      for (let i = 1; i <= 5; i++) {
+        stars += `
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline-block ${i <= rating ? 'text-yellow-400' : 'text-gray-300'}" fill="currentColor" viewBox="0 0 20 20" stroke="currentColor">
+            <path d="M10 15l-3.6 2.3 1-4.3L3 8.9l4.5-.4L10 4l2.5 4.5 4.5.4-3.4 4.1 1 4.3L10 15z" />
+          </svg>
+        `;
+      }
+      return stars;
+    }
+
+    function createCategoryButtons(categories) {
+      categoryList.innerHTML = '';
+      categories.forEach(category => {
+        const btn = document.createElement('button');
+        btn.className = 'px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition duration-200';
+        btn.textContent = category;
+        btn.onclick = () => {
+          document.getElementById(`category-${category}`).scrollIntoView({ behavior: 'smooth' });
+        };
+        categoryList.appendChild(btn);
+      });
+    }
+
+    function renderMenuItems(items) {
+      menuSections.innerHTML = '';
+      const categories = [...new Set(items.map(item => item.category))];
+      createCategoryButtons(categories);
+
+      categories.forEach(category => {
+        const categoryItems = items.filter(item => item.category === category);
+        const section = document.createElement('div');
+        section.id = `category-${category}`;
+        section.className = 'mb-8';
+        section.innerHTML = `
+          <h2 class="text-xl font-bold text-gray-800 mb-4">${category}</h2>
+          <div class="space-y-4"></div>
+        `;
+        const itemsContainer = section.querySelector('div');
+        categoryItems.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'menu-item';
+          itemDiv.innerHTML = `
+            <div class="flex-1 pr-4">
+              <h3 class="text-md font-semibold text-gray-800">${item.name}</h3>
+              <p class="text-sm text-gray-600 mt-1">${item.description || ''}</p>
+              <p class="text-sm font-semibold text-gray-800 mt-2">R${item.price.toFixed(2)}</p>
+            </div>
+            ${item.image ? `<img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-lg">` : ''}
+            <button id="add-${item.id}" class="btn-orange px-4 py-2 rounded-lg text-sm">Add</button>
+          `;
+          itemDiv.querySelector(`#add-${item.id}`).addEventListener('click', (e) => {
+            e.stopPropagation();
+            addToCart(item);
+          });
+          itemsContainer.appendChild(itemDiv);
+        });
+        menuSections.appendChild(section);
+      });
+    }
+
+    function addToCart(item) {
+      const existingItem = cart.find(cartItem => cartItem.id === item.id);
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({ ...item, quantity: 1, restaurantId });
+      }
+      localStorage.setItem(`cart-${userId}`, JSON.stringify(cart));
+      updateCartDisplay();
+      showToast(`${item.name} added to cart!`);
+    }
+
+    function updateCartDisplay() {
+      const count = cart.reduce((total, item) => total + item.quantity, 0);
+      cartCount.textContent = count;
+      cartNavCount.textContent = count;
+      floatingCartCount.textContent = count;
+      floatingCartBtn.classList.toggle('hidden', count === 0);
+
+      cartItems.innerHTML = '';
+      if (cart.length === 0) {
+        cartItems.innerHTML = '<p class="text-gray-500 text-center py-4">Your cart is empty.</p>';
+      } else {
+        cart.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'flex justify-between items-center py-2 border-b border-gray-200';
+          itemDiv.innerHTML = `
+            <div>
+              <p class="text-sm font-semibold text-gray-800">${item.name}</p>
+              <p class="text-sm text-gray-600">R${(item.price * item.quantity).toFixed(2)}</p>
+              <div class="flex items-center space-x-2 mt-1">
+                <button id="decrease-${item.id}" class="text-orange-500 hover:text-orange-600">-</button>
+                <span>${item.quantity}</span>
+                <button id="increase-${item.id}" class="text-orange-500 hover:text-orange-600">+</button>
+              </div>
+            </div>
+            ${item.image ? `<img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded-lg">` : ''}
+          `;
+          itemDiv.querySelector(`#decrease-${item.id}`).addEventListener('click', () => {
+            if (item.quantity > 1) {
+              item.quantity -= 1;
+            } else {
+              cart = cart.filter(cartItem => cartItem.id !== item.id);
+            }
+            localStorage.setItem(`cart-${userId}`, JSON.stringify(cart));
+            updateCartDisplay();
+          });
+          itemDiv.querySelector(`#increase-${item.id}`).addEventListener('click', () => {
+            item.quantity += 1;
+            localStorage.setItem(`cart-${userId}`, JSON.stringify(cart));
+            updateCartDisplay();
+          });
+          cartItems.appendChild(itemDiv);
+        });
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      cartTotal.textContent = `R${total.toFixed(2)}`;
+    }
+
+    function filterMenuItems() {
+      const keyword = searchInput.value.toLowerCase().trim();
+      const filteredItems = menuItems.filter(item =>
+        item.name.toLowerCase().includes(keyword) ||
+        (item.description || '').toLowerCase().includes(keyword)
+      );
+      renderMenuItems(filteredItems);
+    }
+
+    function loadRestaurantData() {
+      if (!restaurantId) {
+        showToast('Invalid restaurant ID.');
+        window.location.href = 'index.html';
+        return;
+      }
+      spinner.classList.remove('hidden');
+      const restaurantRef = ref(db, `restaurants/${restaurantId}`);
+      onValue(restaurantRef, snapshot => {
+        restaurantData = snapshot.val();
+        if (!restaurantData) {
+          showToast('Restaurant not found.');
+          window.location.href = 'index.html';
+          return;
+        }
+        restaurantName.textContent = restaurantData.name;
+        restaurantLogo.src = restaurantData.image || 'https://via.placeholder.com/100';
+        restaurantRating.innerHTML = renderStars(restaurantData.rating || 0);
+        restaurantCuisine.textContent = restaurantData.category || 'Various';
+        deliveryTime.textContent = restaurantData.deliveryTime || '30-45 min';
+
+        // Mock menu items based on Chicken Licken
+        menuItems = [
+          { id: '1', category: 'Soulbites', name: 'Soulbites', description: '8 pieces, 2 regular soul fries™, 2 regular soulslaw®, 2 licken loafs®.', price: 129.90, image: 'https://via.placeholder.com/80' },
+          { id: '2', category: 'Super Slyders® Specials', name: 'Slider® Special', description: '1 cheese slider, 1 chilli slider, 2 original sliders.', price: 49.90, image: 'https://via.placeholder.com/80' },
+          { id: '3', category: 'Just Hotwings®', name: 'Hotwings® 6', description: '6 hotwings® with 2 sachets soulfire® sauce.', price: 39.90, image: 'https://via.placeholder.com/80' },
+          { id: '4', category: 'Soulicious® Specials', name: 'Love Me Tender®', description: 'Love me tender® burger, regular soul fries™, 2 hotwings®, 440ml Coke.', price: 59.90, image: 'https://via.placeholder.com/80' },
+          { id: '5', category: 'Chicken Meals', name: '6 Piece Meal', description: '6 pieces, 2 regular soul fries™, 2 regular soulslaw®.', price: 99.90, image: 'https://via.placeholder.com/80' }
+        ];
+        renderMenuItems(menuItems);
+        spinner.classList.add('hidden');
+      }, (error) => {
+        console.error('Error loading restaurant:', error);
+        spinner.classList.add('hidden');
+        showToast('Failed to load restaurant.');
+      });
+    }
+
+    function loadCart() {
+      const storedCart = JSON.parse(localStorage.getItem(`cart-${userId}`));
+      if (storedCart) {
+        cart = storedCart.filter(item => item.restaurantId === restaurantId);
+        localStorage.setItem(`cart-${userId}`, JSON.stringify(cart));
+        updateCartDisplay();
+      }
+    }
+
+    // Authentication
+    onAuthStateChanged(auth, (user) => {
+      spinner.classList.remove('hidden');
+      if (user) {
+        userId = user.uid;
+        userProfilePic.src = user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+        signOutBtn.style.display = 'inline-block';
+        signOutDrawer.style.display = 'block';
+        loadCart();
+        loadRestaurantData();
+        spinner.classList.add('hidden');
+      } else {
+        spinner.classList.add('hidden');
+        window.location.href = 'login.html';
+      }
+    }, (error) => {
+      console.error('Auth error:', error);
+      spinner.classList.add('hidden');
+      showToast('Failed to authenticate.');
+    });
+
+    // Sign Out
+    signOutBtn.addEventListener('click', () => {
+      signOut(auth).then(() => {
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error('Sign Out Error', error);
+        showToast('Failed to sign out.');
+      });
+    });
+    signOutDrawer.addEventListener('click', () => {
+      signOut(auth).then(() => {
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error('Sign Out Error', error);
+        showToast('Failed to sign out.');
+      });
+    });
+
+    // Drawer Toggle
+    rideNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      drawer.classList.toggle('drawer-enter');
+      drawer.classList.toggle('drawer-enter-active');
+      backdrop.classList.toggle('hidden');
+    });
+
+    backdrop.addEventListener('click', () => {
+      drawer.classList.remove('drawer-enter-active');
+      drawer.classList.add('drawer-enter');
+      backdrop.classList.add('hidden');
+    });
+
+    // Cart Button
+    cartBtn.addEventListener('click', () => {
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      cartDrawer.classList.toggle('active');
+    });
+
+    cartNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      cartDrawer.classList.toggle('active');
+    });
+
+    floatingCartBtn.addEventListener('click', () => {
+      cartDrawer.classList.toggle('active');
+    });
+
+    // Checkout
+    checkoutBtn.addEventListener('click', () => {
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
+    });
+
+    // Search with Debounce
+    let debounceTimeout;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => {
+        filterMenuItems();
+      }, 300);
+    });
+
+    // Clear Search
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      renderMenuItems(menuItems);
+    });
+
+    // Change Delivery (Placeholder)
+    changeDeliveryBtn.addEventListener('click', () => {
+      showToast('Delivery address change not implemented yet.');
+    });
+  </script>
+</body>
+</html>
