@@ -117,17 +117,17 @@
     .bottom-nav .home-icon {
       background-color: #f97316;
       color: white;
-      border-radius: 50%;
-      padding: 12px;
-      transform: translateY(-10px);
+      border-radius: 8px;
+      padding: 8px 16px;
+      transform: translateY(-4px);
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
     .bottom-nav .home-icon i {
-      font-size: 24px;
+      font-size: 20px;
       margin-bottom: 0;
     }
     .bottom-nav .home-icon span {
-      color: #f97316;
+      color: white;
       margin-top: 4px;
     }
     @media (min-width: 640px) {
@@ -143,11 +143,6 @@
 <body class="bg-gray-50 font-sans">
   <!-- Header -->
   <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
-    <button id="menuBtn" class="text-gray-600 focus:outline-none sm:hidden">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    </button>
     <div class="flex items-center">
       <img src="https://i.postimg.cc/Pf13fPPM/Whats-App-Image-2025-05-05-at-11-16-46-1-removebg-preview.png" alt="Logo" class="h-8 object-contain">
     </div>
@@ -299,7 +294,6 @@
     const cartNavCount = document.getElementById('cartNavCount');
     const rideNavBtn = document.getElementById('rideNavBtn');
     const spinner = document.getElementById('spinner');
-    const menuBtn = document.getElementById('menuBtn');
     const drawer = document.getElementById('drawer');
     const backdrop = document.getElementById('drawerBackdrop');
 
@@ -543,12 +537,6 @@
     });
 
     // Drawer Toggle
-    menuBtn.addEventListener('click', () => {
-      drawer.classList.toggle('drawer-enter');
-      drawer.classList.toggle('drawer-enter-active');
-      backdrop.classList.toggle('hidden');
-    });
-
     rideNavBtn.addEventListener('click', (e) => {
       e.preventDefault();
       drawer.classList.toggle('drawer-enter');
