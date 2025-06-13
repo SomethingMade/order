@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    /* Font (mimicking Uber Eats' lightweight sans-serif) */
+    /* Font (Uber Eats-inspired: clean, modern) */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     body {
       font-family: 'Inter', sans-serif;
@@ -31,21 +31,21 @@
     .btn-disabled {
       @apply bg-gray-300 text-gray-500 cursor-not-allowed rounded-full shadow-none;
     }
-    /* Bottom Nav Bar (Uber Eats-inspired: minimal, icon-focused) */
+    /* Bottom Nav Bar (Uber Eats-inspired: bold icons, minimal) */
     .bottom-nav {
-      @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-3 z-50 shadow-[0_-2px_5px_rgba(0,0,0,0.05)];
+      @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2.5 z-50 shadow-[0_-2px_4px_rgba(0,0,0,0.05)];
     }
     .bottom-nav a {
-      @apply flex flex-col items-center text-gray-600 text-xs transition-all;
+      @apply flex flex-col items-center text-gray-600 text-xs font-medium transition-all px-3 py-1;
     }
     .bottom-nav a:hover, .bottom-nav a.active {
       @apply text-orange-500;
     }
     .bottom-nav i {
-      @apply text-lg mb-1;
+      @apply text-xl mb-0.5;
     }
     .bottom-nav .home-icon {
-      @apply bg-orange-500 text-white rounded-lg px-4 py-2 -translate-y-1 shadow-sm;
+      @apply bg-orange-500 text-white rounded-lg px-3 py-1.5 -translate-y-1 shadow-sm;
     }
     .bottom-nav .home-icon i, .bottom-nav .home-icon span {
       @apply text-white;
@@ -54,11 +54,11 @@
       @apply relative;
     }
     .bottom-nav .cart-icon .cart-count {
-      @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5;
+      @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[16px] text-center;
     }
     /* Sidebar Drawer */
     .sidebar-drawer {
-      @apply fixed top-0 left-0 w-64 h-full bg-white shadow-[2px_0_10px_rgba(0,0,0,0.1)] transform -translate-x-full transition-all z-60;
+      @apply fixed top-0 left-0 w-64 h-full bg-white shadow-[2px_0_8px_rgba(0,0,0,0.1)] transform -translate-x-full transition-all z-60;
     }
     .sidebar-drawer.active {
       @apply transform translate-x-0;
@@ -72,22 +72,26 @@
     }
     /* Content Container */
     .content-container {
-      @apply pb-32 sm:pb-0; /* Space for nav bar + button */
+      @apply pb-[136px] sm:pb-0; /* Space for nav bar (~56px) + button (~48px + 16px gap) */
     }
-    /* Floating Place Order Button (Uber Eats-inspired CTA) */
+    /* Floating Place Order Button */
     .place-order-button {
-      @apply fixed bottom-16 w-[calc(100%-2rem)] mx-4 z-60 btn-orange py-4 text-base flex items-center justify-center gap-2 shadow-lg;
+      @apply fixed bottom-16 w-[calc(100%-2rem)] mx-4 z-60 btn-orange py-3.5 text-base flex items-center justify-center gap-2 shadow-lg;
     }
     /* Card Style */
     .card {
-      @apply bg-white rounded-xl shadow-sm p-6 mb-6;
+      @apply bg-white rounded-xl shadow-sm p-5 mb-6;
     }
     /* Input Style */
     .input-field {
-      @apply mt-1 block w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all;
+      @apply mt-1 block w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all;
     }
     .input-label {
-      @apply block text-sm font-medium text-gray-700 mb-1;
+      @apply block text-sm font-medium text-gray-700 mb-1.5;
+    }
+    /* Header */
+    .header {
+      @apply bg-white shadow-sm py-3 sticky top-0 z-40;
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -99,48 +103,54 @@
       .backdrop {
         @apply hidden;
       }
+      .content-container {
+        @apply pb-0;
+      }
       .place-order-button {
-        @apply static w-full mx-0 mt-6 shadow-md py-4;
+        @apply static w-full mx-0 mt-5 shadow-md py-3.5;
+      }
+      .card {
+        @apply p-6;
       }
     }
   </style>
 </head>
 <body class="bg-gray-100">
-  <!-- Header (Uber Eats-inspired: clean, image-focused) -->
-  <div class="bg-white shadow-sm">
-    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <img id="restaurantImage" src="https://via.placeholder.com/64x64" alt="Restaurant Logo" class="w-16 h-16 rounded-full object-cover">
+  <!-- Header (Uber Eats-inspired: restaurant logo, clean) -->
+  <div class="header">
+    <div class="container mx-auto px-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img id="restaurantImage" src="https://via.placeholder.com/48x48" alt="Restaurant Logo" class="w-12 h-12 rounded-full object-cover">
         <div>
-          <h1 id="restaurantName" class="text-xl font-bold text-gray-800">Restaurant Name</h1>
-          <p id="restaurantLocation" class="text-sm text-gray-500 flex items-center gap-2">
-            <i class="fas fa-map-marker-alt text-gray-400"></i>
+          <h1 id="restaurantName" class="text-lg font-semibold text-gray-800">Restaurant Name</h1>
+          <p id="restaurantLocation" class="text-xs text-gray-500 flex items-center gap-1.5">
+            <i class="fas fa-map-marker-alt text-gray-400 text-xs"></i>
             <span id="locationText">Restaurant Location</span>
           </p>
         </div>
       </div>
       <a href="index.html" class="text-orange-500 hover:text-orange-600 transition-all">
-        <i class="fas fa-arrow-left text-lg"></i>
+        <i class="fas fa-arrow-left text-base"></i>
       </a>
     </div>
   </div>
 
   <!-- Checkout Content -->
-  <div class="container mx-auto px-4 py-8 content-container">
+  <div class="container mx-auto px-4 py-6 content-container">
     <!-- Order Summary -->
     <div class="card">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">Order Summary</h2>
-      <div id="cartItems" class="space-y-4"></div>
-      <div class="border-t border-gray-200 mt-4 pt-4">
+      <h2 class="text-base font-semibold text-gray-800 mb-3">Your Order</h2>
+      <div id="cartItems" class="space-y-3"></div>
+      <div class="border-t border-gray-200 mt-3 pt-3">
         <div class="flex justify-between text-gray-600 text-sm">
           <span>Subtotal</span>
           <span id="subtotal">R0.00</span>
         </div>
-        <div class="flex justify-between text-gray-600 text-sm mt-2">
+        <div class="flex justify-between text-gray-600 text-sm mt-1.5">
           <span>Delivery Fee</span>
           <span id="deliveryFee">R20.00</span>
         </div>
-        <div class="flex justify-between font-semibold text-gray-800 mt-2">
+        <div class="flex justify-between font-semibold text-gray-800 text-sm mt-1.5">
           <span>Total</span>
           <span id="total">R0.00</span>
         </div>
@@ -149,7 +159,7 @@
 
     <!-- Delivery Details -->
     <div class="card">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">Delivery Details</h2>
+      <h2 class="text-base font-semibold text-gray-800 mb-3">Delivery Details</h2>
       <form id="deliveryForm">
         <div class="mb-4">
           <label for="name" class="input-label">Full Name</label>
@@ -159,12 +169,12 @@
           <label for="phone" class="input-label">Phone Number</label>
           <input type="tel" id="phone" class="input-field" required>
         </div>
-        <div class="mb-6">
+        <div class="mb-5">
           <label for="address" class="input-label">Delivery Address</label>
-          <textarea id="address" class="input-field" rows="4" required></textarea>
+          <textarea id="address" class="input-field" rows="3" required></textarea>
         </div>
         <button type="submit" id="placeOrderBtn" class="place-order-button">
-          <i class="fas fa-shopping-bag"></i>
+          <i class="fas fa-shopping-bag text-sm"></i>
           Place Order
         </button>
       </form>
@@ -173,15 +183,15 @@
 
   <!-- Sidebar Drawer Menu -->
   <div id="sidebarDrawer" class="sidebar-drawer">
-    <div class="p-6">
-      <h2 class="text-lg font-bold text-gray-800 mb-6">Menu</h2>
-      <ul class="space-y-4">
-        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all"><i class="fas fa-home mr-2"></i>Home</a></li>
-        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
-        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all"><i class="fas fa-user mr-2"></i>Profile</a></li>
-        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all"><i class="fas fa-cog mr-2"></i>Settings</a></li>
-        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all"><i class="fas fa-car mr-2"></i>My Orders</a></li>
-        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition-all"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
+    <div class="p-5">
+      <h2 class="text-base font-semibold text-gray-800 mb-5">Menu</h2>
+      <ul class="space-y-3">
+        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-home mr-2 text-sm"></i>Home</a></li>
+        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-clipboard-list mr-2 text-sm"></i>Orders</a></li>
+        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-user mr-2 text-sm"></i>Profile</a></li>
+        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-cog mr-2 text-sm"></i>Settings</a></li>
+        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-car mr-2 text-sm"></i>My Orders</a></li>
+        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition-all text-sm"><i class="fas fa-sign-out-alt mr-2 text-sm"></i>Sign Out</a></li>
       </ul>
     </div>
   </div>
@@ -272,7 +282,7 @@
         }
         restaurantName.textContent = restaurant.name;
         restaurantLocation.textContent = restaurant.location || 'Location not available';
-        restaurantImage.src = restaurant.image || 'https://via.placeholder.com/64x64';
+        restaurantImage.src = restaurant.image || 'https://via.placeholder.com/48x48';
       }, (error) => {
         console.error('Error loading restaurant:', error);
         showToast('Failed to load restaurant details.');
@@ -310,15 +320,15 @@
         const itemTotal = c.item.price * c.quantity;
         subtotal += itemTotal;
         const el = document.createElement('div');
-        el.className = 'flex items-center gap-4 mb-4 border-b border-gray-100 pb-4';
+        el.className = 'flex items-center gap-3 pb-3';
         el.innerHTML = `
-          <img src="${c.item.image || 'https://via.placeholder.com/48x48'}" alt="${c.item.name}" class="w-12 h-12 rounded-lg object-cover">
+          <img src="${c.item.image || 'https://via.placeholder.com/40x40'}" alt="${c.item.name}" class="w-10 h-10 rounded-md object-cover">
           <div class="flex-1">
-            <h4 class="text-sm font-medium text-gray-800">${c.item.name} (x${c.quantity})</h4>
+            <h4 class="text-sm font-medium text-gray-800 leading-tight">${c.item.name} <span class="text-gray-500">x${c.quantity}</span></h4>
             <p class="text-orange-500 text-sm font-medium">R${itemTotal.toFixed(2)}</p>
           </div>
           <button class="text-gray-500 hover:text-red-500 transition-all" data-index="${index}">
-            <i class="fas fa-trash text-sm"></i>
+            <i class="fas fa-trash text-xs"></i>
           </button>
         `;
         el.querySelector('button').addEventListener('click', () => {
@@ -421,7 +431,7 @@
     });
   </script>
 
-  <!-- Bottom Navigation Bar (Uber Eats-inspired) -->
+  <!-- Bottom Navigation Bar (Uber Eats-inspired: bold, minimal) -->
   <nav class="bottom-nav sm:hidden">
     <a href="status.html">
       <i class="fas fa-clipboard-list"></i>
