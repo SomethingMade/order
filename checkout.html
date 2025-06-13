@@ -3,15 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Checkout - My Two Minutes Food</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Font (Uber Eats-inspired: clean, modern) */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body {
-      font-family: 'Inter', sans-serif;
-    }
     /* Hide Scrollbar */
     .scrollbar-hide {
       -ms-overflow-style: none;
@@ -20,189 +15,322 @@
     .scrollbar-hide::-webkit-scrollbar {
       display: none;
     }
-    /* Smooth transitions */
-    .transition-all {
-      transition: all 0.3s ease-in-out;
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-size: 14px;
+      z-index: 1000;
     }
-    /* Button styles */
+    /* Spinner */
+    .spinner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .spinner.hidden {
+      display: none;
+    }
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* Button Hover Effect */
     .btn-orange {
-      @apply bg-orange-500 text-white hover:bg-orange-600 transition-all font-semibold rounded-full shadow-md;
+      @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out;
+    }
+    .btn-secondary {
+      @apply bg-gray-100 text-gray-700 hover:bg-gray-200 transition duration-200 ease-in-out;
     }
     .btn-disabled {
-      @apply bg-gray-300 text-gray-500 cursor-not-allowed rounded-full shadow-none;
+      @apply bg-gray-300 text-gray-500 cursor-not-allowed;
     }
-    /* Bottom Nav Bar (Uber Eats-inspired: bold icons, minimal) */
+    /* Drawer Animation */
+    .drawer-enter {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    .drawer-enter-active {
+      transform: translateX(0);
+    }
+    /* Bottom Nav Bar */
     .bottom-nav {
-      @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2.5 z-50 shadow-[0_-2px_4px_rgba(0,0,0,0.05)];
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #ffffff;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0;
+      z-index: 50;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
     }
     .bottom-nav a {
-      @apply flex flex-col items-center text-gray-600 text-xs font-medium transition-all px-3 py-1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #6b7280;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
     }
-    .bottom-nav a:hover, .bottom-nav a.active {
-      @apply text-orange-500;
+    .bottom-nav a.active {
+      color: #f97316;
+    }
+    .bottom-nav a:hover {
+      color: #f97316;
     }
     .bottom-nav i {
-      @apply text-xl mb-0.5;
-    }
-    .bottom-nav .home-icon {
-      @apply bg-orange-500 text-white rounded-lg px-3 py-1.5 -translate-y-1 shadow-sm;
-    }
-    .bottom-nav .home-icon i, .bottom-nav .home-icon span {
-      @apply text-white;
+      font-size: 20px;
+      margin-bottom: 4px;
     }
     .bottom-nav .cart-icon {
-      @apply relative;
+      position: relative;
     }
     .bottom-nav .cart-icon .cart-count {
-      @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[16px] text-center;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #ef4444;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      border-radius: 50%;
+      padding: 2px 6px;
     }
-    /* Sidebar Drawer */
-    .sidebar-drawer {
-      @apply fixed top-0 left-0 w-64 h-full bg-white shadow-[2px_0_8px_rgba(0,0,0,0.1)] transform -translate-x-full transition-all z-60;
+    .bottom-nav .home-icon {
+      background-color: #f97316;
+      color: white;
+      border-radius: 8px;
+      padding: 8px 16px;
+      transform: translateY(-4px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
-    .sidebar-drawer.active {
-      @apply transform translate-x-0;
+    .bottom-nav .home-icon i {
+      font-size: 20px;
+      margin-bottom: 0;
+      color: white;
     }
-    /* Backdrop */
-    .backdrop {
-      @apply fixed inset-0 bg-black bg-opacity-50 z-55 hidden;
-    }
-    .backdrop.active {
-      @apply block;
-    }
-    /* Content Container */
-    .content-container {
-      @apply pb-[136px] sm:pb-0; /* Space for nav bar (~56px) + button (~48px + 16px gap) */
-    }
-    /* Floating Place Order Button */
-    .place-order-button {
-      @apply fixed bottom-16 w-[calc(100%-2rem)] mx-4 z-60 btn-orange py-3.5 text-base flex items-center justify-center gap-2 shadow-lg;
+    .bottom-nav .home-icon span {
+      color: white;
+      margin-top: 4px;
     }
     /* Card Style */
     .card {
-      @apply bg-white rounded-xl shadow-sm p-5 mb-6;
+      @apply bg-white rounded-lg shadow-md p-4 mb-4;
     }
     /* Input Style */
     .input-field {
-      @apply mt-1 block w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all;
+      @apply mt-1 block w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500;
     }
     .input-label {
-      @apply block text-sm font-medium text-gray-700 mb-1.5;
+      @apply block text-sm font-medium text-gray-700 mb-1;
     }
-    /* Header */
-    .header {
-      @apply bg-white shadow-sm py-3 sticky top-0 z-40;
+    /* Content Container */
+    .content-container {
+      @apply pb-20 sm:pb-8;
     }
     @media (min-width: 640px) {
       .bottom-nav {
-        @apply hidden;
+        display: none;
       }
-      .sidebar-drawer {
-        @apply w-72 transform translate-x-0 block;
-      }
-      .backdrop {
-        @apply hidden;
-      }
-      .content-container {
-        @apply pb-0;
-      }
-      .place-order-button {
-        @apply static w-full mx-0 mt-5 shadow-md py-3.5;
+      .toast {
+        bottom: 20px;
       }
       .card {
-        @apply p-6;
+        @apply p-5;
+      }
+      #drawer {
+        width: 288px;
+        transform: translateX(0);
+        display: block;
+      }
+      #drawerBackdrop {
+        display: none;
       }
     }
   </style>
 </head>
-<body class="bg-gray-100">
-  <!-- Header (Uber Eats-inspired: restaurant logo, clean) -->
-  <div class="header">
-    <div class="container mx-auto px-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <img id="restaurantImage" src="https://via.placeholder.com/48x48" alt="Restaurant Logo" class="w-12 h-12 rounded-full object-cover">
-        <div>
-          <h1 id="restaurantName" class="text-lg font-semibold text-gray-800">Restaurant Name</h1>
-          <p id="restaurantLocation" class="text-xs text-gray-500 flex items-center gap-1.5">
-            <i class="fas fa-map-marker-alt text-gray-400 text-xs"></i>
-            <span id="locationText">Restaurant Location</span>
-          </p>
-        </div>
-      </div>
-      <a href="index.html" class="text-orange-500 hover:text-orange-600 transition-all">
-        <i class="fas fa-arrow-left text-base"></i>
-      </a>
+<body class="bg-gray-50 font-sans">
+  <!-- Header -->
+  <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
+    <div class="flex items-center">
+      <img src="logo.jpg" alt="Logo" class="w-8 h-8 rounded-full object-cover">
     </div>
-  </div>
-
-  <!-- Checkout Content -->
-  <div class="container mx-auto px-4 py-6 content-container">
-    <!-- Order Summary -->
-    <div class="card">
-      <h2 class="text-base font-semibold text-gray-800 mb-3">Your Order</h2>
-      <div id="cartItems" class="space-y-3"></div>
-      <div class="border-t border-gray-200 mt-3 pt-3">
-        <div class="flex justify-between text-gray-600 text-sm">
-          <span>Subtotal</span>
-          <span id="subtotal">R0.00</span>
-        </div>
-        <div class="flex justify-between text-gray-600 text-sm mt-1.5">
-          <span>Delivery Fee</span>
-          <span id="deliveryFee">R20.00</span>
-        </div>
-        <div class="flex justify-between font-semibold text-gray-800 text-sm mt-1.5">
-          <span>Total</span>
-          <span id="total">R0.00</span>
-        </div>
+    <div class="flex items-center space-x-4">
+      <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden">
+        <i class="fas fa-shopping-cart text-lg"></i>
+        <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
+      </button>
+      <div id="userProfile" class="flex items-center space-x-2">
+        <span id="userName" class="text-sm font-semibold text-gray-800 hidden sm:block"></span>
+        <img id="userProfilePic" src="" alt="Profile" class="w-8 h-8 rounded-full">
+        <button id="signOutBtn" class="text-sm text-red-500 hover:text-red-600 focus:outline-none hidden sm:block">Sign Out</button>
       </div>
     </div>
+  </header>
 
-    <!-- Delivery Details -->
-    <div class="card">
-      <h2 class="text-base font-semibold text-gray-800 mb-3">Delivery Details</h2>
-      <form id="deliveryForm">
-        <div class="mb-4">
-          <label for="name" class="input-label">Full Name</label>
-          <input type="text" id="name" class="input-field" required>
-        </div>
-        <div class="mb-4">
-          <label for="phone" class="input-label">Phone Number</label>
-          <input type="tel" id="phone" class="input-field" required>
-        </div>
-        <div class="mb-5">
-          <label for="address" class="input-label">Delivery Address</label>
-          <textarea id="address" class="input-field" rows="3" required></textarea>
-        </div>
-        <button type="submit" id="placeOrderBtn" class="place-order-button">
-          <i class="fas fa-shopping-bag text-sm"></i>
-          Place Order
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Sidebar Drawer Menu -->
-  <div id="sidebarDrawer" class="sidebar-drawer">
-    <div class="p-5">
-      <h2 class="text-base font-semibold text-gray-800 mb-5">Menu</h2>
-      <ul class="space-y-3">
-        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-home mr-2 text-sm"></i>Home</a></li>
-        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-clipboard-list mr-2 text-sm"></i>Orders</a></li>
-        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-user mr-2 text-sm"></i>Profile</a></li>
-        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-cog mr-2 text-sm"></i>Settings</a></li>
-        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-car mr-2 text-sm"></i>My Orders</a></li>
-        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition-all text-sm"><i class="fas fa-sign-out-alt mr-2 text-sm"></i>Sign Out</a></li>
+  <!-- Drawer Menu -->
+  <div id="drawer" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72 hidden sm:block">
+    <div class="p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
+      <ul class="space-y-4">
+        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition active"><i class="fas fa-home mr-2"></i>Home</a></li>
+        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
+        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-user mr-2"></i>Profile</a></li>
+        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
+        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
+        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
       </ul>
     </div>
   </div>
 
   <!-- Backdrop -->
-  <div id="backdrop" class="backdrop"></div>
+  <div id="drawerBackdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
 
-  <!-- Firebase + Logic -->
+  <!-- Spinner -->
+  <div id="spinner" class="spinner hidden">
+    <svg class="animate-spin h-10 w-10 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+  </div>
+
+  <!-- Checkout Content -->
+  <div class="container mx-auto px-4 sm:px-6 py-8 content-container">
+    <!-- Restaurant Info -->
+    <div class="card">
+      <h2 id="restaurantName" class="text-xl font-bold text-gray-800 mb-2">Loading...</h2>
+      <p id="restaurantLocation" class="text-sm text-gray-600"><i class="fas fa-map-marker-alt mr-1"></i>Loading...</p>
+    </div>
+
+    <!-- Cart Items -->
+    <div class="card">
+      <h3 class="text-lg font-semibold text-gray-800 mb-3">Your Order</h3>
+      <div id="cartItems" class="space-y-3"></div>
+      <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
+        <span class="text-sm font-semibold text-gray-800">Total</span>
+        <span id="cartTotal" class="text-sm font-semibold text-gray-800">$0.00</span>
+      </div>
+    </div>
+
+    <!-- Delivery Details -->
+    <div class="card">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-lg font-semibold text-gray-800">Delivery Details</h3>
+        <button id="editDeliveryBtn" class="text-orange-500 hover:text-orange-600 text-sm font-medium transition">
+          <i class="fas fa-edit mr-1"></i>Edit
+        </button>
+      </div>
+      <div id="deliveryDisplay" class="space-y-2">
+        <div>
+          <p class="text-xs font-medium text-gray-500">Name</p>
+          <p id="deliveryName" class="text-sm text-gray-800">Loading...</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-gray-500">Phone</p>
+          <p id="deliveryPhone" class="text-sm text-gray-800">Loading...</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-gray-500">Address</p>
+          <p id="deliveryAddress" class="text-sm text-gray-800">Loading...</p>
+        </div>
+      </div>
+      <form id="deliveryForm" class="hidden space-y-4 mt-4">
+        <div>
+          <label for="deliveryNameInput" class="input-label">Full Name</label>
+          <input type="text" id="deliveryNameInput" class="input-field" required>
+        </div>
+        <div>
+          <label for="deliveryPhoneInput" class="input-label">Phone Number</label>
+          <input type="tel" id="deliveryPhoneInput" class="input-field" required>
+        </div>
+        <div>
+          <label for="deliveryAddressInput" class="input-label">Delivery Address</label>
+          <textarea id="deliveryAddressInput" class="input-field" rows="3" required></textarea>
+        </div>
+        <div class="flex gap-3">
+          <button type="submit" id="saveDeliveryBtn" class="btn-orange flex-1 py-3 text-sm">Save</button>
+          <button type="button" id="cancelDeliveryBtn" class="btn-secondary flex-1 py-3 text-sm">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Payment Method -->
+    <div class="card">
+      <h3 class="text-lg font-semibold text-gray-800 mb-3">Payment Method</h3>
+      <div class="space-y-2">
+        <label class="flex items-center">
+          <input type="radio" name="paymentMethod" value="Cash" class="mr-2 text-orange-500 focus:ring-orange-500" checked>
+          <span class="text-sm text-gray-800">Cash on Delivery</span>
+        </label>
+        <label class="flex items-center">
+          <input type="radio" name="paymentMethod" value="Card" class="mr-2 text-orange-500 focus:ring-orange-500">
+          <span class="text-sm text-gray-800">Credit/Debit Card</span>
+        </label>
+        <label class="flex items-center">
+          <input type="radio" name="paymentMethod" value="PayPal" class="mr-2 text-orange-500 focus:ring-orange-500">
+          <span class="text-sm text-gray-800">PayPal</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Place Order -->
+    <div class="card">
+      <button id="placeOrderBtn" class="w-full btn-orange py-3 text-sm flex items-center justify-center gap-2">
+        <i class="fas fa-check text-sm"></i>
+        Place Order
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav sm:hidden">
+    <a href="status.html">
+      <i class="fas fa-clipboard-list"></i>
+      <span>Orders</span>
+    </a>
+    <a href="profile.html">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+    <a href="index.html" class="home-icon active">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" id="cartNavBtn" class="cart-icon">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-count" id="cartNavCount">0</span>
+      <span>Cart</span>
+    </a>
+    <a href="#" id="rideNavBtn">
+      <i class="fas fa-car"></i>
+      <span>Ride</span>
+    </a>
+  </nav>
+
+  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getDatabase, ref, onValue, set, push } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -221,239 +349,327 @@
     const auth = getAuth();
 
     const restaurantName = document.getElementById('restaurantName');
-    const restaurantLocation = document.getElementById('locationText');
-    const restaurantImage = document.getElementById('restaurantImage');
-    const cartItemsContainer = document.getElementById('cartItems');
-    const subtotalEl = document.getElementById('subtotal');
-    const deliveryFeeEl = document.getElementById('deliveryFee');
-    const totalEl = document.getElementById('total');
+    const restaurantLocation = document.getElementById('restaurantLocation');
+    const cartItems = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    const deliveryName = document.getElementById('deliveryName');
+    const deliveryPhone = document.getElementById('deliveryPhone');
+    const deliveryAddress = document.getElementById('deliveryAddress');
+    const deliveryDisplay = document.getElementById('deliveryDisplay');
     const deliveryForm = document.getElementById('deliveryForm');
+    const deliveryNameInput = document.getElementById('deliveryNameInput');
+    const deliveryPhoneInput = document.getElementById('deliveryPhoneInput');
+    const deliveryAddressInput = document.getElementById('deliveryAddressInput');
+    const editDeliveryBtn = document.getElementById('editDeliveryBtn');
+    const saveDeliveryBtn = document.getElementById('saveDeliveryBtn');
+    const cancelDeliveryBtn = document.getElementById('cancelDeliveryBtn');
+    const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
     const placeOrderBtn = document.getElementById('placeOrderBtn');
-    const sidebarDrawer = document.getElementById('sidebarDrawer');
-    const backdrop = document.getElementById('backdrop');
+    const signOutBtn = document.getElementById('signOutBtn');
     const signOutDrawer = document.getElementById('signOutDrawer');
+    const drawer = document.getElementById('drawer');
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const cartBtn = document.getElementById('cartBtn');
+    const cartCount = document.getElementById('cartCount');
+    const cartNavBtn = document.getElementById('cartNavBtn');
     const cartNavCount = document.getElementById('cartNavCount');
+    const rideNavBtn = document.getElementById('rideNavBtn');
+    const spinner = document.getElementById('spinner');
+    const userName = document.getElementById('userName');
+    const userProfilePic = document.getElementById('userProfilePic');
 
     let userId = null;
+    let userData = {};
     let cart = [];
-    const deliveryFee = 20.00;
-    const urlParams = new URLSearchParams(window.location.search);
-    const restaurantId = urlParams.get('restaurantId');
-    const cartParam = urlParams.get('cart');
-
-    // Authentication
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        userId = user.uid;
-        loadRestaurantDetails();
-        loadCart();
-      } else {
-        window.location.href = 'login.html';
-      }
-    });
-
-    // Sign Out
-    signOutDrawer.addEventListener('click', (e) => {
-      e.preventDefault();
-      signOut(auth).then(() => {
-        window.location.href = 'login.html';
-      }).catch((error) => {
-        console.error('Sign Out Error', error);
-        showToast('Failed to sign out.');
-      });
-    });
+    let restaurantId = null;
+    let restaurantData = {};
+    let total = 0;
 
     function showToast(message) {
       const toast = document.createElement('div');
-      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-70 transition-all';
+      toast.className = 'toast';
       toast.textContent = message;
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
     }
 
-    function loadRestaurantDetails() {
+    function loadCart() {
+      const params = new URLSearchParams(window.location.search);
+      restaurantId = params.get('restaurantId');
+      const encodedCart = params.get('cart');
+      if (encodedCart) {
+        cart = JSON.parse(decodeURIComponent(encodedCart));
+        localStorage.setItem(`cart-${userId}`, JSON.stringify(cart));
+      } else {
+        cart = JSON.parse(localStorage.getItem(`cart-${userId}`)) || [];
+      }
+      updateCartCount();
+      renderCartItems();
+    }
+
+    function updateCartCount() {
+      const count = cart.reduce((total, c) => total + (c.quantity || 0), 0);
+      cartCount.textContent = count;
+      cartNavCount.textContent = count;
+      cartBtn.classList.toggle('bg-orange-600', count > 0);
+      cartNavBtn.classList.toggle('active', count > 0);
+    }
+
+    function renderCartItems() {
+      cartItems.innerHTML = '';
+      total = 0;
+      if (cart.length === 0) {
+        cartItems.innerHTML = '<p class="text-sm text-gray-500">Your cart is empty.</p>';
+        cartTotal.textContent = '$0.00';
+        return;
+      }
+      cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        const div = document.createElement('div');
+        div.className = 'flex justify-between items-center';
+        div.innerHTML = `
+          <div>
+            <p class="text-sm font-medium text-gray-800">${item.name} x${item.quantity}</p>
+            <p class="text-xs text-gray-600">$${item.price.toFixed(2)} each</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button class="decreaseQty text-gray-600 hover:text-orange-500" data-index="${index}">
+              <i class="fas fa-minus"></i>
+            </button>
+            <span class="text-sm text-gray-800">${item.quantity}</span>
+            <button class="increaseQty text-gray-600 hover:text-orange-500" data-index="${index}">
+              <i class="fas fa-plus"></i>
+            </button>
+            <span class="text-sm font-semibold text-gray-800">$${itemTotal.toFixed(2)}</span>
+          </div>
+        `;
+        cartItems.appendChild(div);
+      });
+      cartTotal.textContent = `$${total.toFixed(2)}`;
+      document.querySelectorAll('.decreaseQty').forEach(btn => {
+        btn.addEventListener('click', () => updateQuantity(btn.dataset.index, -1));
+      });
+      document.querySelectorAll('.increaseQty').forEach(btn => {
+        btn.addEventListener('click', () => updateQuantity(btn.dataset.index, 1));
+      });
+    }
+
+    function updateQuantity(index, change) {
+      const item = cart[index];
+      item.quantity = Math.max(1, (item.quantity || 1) + change);
+      cart[index] = item;
+      localStorage.setItem(`cart-${userId}`, JSON.stringify(cart));
+      updateCartCount();
+      renderCartItems();
+    }
+
+    function loadRestaurantInfo() {
+      if (!restaurantId) return;
       const restaurantRef = ref(db, `restaurants/${restaurantId}`);
       onValue(restaurantRef, (snapshot) => {
-        const restaurant = snapshot.val();
-        if (!restaurant) {
-          showToast('Restaurant not found.');
-          window.location.href = 'index.html';
-          return;
-        }
-        restaurantName.textContent = restaurant.name;
-        restaurantLocation.textContent = restaurant.location || 'Location not available';
-        restaurantImage.src = restaurant.image || 'https://via.placeholder.com/48x48';
+        restaurantData = snapshot.val() || {};
+        restaurantName.textContent = restaurantData.name || 'Unknown Restaurant';
+        restaurantLocation.textContent = restaurantData.location || 'Unknown Location';
       }, (error) => {
         console.error('Error loading restaurant:', error);
         showToast('Failed to load restaurant details.');
       });
     }
 
-    function loadCart() {
-      try {
-        if (cartParam) {
-          cart = JSON.parse(decodeURIComponent(cartParam));
-        } else {
-          const storedCart = JSON.parse(localStorage.getItem(`cart-${userId}`));
-          if (storedCart) {
-            cart = storedCart.filter(item => item.restaurantId === restaurantId);
-          }
-        }
-        if (cart.length === 0) {
-          showToast('Your cart is empty.');
-          window.location.href = `restaurant_menu.html?restaurantId=${restaurantId}`;
-          return;
-        }
-        renderCartItems();
-        updateCartCount();
-      } catch (error) {
-        console.error('Error parsing cart:', error);
-        showToast('Invalid cart data.');
-        window.location.href = `restaurant_menu.html?restaurantId=${restaurantId}`;
-      }
-    }
-
-    function renderCartItems() {
-      cartItemsContainer.innerHTML = '';
-      let subtotal = 0;
-      cart.forEach((c, index) => {
-        const itemTotal = c.item.price * c.quantity;
-        subtotal += itemTotal;
-        const el = document.createElement('div');
-        el.className = 'flex items-center gap-3 pb-3';
-        el.innerHTML = `
-          <img src="${c.item.image || 'https://via.placeholder.com/40x40'}" alt="${c.item.name}" class="w-10 h-10 rounded-md object-cover">
-          <div class="flex-1">
-            <h4 class="text-sm font-medium text-gray-800 leading-tight">${c.item.name} <span class="text-gray-500">x${c.quantity}</span></h4>
-            <p class="text-orange-500 text-sm font-medium">R${itemTotal.toFixed(2)}</p>
-          </div>
-          <button class="text-gray-500 hover:text-red-500 transition-all" data-index="${index}">
-            <i class="fas fa-trash text-xs"></i>
-          </button>
-        `;
-        el.querySelector('button').addEventListener('click', () => {
-          cart.splice(index, 1);
-          saveCart();
-          renderCartItems();
-          updateCartCount();
-          if (cart.length === 0) {
-            showToast('Your cart is empty.');
-            window.location.href = `restaurant_menu.html?restaurantId=${restaurantId}`;
-          }
-        });
-        cartItemsContainer.appendChild(el);
+    function loadUserProfile() {
+      const userRef = ref(db, `users/${userId}`);
+      onValue(userRef, (snapshot) => {
+        userData = snapshot.val() || {};
+        deliveryName.textContent = userData.name || 'Not set';
+        deliveryPhone.textContent = userData.phone || 'Not set';
+        deliveryAddress.textContent = userData.address || 'Not set';
+        deliveryNameInput.value = userData.name || '';
+        deliveryPhoneInput.value = userData.phone || '';
+        deliveryAddressInput.value = userData.address || '';
+      }, (error) => {
+        console.error('Error loading profile:', error);
+        showToast('Failed to load delivery details.');
       });
-      subtotalEl.textContent = `R${subtotal.toFixed(2)}`;
-      deliveryFeeEl.textContent = `R${deliveryFee.toFixed(2)}`;
-      totalEl.textContent = `R${(subtotal + deliveryFee).toFixed(2)}`;
     }
 
-    function saveCart() {
-      if (userId) {
-        localStorage.setItem(`cart-${userId}`, JSON.stringify(cart));
+    // Authentication
+    onAuthStateChanged(auth, (user) => {
+      spinner.classList.remove('hidden');
+      if (user) {
+        userId = user.uid;
+        userName.textContent = user.displayName || 'User';
+        userProfilePic.src = user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+        signOutBtn.style.display = 'inline-block';
+        signOutDrawer.style.display = 'block';
+        loadCart();
+        loadRestaurantInfo();
+        loadUserProfile();
+        spinner.classList.add('hidden');
+      } else {
+        spinner.classList.add('hidden');
+        window.location.href = 'login.html';
       }
-    }
+    }, (error) => {
+      console.error('Auth error:', error);
+      spinner.classList.add('hidden');
+      showToast('Failed to authenticate. Please try again.');
+    });
 
-    function updateCartCount() {
-      const count = cart.reduce((total, c) => total + c.quantity, 0);
-      cartNavCount.textContent = count;
-    }
+    // Edit Delivery
+    editDeliveryBtn.addEventListener('click', () => {
+      deliveryDisplay.classList.add('hidden');
+      deliveryForm.classList.remove('hidden');
+      editDeliveryBtn.classList.add('hidden');
+    });
 
+    // Cancel Delivery Edit
+    cancelDeliveryBtn.addEventListener('click', () => {
+      deliveryDisplay.classList.remove('hidden');
+      deliveryForm.classList.add('hidden');
+      editDeliveryBtn.classList.remove('hidden');
+      deliveryNameInput.value = userData.name || '';
+      deliveryPhoneInput.value = userData.phone || '';
+      deliveryAddressInput.value = userData.address || '';
+    });
+
+    // Save Delivery
     deliveryForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const name = document.getElementById('name').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const address = document.getElementById('address').value.trim();
+      const name = deliveryNameInput.value.trim();
+      const phone = deliveryPhoneInput.value.trim();
+      const address = deliveryAddressInput.value.trim();
 
       if (!name || !phone || !address) {
         showToast('Please fill in all fields.');
         return;
       }
 
-      placeOrderBtn.disabled = true;
-      placeOrderBtn.classList.add('btn-disabled');
+      saveDeliveryBtn.disabled = true;
+      saveDeliveryBtn.classList.add('btn-disabled');
+      spinner.classList.remove('hidden');
 
       try {
-        const subtotal = cart.reduce((total, c) => total + c.item.price * c.quantity, 0);
-        const total = subtotal + deliveryFee;
+        await set(ref(db, `users/${userId}`), {
+          name,
+          phone,
+          address,
+          email: auth.currentUser.email
+        });
+        showToast('Delivery details updated successfully!');
+        deliveryDisplay.classList.remove('hidden');
+        deliveryForm.classList.add('hidden');
+        editDeliveryBtn.classList.remove('hidden');
+      } catch (error) {
+        console.error('Error saving delivery details:', error);
+        showToast('Failed to save delivery details.');
+      } finally {
+        saveDeliveryBtn.disabled = false;
+        saveDeliveryBtn.classList.remove('btn-disabled');
+        spinner.classList.add('hidden');
+      }
+    });
+
+    // Place Order
+    placeOrderBtn.addEventListener('click', async () => {
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      const paymentMethod = Array.from(paymentMethods).find(method => method.checked)?.value;
+      if (!paymentMethod) {
+        showToast('Please select a payment method.');
+        return;
+      }
+      if (!userData.name || !userData.phone || !userData.address) {
+        showToast('Please complete your delivery details.');
+        return;
+      }
+
+      placeOrderBtn.disabled = true;
+      placeOrderBtn.classList.add('btn-disabled');
+      spinner.classList.remove('hidden');
+
+      try {
+        const orderRef = push(ref(db, 'orders'));
         const order = {
+          userId,
           restaurantId,
-          restaurantName: restaurantName.textContent,
-          items: cart.map(c => ({
-            name: c.item.name,
-            quantity: c.quantity,
-            price: c.item.price,
-            total: c.item.price * c.quantity
-          })),
-          subtotal,
-          deliveryFee,
+          items: cart,
           total,
-          userDetails: {
-            name,
-            phone,
-            address,
-            email: auth.currentUser.email
+          deliveryDetails: {
+            name: userData.name,
+            phone: userData.phone,
+            address: userData.address
           },
-          timestamp: Date.now(),
-          status: 'Pending'
+          paymentMethod,
+          status: 'Pending',
+          timestamp: Date.now()
         };
-
-        const ordersRef = ref(db, `orders/${userId}`);
-        const newOrderRef = push(ordersRef);
-        await set(newOrderRef, order);
-
-        // Clear cart
+        await set(orderRef, order);
+        localStorage.removeItem(`cart-${userId}`);
         cart = [];
-        saveCart();
         updateCartCount();
-
         showToast('Order placed successfully!');
         window.location.href = 'status.html';
       } catch (error) {
         console.error('Error placing order:', error);
         showToast('Failed to place order.');
+      } finally {
         placeOrderBtn.disabled = false;
         placeOrderBtn.classList.remove('btn-disabled');
+        spinner.classList.add('hidden');
       }
     });
 
-    // Sidebar Drawer Toggle
-    function toggleSidebarDrawer(e) {
-      e.preventDefault();
-      sidebarDrawer.classList.toggle('active');
-      backdrop.classList.toggle('active');
+    // Sign Out
+    function handleSignOut() {
+      spinner.classList.remove('hidden');
+      signOut(auth).then(() => {
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error('Sign Out Error', error);
+        spinner.classList.add('hidden');
+        showToast('Failed to sign out.');
+      });
     }
+    signOutBtn.addEventListener('click', handleSignOut);
+    signOutDrawer.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleSignOut();
+    });
 
-    document.querySelector('#rideNavBtn').addEventListener('click', toggleSidebarDrawer);
-    backdrop.addEventListener('click', () => {
-      sidebarDrawer.classList.remove('active');
-      backdrop.classList.remove('active');
+    // Drawer Toggle
+    rideNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      drawer.classList.toggle('drawer-enter');
+      drawer.classList.toggle('drawer-enter-active');
+      drawerBackdrop.classList.toggle('hidden');
+    });
+
+    drawerBackdrop.addEventListener('click', () => {
+      drawer.classList.remove('drawer-enter-active');
+      drawer.classList.add('drawer-enter');
+      drawerBackdrop.classList.add('hidden');
+    });
+
+    // Cart Button
+    cartBtn.addEventListener('click', () => {
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      window.location.href = window.location.href; // Reload current page
+    });
+
+    cartNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      window.location.href = window.location.href;
     });
   </script>
-
-  <!-- Bottom Navigation Bar (Uber Eats-inspired: bold, minimal) -->
-  <nav class="bottom-nav sm:hidden">
-    <a href="status.html">
-      <i class="fas fa-clipboard-list"></i>
-      <span>Orders</span>
-    </a>
-    <a href="profile.html">
-      <i class="fas fa-user"></i>
-      <span>Profile</span>
-    </a>
-    <a href="index.html" class="home-icon">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
-    </a>
-    <a href="#" id="cartNavBtn" class="cart-icon">
-      <i class="fas fa-shopping-cart"></i>
-      <span class="cart-count" id="cartNavCount">0</span>
-      <span>Cart</span>
-    </a>
-    <a href="#" id="rideNavBtn">
-      <i class="fas fa-car"></i>
-      <span>Ride</span>
-    </a>
-  </nav>
 </body>
 </html>
