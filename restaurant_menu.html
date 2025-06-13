@@ -40,7 +40,7 @@
     }
     /* Rounded add button */
     .add-btn {
-      @apply rounded-full p-2 w-10 h-10 flex items-center justify-center;
+      @apply rounded-full p-1.5 w-8 h-8 flex items-center justify-center;
     }
     /* Availability styling */
     .available {
@@ -144,6 +144,30 @@
     }
     .backdrop.active {
       display: block;
+    }
+    /* Menu Item Card */
+    .menu-item-card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease-in-out;
+      height: 120px; /* Reduced height */
+    }
+    .menu-item-card:hover {
+      transform: translateY(-2px);
+    }
+    .menu-item-text {
+      flex: 1;
+      padding: 0.75rem; /* Reduced padding */
+    }
+    .menu-item-image {
+      width: 100px; /* Smaller image */
+      height: 100px;
+      object-fit: cover;
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -282,6 +306,7 @@
     const sidebarDrawer = document.getElementById('sidebarDrawer');
     const backdrop = document.getElementById('backdrop');
     const signOutDrawer = document.getElementById('signOutDrawer');
+    const cartNavCount = document.getElementById('cartNavCount');
 
     let userId = null;
     let cart = [];
@@ -371,22 +396,18 @@
       items.forEach(item => {
         const isAvailable = item.isAvailable !== false;
         const el = document.createElement('div');
-        el.className = `bg-white rounded-lg shadow-lg overflow-hidden transition duration-300 flex flex-col sm:flex-row ${isAvailable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`;
+        el.className = `menu-item-card ${isAvailable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`;
         el.innerHTML = `
-          <div class="flex-1 p-4 flex flex-col justify-between">
-            <div>
-              <h3 class="text-lg font-semibold text-gray-800">${item.name}</h3>
-              <p class="text-gray-600 text-sm mt-1 line-clamp-2">${item.description}</p>
-              <p class="text-orange-500 font-bold text-lg mt-2">R${item.price.toFixed(2)}</p>
-              <p class="${isAvailable ? 'available' : 'not-available'} text-sm mt-1">${isAvailable ? 'Available' : 'Not Available'}</p>
-            </div>
-            <button class="btn-orange add-btn self-end mt-2 ${isAvailable ? '' : 'btn-disabled'}" ${isAvailable ? '' : 'disabled'}>
-              <i class="fas fa-plus"></i>
+          <div class="menu-item-text">
+            <h3 class="text-md font-semibold text-gray-800">${item.name}</h3>
+            <p class="text-gray-600 text-xs mt-1 line-clamp-2">${item.description}</p>
+            <p class="text-orange-500 font-bold text-sm mt-1">R${item.price.toFixed(2)}</p>
+            <p class="${isAvailable ? 'available' : 'not-available'} text-xs mt-1">${isAvailable ? 'Available' : 'Not Available'}</p>
+            <button class="btn-orange add-btn mt-1 ${isAvailable ? '' : 'btn-disabled'}" ${isAvailable ? '' : 'disabled'}>
+              <i class="fas fa-plus text-xs"></i>
             </button>
           </div>
-          <div class="w-full sm:w-1/3">
-            <img src="${item.image || 'https://via.placeholder.com/300x200'}" alt="${item.name}" class="w-full h-48 sm:h-full object-cover">
-          </div>
+          <img src="${item.image || 'https://via.placeholder.com/100x100'}" alt="${item.name}" class="menu-item-image">
         `;
         if (isAvailable) {
           el.querySelector('button').addEventListener('click', (e) => {
@@ -471,6 +492,7 @@
     function updateCartCount() {
       const count = cart.reduce((total, c) => total + c.quantity, 0);
       cartCountText.textContent = count;
+      cartNavCount.textContent = count;
       cartCountBtn.classList.toggle('bg-orange-600', count > 0);
     }
 
@@ -503,6 +525,13 @@
 
     // Cart Drawer Toggle
     cartCountBtn.addEventListener('click', () => {
+      cartDrawer.classList.remove('hidden');
+      renderCartItems();
+      setTimeout(() => cartDrawer.querySelector('.drawer-enter').classList.add('drawer-enter-active'), 10);
+    });
+
+    document.querySelector('#cartNavBtn').addEventListener('click', (e) => {
+      e.preventDefault();
       cartDrawer.classList.remove('hidden');
       renderCartItems();
       setTimeout(() => cartDrawer.querySelector('.drawer-enter').classList.add('drawer-enter-active'), 10);
