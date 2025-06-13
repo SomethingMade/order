@@ -566,17 +566,29 @@
         restaurantCuisine.textContent = restaurantData.category || 'Various';
         deliveryTime.textContent = restaurantData.deliveryTime || '30-45 min';
 
-        // Mock menu items based on Chicken Licken
-        menuItems = [
-          { id: '1', category: 'Soulbites', name: 'Soulbites', description: '8 pieces, 2 regular soul fries™, 2 regular soulslaw®, 2 licken loafs®.', price: 129.90, image: 'https://via.placeholder.com/80' },
-          { id: '2', category: 'Super Slyders® Specials', name: 'Slider® Special', description: '1 cheese slider, 1 chilli slider, 2 original sliders.', price: 49.90, image: 'https://via.placeholder.com/80' },
-          { id: '3', category: 'Just Hotwings®', name: 'Hotwings® 6', description: '6 hotwings® with 2 sachets soulfire® sauce.', price: 39.90, image: 'https://via.placeholder.com/80' },
-          { id: '4', category: 'Soulicious® Specials', name: 'Love Me Tender®', description: 'Love me tender® burger, regular soul fries™, 2 hotwings®, 440ml Coke.', price: 59.90, image: 'https://via.placeholder.com/80' },
-          { id: '5', category: 'Chicken Meals', name: '6 Piece Meal', description: '6 pieces, 2 regular soul fries™, 2 regular soulslaw®.', price: 99.90, image: 'https://via.placeholder.com/80' }
-        ];
-        renderMenuItems(menuItems);
+        // Load menu from Firebase
+        menuItems = [];
+        if (restaurantData.menu) {
+          Object.keys(restaurantData.menu).forEach(category => {
+            restaurantData.menu[category].forEach(item => {
+              menuItems.push({
+                id: item.id,
+                category,
+                name: item.name,
+                description: item.description || '',
+                price: item.price,
+                image: item.image || ''
+              });
+            });
+          });
+        }
+        if (menuItems.length === 0) {
+          menuSections.innerHTML = '<p class="text-gray-500 text-center py-4">No menu items available.</p>';
+        } else {
+          renderMenuItems(menuItems);
+        }
         spinner.classList.add('hidden');
-      }, (error) => {
+      }, error => {
         console.error('Error loading restaurant:', error);
         spinner.classList.add('hidden');
         showToast('Failed to load restaurant.');
@@ -604,7 +616,7 @@
         loadRestaurantData();
         spinner.classList.add('hidden');
       } else {
-        spinner.classList.add('hidden');
+        spinner.classList.remove('hidden');
         window.location.href = 'login.html';
       }
     }, (error) => {
