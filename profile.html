@@ -3,15 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Profile - My Two Minutes Food</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Font (Uber Eats-inspired: clean, modern) */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body {
-      font-family: 'Inter', sans-serif;
-    }
     /* Hide Scrollbar */
     .scrollbar-hide {
       -ms-overflow-style: none;
@@ -20,117 +15,212 @@
     .scrollbar-hide::-webkit-scrollbar {
       display: none;
     }
-    /* Smooth transitions */
-    .transition-all {
-      transition: all 0.3s ease-in-out;
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-size: 14px;
+      z-index: 1000;
     }
-    /* Button styles */
+    /* Spinner */
+    .spinner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .spinner.hidden {
+      display: none;
+    }
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* Button Hover Effect */
     .btn-orange {
-      @apply bg-orange-500 text-white hover:bg-orange-600 transition-all font-semibold rounded-full shadow-md;
+      @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out;
     }
     .btn-secondary {
-      @apply bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all font-semibold rounded-full;
+      @apply bg-gray-100 text-gray-700 hover:bg-gray-200 transition duration-200 ease-in-out;
     }
     .btn-disabled {
-      @apply bg-gray-300 text-gray-500 cursor-not-allowed rounded-full shadow-none;
+      @apply bg-gray-300 text-gray-500 cursor-not-allowed;
     }
-    /* Bottom Nav Bar (matches checkout.html) */
+    /* Drawer Animation */
+    .drawer-enter {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    .drawer-enter-active {
+      transform: translateX(0);
+    }
+    /* Bottom Nav Bar */
     .bottom-nav {
-      @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2.5 z-50 shadow-[0_-2px_4px_rgba(0,0,0,0.05)];
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #ffffff;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0;
+      z-index: 50;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
     }
     .bottom-nav a {
-      @apply flex flex-col items-center text-gray-600 text-xs font-medium transition-all px-3 py-1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #6b7280;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
     }
-    .bottom-nav a:hover, .bottom-nav a.active {
-      @apply text-orange-500;
+    .bottom-nav a.active {
+      color: #f97316;
+    }
+    .bottom-nav a:hover {
+      color: #f97316;
     }
     .bottom-nav i {
-      @apply text-xl mb-0.5;
-    }
-    .bottom-nav .home-icon {
-      @apply bg-orange-500 text-white rounded-lg px-3 py-1.5 -translate-y-1 shadow-sm;
-    }
-    .bottom-nav .home-icon i, .bottom-nav .home-icon span {
-      @apply text-white;
+      font-size: 20px;
+      margin-bottom: 4px;
     }
     .bottom-nav .cart-icon {
-      @apply relative;
+      position: relative;
     }
     .bottom-nav .cart-icon .cart-count {
-      @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[16px] text-center;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #ef4444;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      border-radius: 50%;
+      padding: 2px 6px;
     }
-    /* Sidebar Drawer */
-    .sidebar-drawer {
-      @apply fixed top-0 left-0 w-64 h-full bg-white shadow-[2px_0_8px_rgba(0,0,0,0.1)] transform -translate-x-full transition-all z-60;
+    .bottom-nav .home-icon {
+      background-color: #f97316;
+      color: white;
+      border-radius: 8px;
+      padding: 8px 16px;
+      transform: translateY(-4px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
-    .sidebar-drawer.active {
-      @apply transform translate-x-0;
+    .bottom-nav .home-icon i {
+      font-size: 20px;
+      margin-bottom: 0;
+      color: white;
     }
-    /* Backdrop */
-    .backdrop {
-      @apply fixed inset-0 bg-black bg-opacity-50 z-55 hidden;
-    }
-    .backdrop.active {
-      @apply block;
-    }
-    /* Content Container */
-    .content-container {
-      @apply pb-[80px] sm:pb-0; /* Space for nav bar (~56px) */
+    .bottom-nav .home-icon span {
+      color: white;
+      margin-top: 4px;
     }
     /* Card Style */
     .card {
-      @apply bg-white rounded-xl shadow-sm p-5 mb-6;
+      @apply bg-white rounded-lg shadow-md p-4 mb-4;
     }
     /* Input Style */
     .input-field {
-      @apply mt-1 block w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all;
+      @apply mt-1 block w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500;
     }
     .input-label {
-      @apply block text-sm font-medium text-gray-700 mb-1.5;
+      @apply block text-sm font-medium text-gray-700 mb-1;
     }
-    /* Header */
-    .header {
-      @apply bg-white shadow-sm py-3 sticky top-0 z-40;
+    /* Content Container */
+    .content-container {
+      @apply pb-20 sm:pb-8;
     }
     @media (min-width: 640px) {
       .bottom-nav {
-        @apply hidden;
+        display: none;
       }
-      .sidebar-drawer {
-        @apply w-72 transform translate-x-0 block;
-      }
-      .backdrop {
-        @apply hidden;
-      }
-      .content-container {
-        @apply pb-0;
+      .toast {
+        bottom: 20px;
       }
       .card {
-        @apply p-6;
+        @apply p-5;
+      }
+      #drawer {
+        width: 288px;
+        transform: translateX(0);
+        display: block;
+      }
+      #drawerBackdrop {
+        display: none;
       }
     }
   </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-50 font-sans">
   <!-- Header -->
-  <div class="header">
-    <div class="container mx-auto px-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <h1 class="text-lg font-semibold text-gray-800">Profile</h1>
+  <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
+    <div class="flex items-center">
+      <img src="logo.jpg" alt="Logo" class="w-8 h-8 rounded-full object-cover">
+    </div>
+    <div class="flex items-center space-x-4">
+      <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden">
+        <i class="fas fa-shopping-cart text-lg"></i>
+        <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
+      </button>
+      <div id="userProfile" class="flex items-center space-x-2">
+        <span id="userName" class="text-sm font-semibold text-gray-800 hidden sm:block"></span>
+        <img id="userProfilePic" src="" alt="Profile" class="w-8 h-8 rounded-full">
+        <button id="signOutBtn" class="text-sm text-red-500 hover:text-red-600 focus:outline-none hidden sm:block">Sign Out</button>
       </div>
-      <a href="index.html" class="text-orange-500 hover:text-orange-600 transition-all">
-        <i class="fas fa-arrow-left text-base"></i>
-      </a>
+    </div>
+  </header>
+
+  <!-- Drawer Menu -->
+  <div id="drawer" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72 hidden sm:block">
+    <div class="p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
+      <ul class="space-y-4">
+        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
+        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
+        <li><a href="profile.html" class="flex items-center text-orange-500 transition active"><i class="fas fa-user mr-2"></i>Profile</a></li>
+        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
+        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
+        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
+      </ul>
     </div>
   </div>
 
+  <!-- Backdrop -->
+  <div id="drawerBackdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+
+  <!-- Spinner -->
+  <div id="spinner" class="spinner hidden">
+    <svg class="animate-spin h-10 w-10 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+  </div>
+
   <!-- Profile Content -->
-  <div class="container mx-auto px-4 py-6 content-container">
-    <!-- User Profile -->
+  <div class="container mx-auto px-4 sm:px-6 py-8 content-container">
+    <!-- User Profile Card -->
     <div class="card">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-base font-semibold text-gray-800">Your Details</h2>
-        <button id="editProfileBtn" class="text-orange-500 hover:text-orange-600 text-sm font-medium transition-all">
+        <h2 class="text-xl font-bold text-gray-800">Your Details</h2>
+        <button id="editProfileBtn" class="text-orange-500 hover:text-orange-600 text-sm font-medium transition">
           <i class="fas fa-edit mr-1"></i>Edit
         </button>
       </div>
@@ -172,34 +262,41 @@
       </form>
     </div>
 
-    <!-- Sign Out -->
+    <!-- Sign Out Card -->
     <div class="card">
-      <button id="signOutBtn" class="w-full btn-orange py-3 text-sm flex items-center justify-center gap-2">
+      <button id="signOutBtnMobile" class="w-full btn-orange py-3 text-sm flex items-center justify-center gap-2">
         <i class="fas fa-sign-out-alt text-sm"></i>
         Sign Out
       </button>
     </div>
   </div>
 
-  <!-- Sidebar Drawer Menu -->
-  <div id="sidebarDrawer" class="sidebar-drawer">
-    <div class="p-5">
-      <h2 class="text-base font-semibold text-gray-800 mb-5">Menu</h2>
-      <ul class="space-y-3">
-        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-home mr-2 text-sm"></i>Home</a></li>
-        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-clipboard-list mr-2 text-sm"></i>Orders</a></li>
-        <li><a href="profile.html" class="flex items-center text-orange-500 font-medium transition-all text-sm"><i class="fas fa-user mr-2 text-sm"></i>Profile</a></li>
-        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-cog mr-2 text-sm"></i>Settings</a></li>
-        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all text-sm"><i class="fas fa-car mr-2 text-sm"></i>My Orders</a></li>
-        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition-all text-sm"><i class="fas fa-sign-out-alt mr-2 text-sm"></i>Sign Out</a></li>
-      </ul>
-    </div>
-  </div>
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav sm:hidden">
+    <a href="status.html">
+      <i class="fas fa-clipboard-list"></i>
+      <span>Orders</span>
+    </a>
+    <a href="profile.html" class="active">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+    <a href="index.html" class="home-icon">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" id="cartNavBtn" class="cart-icon">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-count" id="cartNavCount">0</span>
+      <span>Cart</span>
+    </a>
+    <a href="#" id="rideNavBtn">
+      <i class="fas fa-car"></i>
+      <span>Ride</span>
+    </a>
+  </nav>
 
-  <!-- Backdrop -->
-  <div id="backdrop" class="backdrop"></div>
-
-  <!-- Firebase + Logic -->
+  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
@@ -233,27 +330,47 @@
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     const signOutBtn = document.getElementById('signOutBtn');
+    const signOutBtnMobile = document.getElementById('signOutBtnMobile');
     const signOutDrawer = document.getElementById('signOutDrawer');
-    const sidebarDrawer = document.getElementById('sidebarDrawer');
-    const backdrop = document.getElementById('backdrop');
+    const drawer = document.getElementById('drawer');
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const cartBtn = document.getElementById('cartBtn');
+    const cartCount = document.getElementById('cartCount');
+    const cartNavBtn = document.getElementById('cartNavBtn');
     const cartNavCount = document.getElementById('cartNavCount');
+    const rideNavBtn = document.getElementById('rideNavBtn');
+    const spinner = document.getElementById('spinner');
+    const userName = document.getElementById('userName');
+    const userProfilePic = document.getElementById('userProfilePic');
 
     let userId = null;
     let userData = {};
+    let cart = [];
 
-    // Authentication
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        userId = user.uid;
-        loadUserProfile();
-        loadCartCount();
-      } else {
-        window.location.href = 'login.html';
-      }
-    });
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
 
-    // Load User Profile
+    function loadCart() {
+      const storedCart = JSON.parse(localStorage.getItem(`cart-${userId}`)) || [];
+      cart = storedCart;
+      updateCartCount();
+    }
+
+    function updateCartCount() {
+      const count = cart.reduce((total, c) => total + c.quantity, 0);
+      cartCount.textContent = count;
+      cartNavCount.textContent = count;
+      cartBtn.classList.toggle('bg-orange-600', count > 0);
+      cartNavBtn.classList.toggle('active', count > 0);
+    }
+
     function loadUserProfile() {
+      spinner.classList.remove('hidden');
       const userRef = ref(db, `users/${userId}`);
       onValue(userRef, (snapshot) => {
         userData = snapshot.val() || {};
@@ -264,18 +381,35 @@
         nameInput.value = userData.name || '';
         phoneInput.value = userData.phone || '';
         addressInput.value = userData.address || '';
+        spinner.classList.add('hidden');
       }, (error) => {
         console.error('Error loading profile:', error);
+        spinner.classList.add('hidden');
         showToast('Failed to load profile.');
       });
     }
 
-    // Load Cart Count
-    function loadCartCount() {
-      const storedCart = JSON.parse(localStorage.getItem(`cart-${userId}`)) || [];
-      const count = storedCart.reduce((total, c) => total + c.quantity, 0);
-      cartNavCount.textContent = count;
-    }
+    // Authentication
+    onAuthStateChanged(auth, (user) => {
+      spinner.classList.remove('hidden');
+      if (user) {
+        userId = user.uid;
+        userName.textContent = user.displayName || "User";
+        userProfilePic.src = user.photoURL || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+        signOutBtn.style.display = "inline-block";
+        signOutDrawer.style.display = "block";
+        loadCart();
+        loadUserProfile();
+        spinner.classList.add('hidden');
+      } else {
+        spinner.classList.add('hidden');
+        window.location.href = "login.html";
+      }
+    }, (error) => {
+      console.error("Auth error:", error);
+      spinner.classList.add('hidden');
+      showToast("Failed to authenticate. Please try again.");
+    });
 
     // Edit Profile
     editProfileBtn.addEventListener('click', () => {
@@ -308,6 +442,7 @@
 
       saveProfileBtn.disabled = true;
       saveProfileBtn.classList.add('btn-disabled');
+      spinner.classList.remove('hidden');
 
       try {
         await set(ref(db, `users/${userId}`), {
@@ -326,70 +461,61 @@
       } finally {
         saveProfileBtn.disabled = false;
         saveProfileBtn.classList.remove('btn-disabled');
+        spinner.classList.add('hidden');
       }
     });
 
     // Sign Out
     function handleSignOut() {
+      spinner.classList.remove('hidden');
       signOut(auth).then(() => {
         window.location.href = 'login.html';
       }).catch((error) => {
         console.error('Sign Out Error', error);
+        spinner.classList.add('hidden');
         showToast('Failed to sign out.');
       });
     }
     signOutBtn.addEventListener('click', handleSignOut);
+    signOutBtnMobile.addEventListener('click', handleSignOut);
     signOutDrawer.addEventListener('click', (e) => {
       e.preventDefault();
       handleSignOut();
     });
 
-    // Show Toast
-    function showToast(message) {
-      const toast = document.createElement('div');
-      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-70 transition-all';
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    // Sidebar Drawer Toggle
-    function toggleSidebarDrawer(e) {
+    // Drawer Toggle
+    rideNavBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      sidebarDrawer.classList.toggle('active');
-      backdrop.classList.toggle('active');
-    }
+      drawer.classList.toggle('drawer-enter');
+      drawer.classList.toggle('drawer-enter-active');
+      drawerBackdrop.classList.toggle('hidden');
+    });
 
-    document.querySelector('#rideNavBtn').addEventListener('click', toggleSidebarDrawer);
-    backdrop.addEventListener('click', () => {
-      sidebarDrawer.classList.remove('active');
-      backdrop.classList.remove('active');
+    drawerBackdrop.addEventListener('click', () => {
+      drawer.classList.remove('drawer-enter-active');
+      drawer.classList.add('drawer-enter');
+      drawerBackdrop.classList.add('hidden');
+    });
+
+    // Cart Button
+    cartBtn.addEventListener('click', () => {
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      const restaurantId = cart[0].restaurantId;
+      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
+    });
+
+    cartNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      const restaurantId = cart[0].restaurantId;
+      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
     });
   </script>
-
-  <!-- Bottom Navigation Bar (matches checkout.html) -->
-  <nav class="bottom-nav sm:hidden">
-    <a href="status.html">
-      <i class="fas fa-clipboard-list"></i>
-      <span>Orders</span>
-    </a>
-    <a href="profile.html" class="active">
-      <i class="fas fa-user"></i>
-      <span>Profile</span>
-    </a>
-    <a href="index.html" class="home-icon">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
-    </a>
-    <a href="#" id="cartNavBtn" class="cart-icon">
-      <i class="fas fa-shopping-cart"></i>
-      <span class="cart-count" id="cartNavCount">0</span>
-      <span>Cart</span>
-    </a>
-    <a href="#" id="rideNavBtn">
-      <i class="fas fa-car"></i>
-      <span>Ride</span>
-    </a>
-  </nav>
 </body>
 </html>
