@@ -7,6 +7,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    /* Font (mimicking Uber Eats' lightweight sans-serif) */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
     /* Hide Scrollbar */
     .scrollbar-hide {
       -ms-overflow-style: none;
@@ -15,190 +20,127 @@
     .scrollbar-hide::-webkit-scrollbar {
       display: none;
     }
-    /* Smooth transitions for drawers */
-    .drawer-enter {
-      transform: translateX(100%);
-      opacity: 0;
+    /* Smooth transitions */
+    .transition-all {
       transition: all 0.3s ease-in-out;
     }
-    .drawer-enter-active {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    /* Custom button hover effect */
+    /* Button styles */
     .btn-orange {
-      @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out;
+      @apply bg-orange-500 text-white hover:bg-orange-600 transition-all font-semibold rounded-full shadow-md;
     }
-    /* Disabled button */
     .btn-disabled {
-      @apply bg-gray-300 text-gray-500 cursor-not-allowed;
+      @apply bg-gray-300 text-gray-500 cursor-not-allowed rounded-full shadow-none;
     }
-    /* Bottom Nav Bar */
+    /* Bottom Nav Bar (Uber Eats-inspired: minimal, icon-focused) */
     .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: #ffffff;
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 10px 0;
-      z-index: 50;
-      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-3 z-50 shadow-[0_-2px_5px_rgba(0,0,0,0.05)];
     }
     .bottom-nav a {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #6b7280;
-      font-size: 12px;
-      text-decoration: none;
-      transition: color 0.2s;
+      @apply flex flex-col items-center text-gray-600 text-xs transition-all;
     }
-    .bottom-nav a.active {
-      color: #f97316;
-    }
-    .bottom-nav a:hover {
-      color: #f97316;
+    .bottom-nav a:hover, .bottom-nav a.active {
+      @apply text-orange-500;
     }
     .bottom-nav i {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-    .bottom-nav .cart-icon {
-      position: relative;
-    }
-    .bottom-nav .cart-icon .cart-count {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background-color: #ef4444;
-      color: white;
-      font-size: 10px;
-      font-weight: bold;
-      border-radius: 50%;
-      padding: 2px 6px;
+      @apply text-lg mb-1;
     }
     .bottom-nav .home-icon {
-      background-color: #f97316;
-      color: white;
-      border-radius: 8px;
-      padding: 8px 16px;
-      transform: translateY(-4px);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      @apply bg-orange-500 text-white rounded-lg px-4 py-2 -translate-y-1 shadow-sm;
     }
-    .bottom-nav .home-icon i {
-      font-size: 20px;
-      margin-bottom: 0;
-      color: white;
+    .bottom-nav .home-icon i, .bottom-nav .home-icon span {
+      @apply text-white;
     }
-    .bottom-nav .home-icon span {
-      color: white;
-      margin-top: 4px;
+    .bottom-nav .cart-icon {
+      @apply relative;
+    }
+    .bottom-nav .cart-icon .cart-count {
+      @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5;
     }
     /* Sidebar Drawer */
     .sidebar-drawer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 64;
-      height: 100%;
-      background-color: white;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-      transform: translateX(-100%);
-      transition: transform 0.3s ease-in-out;
-      z-index: 60;
+      @apply fixed top-0 left-0 w-64 h-full bg-white shadow-[2px_0_10px_rgba(0,0,0,0.1)] transform -translate-x-full transition-all z-60;
     }
     .sidebar-drawer.active {
-      transform: translateX(0);
+      @apply transform translate-x-0;
     }
     /* Backdrop */
     .backdrop {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 55;
-      display: none;
+      @apply fixed inset-0 bg-black bg-opacity-50 z-55 hidden;
     }
     .backdrop.active {
-      display: block;
+      @apply block;
     }
     /* Content Container */
     .content-container {
-      padding-bottom: 128px; /* Space for nav bar + Place Order button */
+      @apply pb-32 sm:pb-0; /* Space for nav bar + button */
     }
-    /* Floating Place Order Button */
+    /* Floating Place Order Button (Uber Eats-inspired CTA) */
     .place-order-button {
-      position: fixed;
-      bottom: 16px; /* ~16px above nav bar */
-      width: calc(100% - 2rem);
-      margin-left: 1rem;
-      margin-right: 1rem;
-      z-index: 60;
-      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      @apply fixed bottom-16 w-[calc(100%-2rem)] mx-4 z-60 btn-orange py-4 text-base flex items-center justify-center gap-2 shadow-lg;
+    }
+    /* Card Style */
+    .card {
+      @apply bg-white rounded-xl shadow-sm p-6 mb-6;
+    }
+    /* Input Style */
+    .input-field {
+      @apply mt-1 block w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all;
+    }
+    .input-label {
+      @apply block text-sm font-medium text-gray-700 mb-1;
     }
     @media (min-width: 640px) {
       .bottom-nav {
-        display: none;
+        @apply hidden;
       }
       .sidebar-drawer {
-        width: 72;
-        transform: translateX(0);
-        display: block;
+        @apply w-72 transform translate-x-0 block;
       }
       .backdrop {
-        display: none;
-      }
-      .content-container {
-        padding-bottom: 0; /* No nav bar or floating button on desktop */
+        @apply hidden;
       }
       .place-order-button {
-        position: static; /* Revert to form flow */
-        width: 100%;
-        margin-left: 0;
-        margin-right: 0;
-        box-shadow: none;
+        @apply static w-full mx-0 mt-6 shadow-md py-4;
       }
     }
   </style>
 </head>
-<body class="bg-gray-50 font-sans">
-  <!-- Header -->
-  <div class="bg-white shadow-sm py-4 px-6">
-    <div class="container mx-auto flex items-center justify-between">
-      <div>
-        <h1 id="restaurantName" class="text-2xl font-bold text-gray-800">Restaurant Name</h1>
-        <p id="restaurantLocation" class="text-sm text-gray-600 flex items-center gap-2">
-          <i class="fas fa-map-marker-alt"></i>
-          <span id="locationText">Restaurant Location</span>
-        </p>
+<body class="bg-gray-100">
+  <!-- Header (Uber Eats-inspired: clean, image-focused) -->
+  <div class="bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <img id="restaurantImage" src="https://via.placeholder.com/64x64" alt="Restaurant Logo" class="w-16 h-16 rounded-full object-cover">
+        <div>
+          <h1 id="restaurantName" class="text-xl font-bold text-gray-800">Restaurant Name</h1>
+          <p id="restaurantLocation" class="text-sm text-gray-500 flex items-center gap-2">
+            <i class="fas fa-map-marker-alt text-gray-400"></i>
+            <span id="locationText">Restaurant Location</span>
+          </p>
+        </div>
       </div>
-      <a href="index.html" class="text-orange-500 hover:text-orange-600">
-        <i class="fas fa-arrow-left text-xl"></i>
+      <a href="index.html" class="text-orange-500 hover:text-orange-600 transition-all">
+        <i class="fas fa-arrow-left text-lg"></i>
       </a>
     </div>
   </div>
 
   <!-- Checkout Content -->
-  <div class="container mx-auto px-4 sm:px-6 py-8 content-container">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Checkout</h2>
-
-    <!-- Cart Items -->
-    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-      <h3 class="text-lg font-semibold text-gray-800 mb-4">Order Summary</h3>
+  <div class="container mx-auto px-4 py-8 content-container">
+    <!-- Order Summary -->
+    <div class="card">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">Order Summary</h2>
       <div id="cartItems" class="space-y-4"></div>
-      <div class="border-t mt-4 pt-4">
-        <div class="flex justify-between text-gray-600">
+      <div class="border-t border-gray-200 mt-4 pt-4">
+        <div class="flex justify-between text-gray-600 text-sm">
           <span>Subtotal</span>
           <span id="subtotal">R0.00</span>
         </div>
-        <div class="flex justify-between text-gray-600 mt-2">
+        <div class="flex justify-between text-gray-600 text-sm mt-2">
           <span>Delivery Fee</span>
           <span id="deliveryFee">R20.00</span>
         </div>
-        <div class="flex justify-between font-bold text-gray-800 mt-2">
+        <div class="flex justify-between font-semibold text-gray-800 mt-2">
           <span>Total</span>
           <span id="total">R0.00</span>
         </div>
@@ -206,23 +148,22 @@
     </div>
 
     <!-- Delivery Details -->
-    <div class="bg-white rounded-lg shadow-sm p-6">
-      <h3 class="text-lg font-semibold text-gray-800 mb-4">Delivery Details</h3>
+    <div class="card">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">Delivery Details</h2>
       <form id="deliveryForm">
         <div class="mb-4">
-          <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-          <input type="text" id="name" class="mt-1 block w-full border-gray-300 rounded-lg p-2 focus:ring-orange-500 focus:border-orange-500" required>
+          <label for="name" class="input-label">Full Name</label>
+          <input type="text" id="name" class="input-field" required>
         </div>
         <div class="mb-4">
-          <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-          <input type="tel" id="phone" class="mt-1 block w-full border-gray-300 rounded-lg p-2 focus:ring-orange-500 focus:border-orange-500" required>
+          <label for="phone" class="input-label">Phone Number</label>
+          <input type="tel" id="phone" class="input-field" required>
         </div>
-        <div class="mb-4">
-          <label for="address" class="block text-sm font-medium text-gray-700">Delivery Address</label>
-          <textarea id="address" class="mt-1 block w-full border-gray-300 rounded-lg p-2 focus:ring-orange-500 focus:border-orange-500" rows="4" required></textarea>
+        <div class="mb-6">
+          <label for="address" class="input-label">Delivery Address</label>
+          <textarea id="address" class="input-field" rows="4" required></textarea>
         </div>
-        <!-- Place Order Button -->
-        <button type="submit" id="placeOrderBtn" class="place-order-button btn-orange py-3 rounded-lg font-semibold flex items-center justify-center gap-2 sm:static sm:w-full sm:mt-4">
+        <button type="submit" id="placeOrderBtn" class="place-order-button">
           <i class="fas fa-shopping-bag"></i>
           Place Order
         </button>
@@ -233,14 +174,14 @@
   <!-- Sidebar Drawer Menu -->
   <div id="sidebarDrawer" class="sidebar-drawer">
     <div class="p-6">
-      <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
+      <h2 class="text-lg font-bold text-gray-800 mb-6">Menu</h2>
       <ul class="space-y-4">
-        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
-        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
-        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-user mr-2"></i>Profile</a></li>
-        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
-        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
-        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
+        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all"><i class="fas fa-home mr-2"></i>Home</a></li>
+        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
+        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all"><i class="fas fa-user mr-2"></i>Profile</a></li>
+        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all"><i class="fas fa-cog mr-2"></i>Settings</a></li>
+        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition-all"><i class="fas fa-car mr-2"></i>My Orders</a></li>
+        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition-all"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
       </ul>
     </div>
   </div>
@@ -271,6 +212,7 @@
 
     const restaurantName = document.getElementById('restaurantName');
     const restaurantLocation = document.getElementById('locationText');
+    const restaurantImage = document.getElementById('restaurantImage');
     const cartItemsContainer = document.getElementById('cartItems');
     const subtotalEl = document.getElementById('subtotal');
     const deliveryFeeEl = document.getElementById('deliveryFee');
@@ -313,7 +255,7 @@
 
     function showToast(message) {
       const toast = document.createElement('div');
-      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-70';
+      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-70 transition-all';
       toast.textContent = message;
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
@@ -330,6 +272,7 @@
         }
         restaurantName.textContent = restaurant.name;
         restaurantLocation.textContent = restaurant.location || 'Location not available';
+        restaurantImage.src = restaurant.image || 'https://via.placeholder.com/64x64';
       }, (error) => {
         console.error('Error loading restaurant:', error);
         showToast('Failed to load restaurant details.');
@@ -367,14 +310,15 @@
         const itemTotal = c.item.price * c.quantity;
         subtotal += itemTotal;
         const el = document.createElement('div');
-        el.className = 'flex justify-between items-center mb-4';
+        el.className = 'flex items-center gap-4 mb-4 border-b border-gray-100 pb-4';
         el.innerHTML = `
-          <div>
-            <h4 class="text-md font-semibold text-gray-800">${c.item.name} (x${c.quantity})</h4>
-            <p class="text-orange-500 text-sm">R${itemTotal.toFixed(2)}</p>
+          <img src="${c.item.image || 'https://via.placeholder.com/48x48'}" alt="${c.item.name}" class="w-12 h-12 rounded-lg object-cover">
+          <div class="flex-1">
+            <h4 class="text-sm font-medium text-gray-800">${c.item.name} (x${c.quantity})</h4>
+            <p class="text-orange-500 text-sm font-medium">R${itemTotal.toFixed(2)}</p>
           </div>
-          <button class="text-red-500 hover:text-red-600" data-index="${index}">
-            <i class="fas fa-trash"></i>
+          <button class="text-gray-500 hover:text-red-500 transition-all" data-index="${index}">
+            <i class="fas fa-trash text-sm"></i>
           </button>
         `;
         el.querySelector('button').addEventListener('click', () => {
@@ -477,7 +421,7 @@
     });
   </script>
 
-  <!-- Bottom Navigation Bar -->
+  <!-- Bottom Navigation Bar (Uber Eats-inspired) -->
   <nav class="bottom-nav sm:hidden">
     <a href="status.html">
       <i class="fas fa-clipboard-list"></i>
