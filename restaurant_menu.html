@@ -62,6 +62,69 @@
     .drawer-enter-active {
       transform: translateX(0);
     }
+    /* Top Nav Bar */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 0;
+      z-index: 50;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .top-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #6b7280;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+      margin: 0 16px;
+    }
+    .top-nav a.active {
+      color: #f97316;
+    }
+    .top-nav a:hover {
+      color: #f97316;
+    }
+    .top-nav i {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .top-nav .cart-icon {
+      position: relative;
+    }
+    .top-nav .cart-icon .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #ef4444;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      border-radius: 50%;
+      padding: 2px 6px;
+    }
+    .top-nav .home-icon {
+      background-color: #f97316;
+      color: white;
+      border-radius: 8px;
+      padding: 8px 16px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    .top-nav .home-icon i {
+      font-size: 20px;
+      margin-bottom: 0;
+      color: white;
+    }
+    .top-nav .home-icon span {
+      color: white;
+      margin-top: 4px;
+    }
     /* Bottom Nav Bar */
     .bottom-nav {
       position: fixed;
@@ -196,6 +259,9 @@
       transform: translateY(0);
     }
     @media (min-width: 640px) {
+      .top-nav {
+        display: flex;
+      }
       .bottom-nav, .floating-cart {
         display: none;
       }
@@ -208,10 +274,38 @@
         border-top-right-radius: 8px;
         border-top-left-radius: 8px;
       }
+      .menu-categories {
+        top: 60px; /* Adjust for top nav bar height */
+      }
     }
   </style>
 </head>
 <body class="bg-gray-50 font-sans">
+  <!-- Top Navigation Bar -->
+  <nav class="top-nav">
+    <a href="status.html">
+      <i class="fas fa-clipboard-list"></i>
+      <span>Orders</span>
+    </a>
+    <a href="profile.html">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+    <a href="index.html" class="home-icon">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" id="cartTopNavBtn" class="cart-icon">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-count" id="cartTopNavCount">0</span>
+      <span>Cart</span>
+    </a>
+    <a href="#" id="rideTopNavBtn">
+      <i class="fas fa-car"></i>
+      <span>Ride</span>
+    </a>
+  </nav>
+
   <!-- Header -->
   <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
     <div class="flex items-center space-x-4">
@@ -389,6 +483,8 @@
     const cartCount = document.getElementById('cartCount');
     const cartNavBtn = document.getElementById('cartNavBtn');
     const cartNavCount = document.getElementById('cartNavCount');
+    const cartTopNavBtn = document.getElementById('cartTopNavBtn');
+    const cartTopNavCount = document.getElementById('cartTopNavCount');
     const floatingCartBtn = document.getElementById('floatingCartBtn');
     const floatingCartCount = document.getElementById('floatingCartCount');
     const cartDrawer = document.getElementById('cartDrawer');
@@ -396,6 +492,7 @@
     const cartTotal = document.getElementById('cartTotal');
     const checkoutBtn = document.getElementById('checkoutBtn');
     const rideNavBtn = document.getElementById('rideNavBtn');
+    const rideTopNavBtn = document.getElementById('rideTopNavBtn');
     const spinner = document.getElementById('spinner');
     const drawer = document.getElementById('drawer');
     const backdrop = document.getElementById('drawerBackdrop');
@@ -492,6 +589,7 @@
       const count = cart.reduce((total, item) => total + item.quantity, 0);
       cartCount.textContent = count;
       cartNavCount.textContent = count;
+      cartTopNavCount.textContent = count;
       floatingCartCount.textContent = count;
       floatingCartBtn.classList.toggle('hidden', count === 0);
 
@@ -616,7 +714,7 @@
         loadRestaurantData();
         spinner.classList.add('hidden');
       } else {
-        spinner.classList.remove('hidden');
+        spinner.classList.add('hidden');
         window.location.href = 'login.html';
       }
     }, (error) => {
@@ -644,12 +742,14 @@
     });
 
     // Drawer Toggle
-    rideNavBtn.addEventListener('click', (e) => {
+    function toggleDrawer(e) {
       e.preventDefault();
       drawer.classList.toggle('drawer-enter');
       drawer.classList.toggle('drawer-enter-active');
       backdrop.classList.toggle('hidden');
-    });
+    }
+    rideNavBtn.addEventListener('click', toggleDrawer);
+    rideTopNavBtn.addEventListener('click', toggleDrawer);
 
     backdrop.addEventListener('click', () => {
       drawer.classList.remove('drawer-enter-active');
@@ -658,6 +758,14 @@
     });
 
     // Cart Button
+    function toggleCartDrawer(e) {
+      e.preventDefault();
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      cartDrawer.classList.toggle('active');
+    }
     cartBtn.addEventListener('click', () => {
       if (cart.length === 0) {
         showToast('Your cart is empty.');
@@ -665,16 +773,8 @@
       }
       cartDrawer.classList.toggle('active');
     });
-
-    cartNavBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (cart.length === 0) {
-        showToast('Your cart is empty.');
-        return;
-      }
-      cartDrawer.classList.toggle('active');
-    });
-
+    cartNavBtn.addEventListener('click', toggleCartDrawer);
+    cartTopNavBtn.addEventListener('click', toggleCartDrawer);
     floatingCartBtn.addEventListener('click', () => {
       cartDrawer.classList.toggle('active');
     });
