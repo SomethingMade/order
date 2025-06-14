@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bolt Ride Booking</title>
+
+  <!-- Mapbox GL -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    /* Reset and Base Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; font-family: 'Inter', Arial, sans-serif; overflow: hidden; }
+    body { background: #f5f5f5; }
+
+    /* Navigation Bar */
+    nav {
+      background: #00C4B4; /* Bolt green */
+      color: #fff;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    nav .logo { font-size: 24px; font-weight: 700; }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: opacity 0.3s;
+    }
+    nav ul li a:hover { opacity: 0.8; }
+    nav .menu-toggle {
+      display: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* Map */
+    #map { position: fixed; inset: 0; z-index: 0; }
+
+    /* Container */
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 450px;
+      margin: 80px auto 20px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    h2 { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 20px; color: #333; }
+
+    /* Input Fields */
+    .input-wrapper { margin-bottom: 20px; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #00C4B4;
+      box-shadow: 0 0 8px rgba(0, 196, 180, 0.3);
+    }
+    .autocomplete-items {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-top: none;
+      max-height: 180px;
+      overflow-y: auto;
+      z-index: 1000;
+      border-radius: 0 0 12px 12px;
+    }
+    .autocomplete-items div {
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    .autocomplete-items div:hover,
+    .autocomplete-active { background: #f0f0f0; }
+
+    /* Car Selection */
+    .car-selection { display: flex; gap: 12px; margin-bottom: 20px; }
+    .car-card {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #fff;
+    }
+    .car-card:hover {
+      border-color: #00C4B4;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .car-card.selected {
+      border-color: #00C4B4;
+      background: #e6f7f5;
+      box-shadow: 0 5px 15px rgba(0, 196, 180, 0.3);
+    }
+    .car-icon img { width: 60px; height: 60px; margin-bottom: 8px; }
+    .car-name { font-weight: 600; font-size: 16px; color: #333; }
+    .car-price { font-weight: 500; color: #666; font-size: 14px; }
+    .car-eta { font-size: 12px; color: #00C4B4; font-weight: 600; }
+
+    /* Button */
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 9999px;
+      font-weight: 600;
+      color: #fff;
+      background: #00C4B4;
+      box-shadow: 0 5px 15px rgba(0, 196, 180, 0.3);
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    button:hover:enabled { background: #00a89b; }
+
+    /* Ride History */
+    .ride-history {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .ride-history h3 { font-size: 20px; margin-bottom: 15px; }
+    .ride-history ul { list-style: none; }
+    .ride-history li {
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 14px;
+      color: #333;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container { margin: 60px 10px 20px; }
+      nav ul { display: none; }
+      nav ul.active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #00C4B4;
+        padding: 20px;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      }
+      nav .menu-toggle { display: block; }
+      .car-selection { flex-direction: column; }
+      .car-card { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav>
+    <div class="logo">Bolt</div>
+    <ul id="nav-menu">
+      <li><a href="#" data-section="book-ride">Book Ride</a></li>
+      <li><a href="#" data-section="ride-history">Ride History</a></li>
+      <li><a href="#" data-section="profile">Profile</a></li>
+    </ul>
+    <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+  </nav>
+
+  <!-- Map -->
+  <div id="map"></div>
+
+  <!-- Booking Container -->
+  <div class="container" id="book-ride">
+    <h2>Book Your Ride</h2>
+    <div class="input-wrapper">
+      <label for="pickup">Pickup Location</label>
+      <input id="pickup" type="text" placeholder="Enter pickup location" autocomplete="off">
+    </div>
+    <div class="input-wrapper">
+      <label for="dropoff">Drop-off Location</label>
+      <input id="dropoff" type="text" placeholder="Enter drop-off location" autocomplete="off">
+    </div>
+    <div class="car-selection" id="carSelection">
+      <div class="car-card" data-car="Economy">
+        <div class="car-icon">
+          <img src="https://img.freepik.com/premium-vector/circular-gradient-black-transportation-background-designs_1322560-110639.jpg?ga=GA1.1.2073081952.1747646900&semt=ais_hybrid&w=740" alt="Economy Car" />
+        </div>
+        <div class="car-name">Economy</div>
+        <div class="car-price" id="price-economy">--</div>
+        <div class="car-eta" id="eta-economy">--</div>
+      </div>
+      <div class="car-card" data-car="Premium">
+        <div class="car-icon">
+          <img src="https://img.freepik.com/premium-vector/circular-gradient-black-transportation-background-designs_1322560-110639.jpg?ga=GA1.1.2073081952.1747646900&semt=ais_hybrid&w=740" alt="Premium Car" />
+        </div>
+        <div class="car-name">Premium</div>
+        <div class="car-price" id="price-premium">--</div>
+        <div class="car-eta" id="eta-premium">--</div>
+      </div>
+      <div class="car-card" data-car="SUV">
+        <div class="car-icon">
+          <img src="https://img.freepik.com/premium-vector/circular-gradient-black-transportation-background-designs_1322560-110639.jpg?ga=GA1.1.2073081952.1747646900&semt=ais_hybrid&w=740" alt="SUV Car" />
+        </div>
+        <div class="car-name">SUV</div>
+        <div class="car-price" id="price-suv">--</div>
+        <div class="car-eta" id="eta-suv">--</div>
+      </div>
+    </div>
+    <button id="bookRideBtn" disabled>Book Ride</button>
+  </div>
+
+  <!-- Ride History Container -->
+  <div class="ride-history container" id="ride-history">
+    <h3>Ride History</h3>
+    <ul id="history-list"></ul>
+  </div>
+
+  <!-- Profile Container (Placeholder) -->
+  <div class="container" id="profile" style="display: none;">
+    <h2>Profile</h2>
+    <p>User profile details coming soon!</p>
+  </div>
+
+  <script>
+    /* ───────────────────────── 0 ▸ Pricing and ETA Helpers ───────────────────────── */
+    const RATE_PER_KM = 7;
+    const multipliers = { Economy: 1, Premium: 1.6, SUV: 2.2 };
+    const etaMultipliers = { Economy: 1, Premium: 0.9, SUV: 1.1 }; // ETA adjustments
+    let pickupCoords = null, dropoffCoords = null, routeDuration = null;
+    let rideHistory = JSON.parse(localStorage.getItem('rideHistory')) || [];
+
+    function haversine([lon1, lat1], [lon2, lat2]) {
+      const R = 6371, toRad = d => d * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function updatePricesAndETA() {
+      if (!pickupCoords || !dropoffCoords || !routeDuration) {
+        ["economy", "premium", "suv"].forEach(id => {
+          document.getElementById(`price-${id}`).textContent = "--";
+          document.getElementById(`eta-${id}`).textContent = "--";
+        });
+        toggleBookButton();
+        removeRoute();
+        return;
+      }
+      const km = haversine(pickupCoords, dropoffCoords);
+      const fmtPrice = b => `R${b} – R${Math.round(b * 1.3)}`;
+      const fmtETA = t => `${Math.round(t / 60)} min`;
+      ["economy", "premium", "suv"].forEach(id => {
+        const price = Math.round(km * RATE_PER_KM * multipliers[id.charAt(0).toUpperCase() + id.slice(1)]);
+        const eta = routeDuration * etaMultipliers[id.charAt(0).toUpperCase() + id.slice(1)];
+        document.getElementById(`price-${id}`).textContent = fmtPrice(price);
+        document.getElementById(`eta-${id}`).textContent = fmtETA(eta);
+      });
+      toggleBookButton();
+      drawRoute();
+    }
+
+    /* ───────────────────────── 1 ▸ Mapbox & Autocomplete ───────────────────────── */
+    mapboxgl.accessToken = "pk.eyJ1Ijoia2F0bGVnb3BoYXNoYSIsImEiOiJjbTlpOTdzbmYwMGNsMmpzYWJtZzN4d3pqIn0.Zt-aSMEoahrV3zkiVVHbOw";
+
+    const map = new mapboxgl.Map({
+      container: "map",
+      style: "mapbox://styles/mapbox/streets-v12",
+      center: [28.0473, -26.2041],
+      zoom: 11
+    });
+
+    function setupAutocomplete(id) {
+      const inp = document.getElementById(id);
+      let cur = -1;
+
+      inp.addEventListener("input", async function () {
+        const val = this.value;
+        closeLists();
+        if (!val) { updatePricesAndETA(); return; }
+        const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(val)}.json?autocomplete=true&limit=5&access_token=${mapboxgl.accessToken}`);
+        const feats = (await res.json()).features;
+        if (!feats.length) { updatePricesAndETA(); return; }
+
+        const list = document.createElement("div");
+        list.id = this.id + "-list";
+        list.className = "autocomplete-items";
+        this.parentNode.appendChild(list);
+
+        feats.forEach(f => {
+          const item = document.createElement("div");
+          item.textContent = f.place_name;
+          item.onclick = () => {
+            inp.value = f.place_name;
+            if (id === "pickup") pickupCoords = f.center;
+            if (id === "dropoff") dropoffCoords = f.center;
+            updatePricesAndETA();
+            map.flyTo({ center: f.center, zoom: 14 });
+            closeLists();
+          };
+          list.appendChild(item);
+        });
+      });
+
+      inp.addEventListener("keydown", e => {
+        const list = document.getElementById(inp.id + "-list");
+        if (!list) return;
+        const items = list.getElementsByTagName("div");
+        if (e.key === "ArrowDown") { cur = (cur + 1) % items.length; setActive(items); }
+        if (e.key === "ArrowUp") { cur = (cur - 1 + items.length) % items.length; setActive(items); }
+        if (e.key === "Enter") { e.preventDefault(); items[cur]?.click(); }
+      });
+
+      function setActive(items) {
+        [...items].forEach(i => i.classList.remove("autocomplete-active"));
+        if (cur >= 0) items[cur].classList.add("autocomplete-active");
+      }
+      function closeLists(el) {
+        document.querySelectorAll(".autocomplete-items").forEach(l => {
+          if (el !== l && el !== inp) l.remove();
+        });
+      }
+      document.addEventListener("click", e => closeLists(e.target));
+    }
+
+    setupAutocomplete("pickup");
+    setupAutocomplete("dropoff");
+
+    /* ───────────────────────── 2 ▸ UI State ─────────────────────────────── */
+    let selectedCar = null;
+    function toggleBookButton() {
+      const ok = document.getElementById("pickup").value.trim() &&
+                 document.getElementById("dropoff").value.trim() &&
+                 selectedCar;
+      document.getElementById("bookRideBtn").disabled = !ok;
+    }
+
+    document.querySelectorAll(".car-card").forEach(card => {
+      card.onclick = () => {
+        document.querySelectorAll(".car-card").forEach(c => c.classList.remove("selected"));
+        card.classList.add("selected");
+        selectedCar = card.dataset.car;
+        toggleBookButton();
+      };
+    });
+
+    document.getElementById("bookRideBtn").onclick = () => {
+      const pickup = document.getElementById("pickup").value;
+      const dropoff = document.getElementById("dropoff").value;
+      const ride = {
+        id: Date.now(),
+        pickup,
+        dropoff,
+        car: selectedCar,
+        price: document.getElementById(`price-${selectedCar.toLowerCase()}`).textContent,
+        eta: document.getElementById(`eta-${selectedCar.toLowerCase()}`).textContent,
+        date: new Date().toLocaleString()
+      };
+      rideHistory.push(ride);
+      localStorage.setItem('rideHistory', JSON.stringify(rideHistory));
+      updateRideHistory();
+      alert(`Ride booked!\nPickup: ${pickup}\nDrop-off: ${dropoff}\nCar: ${selectedCar}\nDriver: John Doe\nCar: Toyota Corolla\nETA: ${ride.eta}`);
+    };
+
+    /* ───────────────────────── 3 ▸ Route Drawing ───────────────────────── */
+    async function drawRoute() {
+      if (!pickupCoords || !dropoffCoords) return removeRoute();
+
+      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${pickupCoords[0]},${pickupCoords[1]};${dropoffCoords[0]},${dropoffCoords[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.routes || !data.routes.length) return removeRoute();
+
+        const route = data.routes[0].geometry;
+        routeDuration = data.routes[0].duration; // Store duration for ETA
+        updatePricesAndETA();
+
+        if (map.getSource('route')) {
+          map.getSource('route').setData(route);
+        } else {
+          map.addSource('route', {
+            'type': 'geojson',
+            'data': route
+          });
+          map.addLayer({
+            'id': 'route',
+            'type': 'line',
+            'source': 'route',
+            'layout': { 'line-join': 'round', 'line-cap': 'round' },
+            'paint': { 'line-color': '#00C4B4', 'line-width': 6 }
+          });
+        }
+
+        const coords = route.coordinates;
+        const bounds = coords.reduce((b, coord) => b.extend(coord), new mapboxgl.LngLatBounds(coords[0], coords[0]));
+        map.fitBounds(bounds, { padding: 60 });
+      } catch (e) {
+        console.error("Failed to fetch route:", e);
+        removeRoute();
+      }
+    }
+
+    function removeRoute() {
+      if (map.getLayer('route')) map.removeLayer('route');
+      if (map.getSource('route')) map.removeSource('route');
+      routeDuration = null;
+      updatePricesAndETA();
+    }
+
+    /* ───────────────────────── 4 ▸ Navigation and History ───────────────────────── */
+    function updateRideHistory() {
+      const list = document.getElementById('history-list');
+      list.innerHTML = '';
+      rideHistory.forEach(ride => {
+        const li = document.createElement('li');
+        li.textContent = `${ride.date}: ${ride.pickup} to ${ride.dropoff} (${ride.car}, ${ride.price}, ${ride.eta})`;
+        list.appendChild(li);
+      });
+    }
+
+    document.querySelectorAll('#nav-menu a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const section = link.dataset.section;
+        document.querySelectorAll('.container').forEach(c => c.style.display = 'none');
+        document.getElementById(section).style.display = 'block';
+        if (section === 'ride-history') updateRideHistory();
+        if (window.innerWidth <= 768) document.getElementById('nav-menu').classList.remove('active');
+      });
+    });
+
+    document.querySelector('.menu-toggle').addEventListener('click', () => {
+      document.getElementById('nav-menu').classList.toggle('active');
+    });
+
+    // Initialize
+    updateRideHistory();
+  </script>
+</body>
+</html>
