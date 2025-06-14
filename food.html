@@ -258,7 +258,9 @@
     </div>
 
     <!-- Restaurant List -->
-    <div id="restaurantList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    <div id="restaurantList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <p id="loadingMessage" class="text-sm text-gray-500 text-center col-span-full">Loading restaurants...</p>
+    </div>
   </div>
 
   <!-- Bottom Navigation Bar -->
@@ -311,6 +313,7 @@
     const sortSelect = document.getElementById('sortSelect');
     const filterBtn = document.getElementById('filterBtn');
     const restaurantList = document.getElementById('restaurantList');
+    const loadingMessage = document.getElementById('loadingMessage');
     const categoriesContainer = document.querySelector('.categories-container');
     const cartBtn = document.getElementById('cartBtn');
     const cartCount = document.getElementById('cartCount');
@@ -372,6 +375,8 @@
 
     function renderRestaurants() {
       restaurantList.innerHTML = '';
+      loadingMessage.style.display = 'none';
+
       let filteredRestaurants = restaurants;
 
       // Filter by category
@@ -382,20 +387,20 @@
       // Search filter
       const searchTerm = searchInput.value.toLowerCase();
       filteredRestaurants = filteredRestaurants.filter(r => 
-        r.name.toLowerCase().includes(searchTerm) || 
-        r.location.toLowerCase().includes(searchTerm)
+        (r.name || '').toLowerCase().includes(searchTerm) || 
+        (r.location || '').toLowerCase().includes(searchTerm)
       );
 
       // Sort
       const sortBy = sortSelect.value;
       filteredRestaurants.sort((a, b) => {
-        if (sortBy === 'rating') return b.rating - a.rating;
-        if (sortBy === 'distance') return a.distance - b.distance;
-        return a.name.localeCompare(b.name);
+        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+        if (sortBy === 'distance') return (a.distance || 0) - (b.distance || 0);
+        return (a.name || '').localeCompare(b.name || '');
       });
 
       if (filteredRestaurants.length === 0) {
-        restaurantList.innerHTML = '<p class="text-sm text-gray-500 text-center">No restaurants found.</p>';
+        restaurantList.innerHTML = '<p class="text-sm text-gray-500 text-center col-span-full">No restaurants found.</p>';
         return;
       }
 
@@ -403,10 +408,10 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-          <img src="${restaurant.image || 'https://via.placeholder.com/150'}" alt="${restaurant.name}" class="w-full h-40 object-cover rounded-t-lg">
+          <img src="${restaurant.image || 'https://via.placeholder.com/150'}" alt="${restaurant.name || 'Restaurant'}" class="w-full h-40 object-cover rounded-t-lg">
           <div class="p-3">
-            <h3 class="text-lg font-semibold text-gray-800">${restaurant.name}</h3>
-            <p class="text-sm text-gray-600">${restaurant.location}</p>
+            <h3 class="text-lg font-semibold text-gray-800">${restaurant.name || 'Unknown'}</h3>
+            <p class="text-sm text-gray-600">${restaurant.location || 'No location'}</p>
             <div class="flex justify-between items-center mt-2">
               <span class="text-sm text-gray-600"><i class="fas fa-star text-orange-500"></i> ${restaurant.rating || 'N/A'}</span>
               <span class="text-sm text-gray-600">${restaurant.distance || 'N/A'} km</span>
@@ -429,6 +434,7 @@
       const categoriesRef = ref(db, 'categories');
       onValue(categoriesRef, (snapshot) => {
         const data = snapshot.val();
+        console.log('Categories data:', data); // Debug log
         if (data) {
           categories = [{ id: 'all', name: 'All', icon: 'fa-utensils' }, ...Object.keys(data).map(id => ({ id, ...data[id] }))];
         }
@@ -444,11 +450,21 @@
       const restaurantsRef = ref(db, 'restaurants');
       onValue(restaurantsRef, (snapshot) => {
         const data = snapshot.val();
+        console.log('Restaurants data:', data); // Debug log
         restaurants = data ? Object.keys(data).map(id => ({ id, ...data[id] })) : [];
+        if (restaurants.length === 0) {
+          console.log('No restaurants found in database.'); // Debug log
+          loadingMessage.textContent = 'No restaurants available.';
+          loadingMessage.style.display = 'block';
+        } else {
+          loadingMessage.style.display = 'none';
+        }
         renderRestaurants();
         spinner.classList.add('hidden');
       }, (error) => {
         console.error('Error loading restaurants:', error);
+        loadingMessage.textContent = 'Failed to load restaurants.';
+        loadingMessage.style.display = 'block';
         showToast('Failed to load restaurants.');
         spinner.classList.add('hidden');
       });
@@ -459,6 +475,7 @@
       spinner.classList.remove('hidden');
       if (user) {
         userId = user.uid;
+        console.log('Authenticated user:', userId); // Debug log
         userName.textContent = user.displayName || 'User';
         userProfilePic.src = user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
         signOutBtn.style.display = 'inline-block';
@@ -467,6 +484,7 @@
         loadCategories();
         loadRestaurants();
       } else {
+        console.log('No authenticated user, redirecting to login.'); // Debug log
         window.location.href = 'login.html';
       }
     }, (error) => {
