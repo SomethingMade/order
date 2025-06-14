@@ -18,8 +18,8 @@
     html, body { height: 100%; font-family: 'Inter', Arial, sans-serif; overflow: hidden; }
     body { background: #f5f5f5; }
 
-    /* Navigation Bar */
-    nav {
+    /* Top Navigation Bar (Desktop) */
+    nav.top-nav {
       background: #00C4B4;
       color: #fff;
       padding: 12px 16px;
@@ -33,26 +33,51 @@
       z-index: 1000;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-    nav .logo { font-size: 20px; font-weight: 700; }
-    nav ul {
+    nav.top-nav .logo { font-size: 24px; font-weight: 700; }
+    nav.top-nav ul {
       list-style: none;
       display: flex;
       gap: 16px;
     }
-    nav ul li a {
+    nav.top-nav ul li a {
       color: #fff;
       text-decoration: none;
       font-weight: 500;
-      font-size: 14px;
+      font-size: 16px;
       padding: 8px;
     }
-    nav ul li a:hover { opacity: 0.8; }
-    nav .menu-toggle {
+    nav.top-nav ul li a:hover { opacity: 0.8; }
+    nav.top-nav .menu-toggle { display: none; font-size: 20px; cursor: pointer; padding: 8px; }
+
+    /* Bottom Navigation Bar (Mobile) */
+    nav.bottom-nav {
       display: none;
-      font-size: 20px;
-      cursor: pointer;
+      background: #fff;
+      border-top: 1px solid #e0e0e0;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 8px 0;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    }
+    nav.bottom-nav ul {
+      display: flex;
+      justify-content: space-around;
+      list-style: none;
+    }
+    nav.bottom-nav ul li a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #333;
+      text-decoration: none;
+      font-size: 12px;
       padding: 8px;
     }
+    nav.bottom-nav ul li a i { font-size: 20px; margin-bottom: 4px; }
+    nav.bottom-nav ul li a.active, nav.bottom-nav ul li a:hover { color: #00C4B4; }
 
     /* Map */
     #map { position: fixed; inset: 0; z-index: 0; }
@@ -62,7 +87,7 @@
       position: relative;
       z-index: 10;
       max-width: 90%;
-      margin: 70px auto 20px;
+      margin: 70px auto 70px; /* Adjusted for bottom nav */
       background: #fff;
       padding: 16px;
       border-radius: 12px;
@@ -190,43 +215,41 @@
 
     /* Responsive Design */
     @media (min-width: 768px) {
+      nav.top-nav { display: flex; }
+      nav.bottom-nav { display: none; }
       .container { max-width: 400px; }
-      nav .logo { font-size: 24px; }
-      nav ul li a { font-size: 16px; }
       .car-selection { flex-direction: row; }
       .car-card { flex-direction: column; align-items: center; text-align: center; }
       .car-info { text-align: center; }
     }
     @media (max-width: 767px) {
-      nav ul { display: none; }
-      nav ul.active {
-        display: flex;
-        flex-direction: column;
-        position: absolute;
-        top: 56px;
-        left: 0;
-        right: 0;
-        background: #00C4B4;
-        padding: 16px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-      nav .menu-toggle { display: block; }
-      .container { margin: 60px 8px 16px; }
+      nav.top-nav { display: none; }
+      nav.bottom-nav { display: block; }
+      .container { margin: 16px 8px 80px; } /* Space for bottom nav */
       h2 { font-size: 18px; }
       button { font-size: 15px; }
     }
   </style>
 </head>
 <body>
-  <!-- Navigation Bar -->
-  <nav>
+  <!-- Top Navigation Bar (Desktop) -->
+  <nav class="top-nav">
     <div class="logo">Bolt</div>
-    <ul id="nav-menu">
+    <ul id="nav-menu-top">
       <li><a href="#" data-section="book-ride">Book Ride</a></li>
       <li><a href="#" data-section="ride-history">Ride History</a></li>
       <li><a href="#" data-section="profile">Profile</a></li>
     </ul>
     <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+  </nav>
+
+  <!-- Bottom Navigation Bar (Mobile) -->
+  <nav class="bottom-nav">
+    <ul id="nav-menu-bottom">
+      <li><a href="#" data-section="book-ride" class="active"><i class="fas fa-car"></i>Book</a></li>
+      <li><a href="#" data-section="ride-history"><i class="fas fa-history"></i>History</a></li>
+      <li><a href="#" data-section="profile"><i class="fas fa-user"></i>Profile</a></li>
+    </ul>
   </nav>
 
   <!-- Map -->
@@ -279,7 +302,7 @@
   </div>
 
   <!-- Ride History Container -->
-  <div class="ride-history container" id="ride-history">
+  <div class="ride-history container" id="ride-history" style="display: none;">
     <h3>Ride History</h3>
     <ul id="history-list"></ul>
   </div>
@@ -326,7 +349,6 @@
         document.getElementById(`eta-${id}`).textContent = fmtETA(eta);
       });
       toggleBookButton();
-      drawRoute();
     }
 
     /* ───────────────────────── 1 ▸ Mapbox & Current Location ───────────────────────── */
@@ -335,11 +357,10 @@
     const map = new mapboxgl.Map({
       container: "map",
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [28.0473, -26.2041], // Default center (Johannesburg)
+      center: [28.0473, -26.2041],
       zoom: 12
     });
 
-    // Get and show current location
     function showCurrentLocation() {
       if (!navigator.geolocation) {
         console.warn("Geolocation not supported");
@@ -351,13 +372,11 @@
           map.setCenter([longitude, latitude]);
           map.setZoom(14);
 
-          // Add marker for current location
           if (currentLocationMarker) currentLocationMarker.remove();
           currentLocationMarker = new mapboxgl.Marker({ element: createMarkerElement() })
             .setLngLat([longitude, latitude])
             .addTo(map);
 
-          // Reverse geocode to get address
           try {
             const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${mapboxgl.accessToken}`);
             const data = await res.json();
@@ -402,7 +421,6 @@
           return;
         }
 
-        // Debounce API calls
         debounceTimeout = setTimeout(async () => {
           try {
             const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(val)}.json?autocomplete=true&limit=5&proximity=${map.getCenter().lng},${map.getCenter().lat}&access_token=${mapboxgl.accessToken}`);
@@ -491,9 +509,10 @@
       };
     });
 
-    document.getElementById("bookRideBtn").onclick = () => {
+    document.getElementById("bookRideBtn").onclick = async () => {
       const pickup = document.getElementById("pickup").value;
       const dropoff = document.getElementById("dropoff").value;
+      await drawRoute(); // Draw route before booking
       const ride = {
         id: Date.now(),
         pickup,
@@ -513,11 +532,14 @@
     async function drawRoute() {
       if (!pickupCoords || !dropoffCoords) return removeRoute();
 
-      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${pickupCoords[0]},${pickupCoords[1]};${pickupCoords[0]},${pickupCoords[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${pickupCoords[0]},${pickupCoords[1]};${dropoffCoords[0]},${dropoffCoords[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
       try {
         const res = await fetch(url);
         const data = await res.json();
-        if (!data.routes || !data.routes.length) return removeRoute();
+        if (!data.routes || !data.routes.length) {
+          removeRoute();
+          return;
+        }
 
         const route = data.routes[0].geometry;
         routeDuration = data.routes[0].duration;
@@ -566,22 +588,42 @@
       });
     }
 
-    document.querySelectorAll('#nav-menu a').forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        const section = link.dataset.section;
-        document.querySelectorAll('.container').forEach(c => c.style.display = 'none');
-        document.getElementById(section).style.display = 'block';
-        if (section === 'ride-history') updateRideHistory();
-        if (window.innerWidth <= 767) document.getElementById('nav-menu').classList.remove('active');
-      });
-    });
+    function setupNavigation() {
+      const navMenus = ['nav-menu-top', 'nav-menu-bottom'];
+      navMenus.forEach(menuId => {
+        document.querySelectorAll(`#${menuId} a`).forEach(link => {
+          link.addEventListener('click', e => {
+            e.preventDefault();
+            const section = link.dataset.section;
+            document.querySelectorAll('.container').forEach(c => c.style.display = 'none');
+            document.getElementById(section).style.display = 'block';
+            if (section === 'ride-history') updateRideHistory();
 
-    document.querySelector('.menu-toggle').addEventListener('click', () => {
-      document.getElementById('nav-menu').classList.toggle('active');
-    });
+            // Update active state
+            document.querySelectorAll(`#${menuId} a`).forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+
+            // Sync active state across top and bottom navs
+            const otherMenuId = menuId === 'nav-menu-top' ? 'nav-menu-bottom' : 'nav-menu-top';
+            document.querySelectorAll(`#${otherMenuId} a`).forEach(l => l.classList.remove('active'));
+            document.querySelector(`#${otherMenuId} a[data-section="${section}"]`)?.classList.add('active');
+
+            // Close mobile menu if open
+            if (window.innerWidth <= 767 && menuId === 'nav-menu-top') {
+              document.getElementById('nav-menu-top').classList.remove('active');
+            }
+          });
+        });
+      });
+
+      // Toggle top nav menu on mobile (for fallback)
+      document.querySelector('.menu-toggle').addEventListener('click', () => {
+        document.getElementById('nav-menu-top').classList.toggle('active');
+      });
+    }
 
     // Initialize
+    setupNavigation();
     updateRideHistory();
   </script>
 </body>
