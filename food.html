@@ -153,10 +153,13 @@
       @apply flex overflow-x-auto space-x-2 py-2 scrollbar-hide;
     }
     .category-btn {
-      @apply px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition;
+      @apply px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition flex items-center gap-1;
     }
     .category-btn.active {
       @apply bg-orange-500 text-white;
+    }
+    .category-btn.active i {
+      @apply text-white;
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -250,7 +253,7 @@
 
     <!-- Categories Section -->
     <div class="categories-container mb-4">
-      <button class="category-btn active" data-category="all">All</button>
+      <button class="category-btn active" data-category="all"><i class="fas fa-utensils mr-1"></i>All</button>
       <!-- Categories will be dynamically populated -->
     </div>
 
@@ -325,7 +328,7 @@
     let userId = null;
     let cart = [];
     let restaurants = [];
-    let categories = [{ id: 'all', name: 'All' }];
+    let categories = [{ id: 'all', name: 'All', icon: 'fa-utensils' }];
     let selectedCategory = 'all';
 
     function showToast(message) {
@@ -355,7 +358,7 @@
       categories.forEach(category => {
         const btn = document.createElement('button');
         btn.className = `category-btn ${category.id === selectedCategory ? 'active' : ''}`;
-        btn.textContent = category.name;
+        btn.innerHTML = `<i class="fas ${category.icon} mr-1"></i>${category.name}`;
         btn.dataset.category = category.id;
         btn.addEventListener('click', () => {
           selectedCategory = category.id;
@@ -427,7 +430,7 @@
       onValue(categoriesRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          categories = [{ id: 'all', name: 'All' }, ...Object.keys(data).map(id => ({ id, name: data[id].name }))];
+          categories = [{ id: 'all', name: 'All', icon: 'fa-utensils' }, ...Object.keys(data).map(id => ({ id, ...data[id] }))];
         }
         renderCategories();
       }, (error) => {
