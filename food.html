@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customer Menu - My Two Minutes Food</title>
+  <title>My Two Minutes Food - Restaurants</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -54,6 +54,12 @@
     .btn-orange {
       @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out;
     }
+    .btn-secondary {
+      @apply bg-gray-100 text-gray-700 hover:bg-gray-200 transition duration-200 ease-in-out;
+    }
+    .btn-disabled {
+      @apply bg-gray-300 text-gray-500 cursor-not-allowed;
+    }
     /* Drawer Animation */
     .drawer-enter {
       transform: translateX(-100%);
@@ -61,10 +67,6 @@
     }
     .drawer-enter-active {
       transform: translateX(0);
-    }
-    /* Tag Styling */
-    .tag {
-      @apply inline-block bg-gray-200 text-gray-700 text-xs font-semibold px-2 py-1 rounded-full mr-1;
     }
     /* Bottom Nav Bar */
     .bottom-nav {
@@ -131,17 +133,30 @@
       color: white;
       margin-top: 4px;
     }
-    /* Horizontal Restaurant List */
-    .restaurant-list {
-      display: flex;
-      overflow-x: auto;
-      gap: 1.5rem;
-      padding-bottom: 1rem;
-      scroll-snap-type: x mandatory;
+    /* Card Style */
+    .card {
+      @apply bg-white rounded-lg shadow-md p-4 mb-4;
     }
-    .restaurant-card {
-      flex: 0 0 250px;
-      scroll-snap-align: start;
+    /* Input Style */
+    .input-field {
+      @apply mt-1 block w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500;
+    }
+    .input-label {
+      @apply block text-sm font-medium text-gray-700 mb-1;
+    }
+    /* Content Container */
+    .content-container {
+      @apply pb-20 sm:pb-8;
+    }
+    /* Categories */
+    .categories-container {
+      @apply flex overflow-x-auto space-x-2 py-2 scrollbar-hide;
+    }
+    .category-btn {
+      @apply px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition;
+    }
+    .category-btn.active {
+      @apply bg-orange-500 text-white;
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -150,8 +165,19 @@
       .toast {
         bottom: 20px;
       }
-      .restaurant-card {
-        flex: 0 0 300px;
+      .card {
+        @apply p-5;
+      }
+      #drawer {
+        width: 288px;
+        transform: translateX(0);
+        display: block;
+      }
+      #drawerBackdrop {
+        display: none;
+      }
+      .categories-container {
+        @apply flex-wrap justify-center gap-2;
       }
     }
   </style>
@@ -160,7 +186,7 @@
   <!-- Header -->
   <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
     <div class="flex items-center">
-      <img src="logo.jpg" alt="Logo" class="w-8 h-8 rounded-full object-cover"> <!-- Changed to circular -->
+      <img src="logo.svg" alt="My Two Minutes Food Logo" class="w-8 h-8 rounded-full object-cover">
     </div>
     <div class="flex items-center space-x-4">
       <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden">
@@ -180,7 +206,7 @@
     <div class="p-6">
       <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
       <ul class="space-y-4">
-        <li><a href="#" class="flex items-center text-gray-700 hover:text-orange-500 transition active"><i class="fas fa-home mr-2"></i>Home</a></li>
+        <li><a href="main.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
         <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
         <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-user mr-2"></i>Profile</a></li>
         <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
@@ -193,69 +219,44 @@
   <!-- Backdrop -->
   <div id="drawerBackdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
 
-  <!-- Banner -->
-  <div class="relative">
-    <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-      <h2 class="text-2xl sm:text-3xl font-bold text-white">Explore Restaurants</h2>
-    </div>
+  <!-- Spinner -->
+  <div id="spinner" class="spinner hidden">
+    <svg class="animate-spin h-10 w-10 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
   </div>
 
-  <!-- Search and Filters -->
-  <div class="container mx-auto px-4 sm:px-6 py-4">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-      <div class="relative flex-1">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search restaurants..."
-          class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm"
-        />
-        <button id="clearSearchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="flex space-x-4 mt-2 sm:mt-0">
-        <select id="sortSelect" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-          <option value="name">Sort by Name</option>
-          <option value="rating">Sort by Rating</option>
-          <option value="favorites">Sort by Favorites</option>
-        </select>
-        <select id="distanceFilter" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-          <option value="all">All Distances</option>
-          <option value="5">Within 5 km</option>
-          <option value="10">Within 10 km</option>
-          <option value="20">Within 20 km</option>
-        </select>
+  <!-- Main Content -->
+  <div class="container mx-auto px-4 sm:px-6 py-8 content-container">
+    <!-- Search and Filter -->
+    <div class="mb-4">
+      <div class="relative">
+        <input type="text" id="searchInput" placeholder="Search restaurants..." class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm">
+        <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
       </div>
     </div>
-  </div>
+    <div class="flex justify-between items-center mb-4">
+      <select id="sortSelect" class="border border-gray-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-orange-500">
+        <option value="rating">Sort by Rating</option>
+        <option value="distance">Sort by Distance</option>
+        <option value="name">Sort by Name</option>
+      </select>
+      <button id="filterBtn" class="text-orange-500 hover:text-orange-600 text-sm font-medium flex items-center gap-1">
+        <i class="fas fa-filter"></i>
+        Filters
+      </button>
+    </div>
 
-  <!-- Categories -->
-  <div class="sticky top-0 bg-white shadow-sm py-4 px-4 sm:px-6 z-10">
-    <div id="categoryList" class="flex space-x-3 overflow-x-auto scrollbar-hide"></div>
-  </div>
+    <!-- Categories Section -->
+    <div class="categories-container mb-4">
+      <button class="category-btn active" data-category="all">All</button>
+      <!-- Categories will be dynamically populated -->
+    </div>
 
-  <!-- Restaurant Sections -->
-  <section class="container mx-auto px-4 sm:px-6 py-8 pb-20 sm:pb-8">
-    <div id="spinner" class="spinner hidden">
-      <svg class="animate-spin h-10 w-10 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-      </svg>
-    </div>
-    <div id="allRestaurantsSection" class="mb-8">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">All Restaurants</h2>
-      <div id="allRestaurantsList" class="restaurant-list scrollbar-hide"></div>
-    </div>
-    <div id="favouriteRestaurantsSection" class="mb-8">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">Favourite Restaurants</h2>
-      <div id="favouriteRestaurantsList" class="restaurant-list scrollbar-hide"></div>
-    </div>
-    <div id="popularRestaurantsSection">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">Popular Restaurants</h2>
-      <div id="popularRestaurantsList" class="restaurant-list scrollbar-hide"></div>
-    </div>
-  </section>
+    <!-- Restaurant List -->
+    <div id="restaurantList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </div>
 
   <!-- Bottom Navigation Bar -->
   <nav class="bottom-nav sm:hidden">
@@ -267,7 +268,7 @@
       <i class="fas fa-user"></i>
       <span>Profile</span>
     </a>
-    <a href="#" class="home-icon active">
+    <a href="index.html" class="home-icon active">
       <i class="fas fa-home"></i>
       <span>Home</span>
     </a>
@@ -276,7 +277,7 @@
       <span class="cart-count" id="cartNavCount">0</span>
       <span>Cart</span>
     </a>
-    <a href="ride.html">
+    <a href="#" id="rideNavBtn">
       <i class="fas fa-car"></i>
       <span>Ride</span>
     </a>
@@ -285,7 +286,7 @@
   <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -303,39 +304,29 @@
     const db = getDatabase(app);
     const auth = getAuth();
 
-    const allRestaurantsList = document.getElementById('allRestaurantsList');
-    const favouriteRestaurantsList = document.getElementById('favouriteRestaurantsList');
-    const popularRestaurantsList = document.getElementById('popularRestaurantsList');
-    const categoryList = document.getElementById('categoryList');
     const searchInput = document.getElementById('searchInput');
-    const clearSearchBtn = document.getElementById('clearSearchBtn');
     const sortSelect = document.getElementById('sortSelect');
-    const distanceFilter = document.getElementById('distanceFilter');
-    const userName = document.getElementById('userName');
-    const userProfilePic = document.getElementById('userProfilePic');
-    const signOutBtn = document.getElementById('signOutBtn');
-    const signOutDrawer = document.getElementById('signOutDrawer');
+    const filterBtn = document.getElementById('filterBtn');
+    const restaurantList = document.getElementById('restaurantList');
+    const categoriesContainer = document.querySelector('.categories-container');
     const cartBtn = document.getElementById('cartBtn');
     const cartCount = document.getElementById('cartCount');
     const cartNavBtn = document.getElementById('cartNavBtn');
     const cartNavCount = document.getElementById('cartNavCount');
     const rideNavBtn = document.getElementById('rideNavBtn');
-    const spinner = document.getElementById('spinner');
     const drawer = document.getElementById('drawer');
-    const backdrop = document.getElementById('drawerBackdrop');
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const signOutDrawer = document.getElementById('signOutDrawer');
+    const spinner = document.getElementById('spinner');
+    const userName = document.getElementById('userName');
+    const userProfilePic = document.getElementById('userProfilePic');
 
-    const categories = [
-      { name: "All Restaurants", icon: "fa-utensils" },
-      { name: "Favourite", icon: "fa-heart" },
-      { name: "Popular", icon: "fa-fire" }
-    ];
-
-    let allRestaurants = [];
-    let cart = [];
-    let activeCategory = "All Restaurants";
     let userId = null;
-    let isInitialLoad = true;
-    let userFavorites = [];
+    let cart = [];
+    let restaurants = [];
+    let categories = [{ id: 'all', name: 'All' }];
+    let selectedCategory = 'all';
 
     function showToast(message) {
       const toast = document.createElement('div');
@@ -345,223 +336,119 @@
       setTimeout(() => toast.remove(), 3000);
     }
 
-    function createCategoryButtons() {
-      categoryList.innerHTML = "";
-      categories.forEach(category => {
-        const isActive = category.name === activeCategory;
-        const btn = document.createElement('button');
-        btn.className = `flex items-center px-4 py-2 rounded-full text-sm font-medium transition duration-200 ${
-          isActive ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-        }`;
-        btn.innerHTML = `<i class="fas ${category.icon} mr-2"></i>${category.name}`;
-        btn.onclick = () => {
-          activeCategory = category.name;
-          isInitialLoad = false;
-          scrollToCategory(category.name);
-          createCategoryButtons();
-        };
-        categoryList.appendChild(btn);
-      });
-    }
-
-    function scrollToCategory(category) {
-      const sectionId = category === "All Restaurants" ? "allRestaurantsSection" :
-                        category === "Favourite" ? "favouriteRestaurantsSection" :
-                        "popularRestaurantsSection";
-      document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function renderRestaurants(container, data) {
-      container.innerHTML = '';
-      if (data.length === 0) {
-        const message = document.createElement('p');
-        message.className = 'text-gray-500 text-center w-full py-4';
-        message.textContent = container.id === 'favouriteRestaurantsList' ? 
-          'No favourite restaurants yet.' : 'No restaurants available.';
-        container.appendChild(message);
-        return;
-      }
-      data.forEach(({ id, restaurant }) => {
-        const card = document.createElement('div');
-        card.className = 'restaurant-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 cursor-pointer';
-        card.innerHTML = `
-          <img src="${restaurant.image || 'https://via.placeholder.com/300x200'}" class="w-full h-32 object-cover" alt="${restaurant.name}">
-          <div class="p-3">
-            <h4 class="text-md font-semibold text-gray-800">${restaurant.name}</h4>
-            <p class="text-gray-600 text-xs mt-1"><i class="fas fa-map-marker-alt mr-1"></i>${restaurant.location || 'Unknown Location'}</p>
-            <div class="flex items-center mt-1">
-              <span class="text-yellow-500">${renderStars(restaurant.rating || 0)}</span>
-            </div>
-            <div class="flex flex-wrap gap-1 mt-1">
-              ${restaurant.tags ? restaurant.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
-            </div>
-            <div class="flex justify-between items-center mt-2">
-              <span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>${restaurant.deliveryTime || 'N/A'}</span>
-              <span class="text-xs text-gray-500">Favorites: <span id="favoriteCount-${id}">${restaurant.favorites || 0}</span></span>
-              <button id="favoriteBtn-${id}" class="text-red-500 hover:text-red-600 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="${userFavorites.includes(id) ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        `;
-        card.addEventListener('click', () => {
-          window.location.href = `restaurant_menu.html?restaurantId=${id}`;
-        });
-        card.querySelector(`#favoriteBtn-${id}`).addEventListener('click', (e) => {
-          e.stopPropagation();
-          toggleFavorite(id);
-        });
-        container.appendChild(card);
-      });
-    }
-
-    function renderStars(rating) {
-      let stars = '';
-      for (let i = 1; i <= 5; i++) {
-        stars += `
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline-block ${i <= rating ? 'text-yellow-400' : 'text-gray-300'}" fill="currentColor" viewBox="0 0 20 20" stroke="currentColor">
-            <path d="M10 15l-3.6 2.3 1-4.3L3 8.9l4.5-.4L10 4l2.5 4.5 4.5.4-3.4 4.1 1 4.3L10 15z" />
-          </svg>
-        `;
-      }
-      return stars;
-    }
-
-    function toggleFavorite(id) {
-      const restaurantRef = ref(db, `restaurants/${id}`);
-      const userFavoritesRef = ref(db, `users/${userId}/favorites`);
-      onValue(restaurantRef, snapshot => {
-        const restaurant = snapshot.val();
-        const newFavoritesCount = userFavorites.includes(id) ? 
-          (restaurant.favorites || 0) - 1 : (restaurant.favorites || 0) + 1;
-        update(restaurantRef, { favorites: newFavoritesCount })
-          .then(() => {
-            document.getElementById(`favoriteCount-${id}`).textContent = newFavoritesCount;
-            if (userFavorites.includes(id)) {
-              userFavorites = userFavorites.filter(favId => favId !== id);
-              showToast("Removed from favorites!");
-            } else {
-              userFavorites.push(id);
-              showToast("Added to favorites!");
-            }
-            update(userFavoritesRef, { [id]: !userFavorites.includes(id) })
-              .then(() => {
-                renderRestaurantSections();
-              })
-              .catch(error => {
-                console.error("Error updating user favorites:", error);
-                showToast("Failed to update favorites.");
-              });
-          })
-          .catch(error => {
-            console.error("Error updating favorites:", error);
-            showToast("Failed to update favorites.");
-          });
-      }, { onlyOnce: true });
-    }
-
-    function filterRestaurants(data) {
-      let filtered = data;
-      if (!isInitialLoad) {
-        const keyword = searchInput.value.toLowerCase().trim();
-        const sortBy = sortSelect.value;
-        const distance = distanceFilter.value;
-
-        if (keyword) {
-          filtered = filtered.filter(item =>
-            (item.restaurant.name || "").toLowerCase().includes(keyword) ||
-            (item.restaurant.location || "").toLowerCase().includes(keyword)
-          );
-        }
-
-        if (distance !== "all") {
-          filtered = filtered.filter(item => {
-            const dist = item.restaurant.distance || 0;
-            return dist <= parseInt(distance);
-          });
-        }
-
-        filtered.sort((a, b) => {
-          if (sortBy === "rating") {
-            return (b.restaurant.rating || 0) - (a.restaurant.rating || 0);
-          } else if (sortBy === "favorites") {
-            return (b.restaurant.favorites || 0) - (a.restaurant.favorites || 0);
-          } else {
-            return a.restaurant.name.localeCompare(b.restaurant.name);
-          }
-        });
-      }
-      return filtered;
-    }
-
-    function renderRestaurantSections() {
-      let filteredRestaurants = filterRestaurants(allRestaurants);
-
-      // All Restaurants
-      renderRestaurants(allRestaurantsList, filteredRestaurants);
-
-      // Favourite Restaurants
-      const favouriteRestaurants = filteredRestaurants.filter(item => userFavorites.includes(item.id));
-      renderRestaurants(favouriteRestaurantsList, favouriteRestaurants);
-
-      // Popular Restaurants
-      const popularRestaurants = filteredRestaurants
-        .filter(item => (item.restaurant.favorites || 0) > 0)
-        .sort((a, b) => (b.restaurant.favorites || 0) - (a.restaurant.favorites || 0))
-        .slice(0, 10);
-      renderRestaurants(popularRestaurantsList, popularRestaurants);
-    }
-
-    function loadRestaurants() {
-      const restaurantsRef = ref(db, 'restaurants');
-      spinner.classList.remove('hidden');
-      onValue(restaurantsRef, snapshot => {
-        const data = snapshot.val();
-        allRestaurants = [];
-        if (data) {
-          for (let id in data) {
-            allRestaurants.push({ id, restaurant: data[id] });
-          }
-        }
-        renderRestaurantSections();
-        spinner.classList.add('hidden');
-      }, (error) => {
-        console.error("Error loading restaurants:", error);
-        spinner.classList.add('hidden');
-        showToast("Failed to load restaurants.");
-      });
-    }
-
-    function loadUserFavorites() {
-      if (userId) {
-        const userFavoritesRef = ref(db, `users/${userId}/favorites`);
-        onValue(userFavoritesRef, snapshot => {
-          const data = snapshot.val();
-          userFavorites = data ? Object.keys(data).filter(key => data[key]) : [];
-          renderRestaurantSections();
-        }, (error) => {
-          console.error("Error loading user favorites:", error);
-          showToast("Failed to load favorites.");
-        });
-      }
-    }
-
     function loadCart() {
-      const storedCart = JSON.parse(localStorage.getItem(`cart-${userId}`));
-      if (storedCart) {
-        cart = storedCart;
-        updateCartCount();
-      }
+      const storedCart = JSON.parse(localStorage.getItem(`cart-${userId}`)) || [];
+      cart = storedCart;
+      updateCartCount();
     }
 
     function updateCartCount() {
-      const count = cart.reduce((total, c) => total + c.quantity, 0);
+      const count = cart.reduce((total, c) => total + (c.quantity || 0), 0);
       cartCount.textContent = count;
       cartNavCount.textContent = count;
       cartBtn.classList.toggle('bg-orange-600', count > 0);
       cartNavBtn.classList.toggle('active', count > 0);
+    }
+
+    function renderCategories() {
+      categoriesContainer.innerHTML = '';
+      categories.forEach(category => {
+        const btn = document.createElement('button');
+        btn.className = `category-btn ${category.id === selectedCategory ? 'active' : ''}`;
+        btn.textContent = category.name;
+        btn.dataset.category = category.id;
+        btn.addEventListener('click', () => {
+          selectedCategory = category.id;
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderRestaurants();
+        });
+        categoriesContainer.appendChild(btn);
+      });
+    }
+
+    function renderRestaurants() {
+      restaurantList.innerHTML = '';
+      let filteredRestaurants = restaurants;
+
+      // Filter by category
+      if (selectedCategory !== 'all') {
+        filteredRestaurants = restaurants.filter(r => r.categoryId === selectedCategory);
+      }
+
+      // Search filter
+      const searchTerm = searchInput.value.toLowerCase();
+      filteredRestaurants = filteredRestaurants.filter(r => 
+        r.name.toLowerCase().includes(searchTerm) || 
+        r.location.toLowerCase().includes(searchTerm)
+      );
+
+      // Sort
+      const sortBy = sortSelect.value;
+      filteredRestaurants.sort((a, b) => {
+        if (sortBy === 'rating') return b.rating - a.rating;
+        if (sortBy === 'distance') return a.distance - b.distance;
+        return a.name.localeCompare(b.name);
+      });
+
+      if (filteredRestaurants.length === 0) {
+        restaurantList.innerHTML = '<p class="text-sm text-gray-500 text-center">No restaurants found.</p>';
+        return;
+      }
+
+      filteredRestaurants.forEach(restaurant => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${restaurant.image || 'https://via.placeholder.com/150'}" alt="${restaurant.name}" class="w-full h-40 object-cover rounded-t-lg">
+          <div class="p-3">
+            <h3 class="text-lg font-semibold text-gray-800">${restaurant.name}</h3>
+            <p class="text-sm text-gray-600">${restaurant.location}</p>
+            <div class="flex justify-between items-center mt-2">
+              <span class="text-sm text-gray-600"><i class="fas fa-star text-orange-500"></i> ${restaurant.rating || 'N/A'}</span>
+              <span class="text-sm text-gray-600">${restaurant.distance || 'N/A'} km</span>
+            </div>
+            <button class="view-menu-btn btn-orange w-full mt-3 py-2 text-sm" data-id="${restaurant.id}">View Menu</button>
+          </div>
+        `;
+        restaurantList.appendChild(card);
+      });
+
+      document.querySelectorAll('.view-menu-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          window.location.href = `menu.html?restaurantId=${btn.dataset.id}`;
+        });
+      });
+    }
+
+    // Load Categories
+    function loadCategories() {
+      const categoriesRef = ref(db, 'categories');
+      onValue(categoriesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          categories = [{ id: 'all', name: 'All' }, ...Object.keys(data).map(id => ({ id, name: data[id].name }))];
+        }
+        renderCategories();
+      }, (error) => {
+        console.error('Error loading categories:', error);
+        showToast('Failed to load categories.');
+      });
+    }
+
+    // Load Restaurants
+    function loadRestaurants() {
+      const restaurantsRef = ref(db, 'restaurants');
+      onValue(restaurantsRef, (snapshot) => {
+        const data = snapshot.val();
+        restaurants = data ? Object.keys(data).map(id => ({ id, ...data[id] })) : [];
+        renderRestaurants();
+        spinner.classList.add('hidden');
+      }, (error) => {
+        console.error('Error loading restaurants:', error);
+        showToast('Failed to load restaurants.');
+        spinner.classList.add('hidden');
+      });
     }
 
     // Authentication
@@ -569,54 +456,35 @@
       spinner.classList.remove('hidden');
       if (user) {
         userId = user.uid;
-        userName.textContent = user.displayName || "User";
-        userProfilePic.src = user.photoURL || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
-        signOutBtn.style.display = "inline-block";
-        signOutDrawer.style.display = "block";
+        userName.textContent = user.displayName || 'User';
+        userProfilePic.src = user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+        signOutBtn.style.display = 'inline-block';
+        signOutDrawer.style.display = 'block';
         loadCart();
-        loadUserFavorites();
+        loadCategories();
         loadRestaurants();
-        spinner.classList.add('hidden');
       } else {
-        spinner.classList.add('hidden');
-        window.location.href = "login.html";
+        window.location.href = 'login.html';
       }
     }, (error) => {
-      console.error("Auth error:", error);
+      console.error('Auth error:', error);
       spinner.classList.add('hidden');
-      showToast("Failed to authenticate. Please try again.");
+      showToast('Failed to authenticate. Please try again.');
     });
 
-    // Sign Out
-    signOutBtn.addEventListener('click', () => {
-      signOut(auth).then(() => {
-        window.location.href = "login.html";
-      }).catch((error) => {
-        console.error("Sign Out Error", error);
-        showToast("Failed to sign out.");
-      });
-    });
-    signOutDrawer.addEventListener('click', () => {
-      signOut(auth).then(() => {
-        window.location.href = "login.html";
-      }).catch((error) => {
-        console.error("Sign Out Error", error);
-        showToast("Failed to sign out.");
-      });
+    // Search
+    searchInput.addEventListener('input', () => {
+      renderRestaurants();
     });
 
-    // Drawer Toggle
-    rideNavBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      drawer.classList.toggle('drawer-enter');
-      drawer.classList.toggle('drawer-enter-active');
-      backdrop.classList.toggle('hidden');
+    // Sort
+    sortSelect.addEventListener('change', () => {
+      renderRestaurants();
     });
 
-    backdrop.addEventListener('click', () => {
-      drawer.classList.remove('drawer-enter-active');
-      drawer.classList.add('drawer-enter');
-      backdrop.classList.add('hidden');
+    // Filter Button (Placeholder)
+    filterBtn.addEventListener('click', () => {
+      showToast('Filters coming soon!');
     });
 
     // Cart Button
@@ -639,36 +507,36 @@
       window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
     });
 
-    // Search with Debounce
-    let debounceTimeout;
-    searchInput.addEventListener('input', () => {
-      clearTimeout(debounceTimeout);
-      isInitialLoad = false;
-      debounceTimeout = setTimeout(() => {
-        renderRestaurantSections();
-      }, 300);
+    // Drawer Toggle
+    rideNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      drawer.classList.toggle('drawer-enter');
+      drawer.classList.toggle('drawer-enter-active');
+      drawerBackdrop.classList.toggle('hidden');
     });
 
-    // Clear Search
-    clearSearchBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      sortSelect.value = "name";
-      distanceFilter.value = "all";
-      isInitialLoad = false;
-      renderRestaurantSections();
+    drawerBackdrop.addEventListener('click', () => {
+      drawer.classList.remove('drawer-enter-active');
+      drawer.classList.add('drawer-enter');
+      drawerBackdrop.classList.add('hidden');
     });
 
-    // Sort and Distance Filter
-    sortSelect.addEventListener('change', () => {
-      isInitialLoad = false;
-      renderRestaurantSections();
+    // Sign Out
+    function handleSignOut() {
+      spinner.classList.remove('hidden');
+      signOut(auth).then(() => {
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error('Sign Out Error', error);
+        spinner.classList.add('hidden');
+        showToast('Failed to sign out.');
+      });
+    }
+    signOutBtn.addEventListener('click', handleSignOut);
+    signOutDrawer.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleSignOut();
     });
-    distanceFilter.addEventListener('change', () => {
-      isInitialLoad = false;
-      renderRestaurantSections();
-    });
-
-    createCategoryButtons();
   </script>
 </body>
 </html>
