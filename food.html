@@ -169,7 +169,7 @@
       @apply flex bg-transparent rounded-lg overflow-hidden mx-auto max-w-full mb-4; /* Card-like container */
     }
     .tab-btn {
-      @apply w-1/2 px-6 py-4 text-center transition-all duration-200 flex flex-col items-center justify-center; /* Card style, centered content */
+      @apply w-1/2 px-6 py-4 text-center transition-all duration-200 flex flex-col items-center justify-center; /* Centered content */
     }
     .tab-btn.active {
       @apply bg-white text-gray-900 shadow-md; /* Raised active tab */
@@ -314,10 +314,10 @@
     </div>
 
     <!-- Tab View -->
-    <div class="home-icon active" role="tablist">
+    <div class="tab-container" role="tablist">
       <button id="restaurantsTab" class="tab-btn active" role="tab" aria-selected="true" aria-controls="restaurantsPanel">
         <i class="fas fa-utensils"></i>
-        <span>Restaurants...</span>
+        <span>Restaurants</span>
       </button>
       <button id="shoppingTab" class="tab-btn" role="tab" aria-selected="false" aria-controls="shoppingPanel">
         <i class="fas fa-shopping-bag"></i>
@@ -385,7 +385,7 @@
     const auth = getAuth();
 
     // Mapbox Configuration
-    mapboxgl.accessToken = 'pk.eyJ1Ijoia2F0bGVnb3BoYXNoYSIsImEiOiJjbTlpOTdznmYwMGNsMmpzYWJtZzN4d3pqIn0.Zt-aSMEoahrV3zkiVVHbOw';
+    mapboxgl.accessToken = 'pk.eyJ1Ijoia2F0bGVnb3BoYXNoYSIsImEiOiJjbTlpOTdzbmYwMGNsMmpzYWJtZzN4d3pqIn0.Zt-aSMEoahrV3zkiVVHbOw';
 
     // PWA Installation
     let deferredPrompt = null;
@@ -701,25 +701,29 @@
 
     // Tab Switching
     restaurantsTab.addEventListener('click', () => {
-      activeTab = 'restaurants';
-      restaurantsTab.classList.add('active');
-      shoppingTab.classList.remove('active');
-      restaurantsPanel.classList.remove('hidden');
-      shoppingPanel.classList.add('hidden');
-      restaurantsTab.setAttribute('aria-selected', 'true');
-      shoppingTab.setAttribute('aria-selected', 'false');
-      renderRestaurants();
+      if (!restaurantsTab.classList.contains('active')) {
+        activeTab = 'restaurants';
+        restaurantsTab.classList.add('active');
+        shoppingTab.classList.remove('active');
+        restaurantsPanel.classList.remove('hidden');
+        shoppingPanel.classList.add('hidden');
+        restaurantsTab.setAttribute('aria-selected', 'true');
+        shoppingTab.setAttribute('aria-selected', 'false');
+        renderRestaurants();
+      }
     });
 
     shoppingTab.addEventListener('click', () => {
-      activeTab = 'shopping';
-      shoppingTab.classList.add('active');
-      restaurantsTab.classList.remove('active');
-      shoppingPanel.classList.remove('hidden');
-      restaurantsPanel.classList.add('hidden');
-      shoppingTab.setAttribute('aria-selected', 'true');
-      restaurantsTab.setAttribute('aria-selected', 'false');
-      renderStores();
+      if (!shoppingTab.classList.contains('active')) {
+        activeTab = 'shopping';
+        shoppingTab.classList.add('active');
+        restaurantsTab.classList.remove('active');
+        shoppingPanel.classList.remove('hidden');
+        restaurantsPanel.classList.add('hidden');
+        shoppingTab.setAttribute('aria-selected', 'true');
+        restaurantsTab.setAttribute('aria-selected', 'false');
+        renderStores();
+      }
     });
 
     onAuthStateChanged(auth, (user) => {
