@@ -167,8 +167,8 @@
     }
     /* Menu Container */
     .menu-container {
-      padding-bottom: 80px; /* Space for nav bar */
-      scroll-padding-bottom: 80px; /* Prevents content overlap */
+      padding-bottom: 100px; /* Increased to ensure no overlap with nav bar */
+      scroll-padding-bottom: 100px; /* Prevents content overlap */
     }
     /* Cart Modal */
     .cart-modal {
@@ -212,6 +212,26 @@
     .cart-button i {
       margin-right: 8px;
     }
+    /* Rate Button */
+    .rate-button {
+      @apply bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition duration-200 ease-in-out;
+    }
+    /* Rating Stars */
+    .rating-stars {
+      display: flex;
+      gap: 2px;
+      color: #f97316;
+      font-size: 1.2rem;
+    }
+    .rating-stars .star {
+      cursor: pointer;
+    }
+    .rating-stars .star.filled {
+      color: #f97316;
+    }
+    .rating-stars .star.unfilled {
+      color: #d1d5db;
+    }
     @media (min-width: 640px) {
       .bottom-nav {
         display: none;
@@ -235,22 +255,6 @@
         max-width: none;
       }
     }
-    /* Rating Stars */
-    .rating-stars {
-      display: flex;
-      gap: 2px;
-      color: #f97316;
-      font-size: 1.2rem;
-    }
-    .rating-stars .star {
-      cursor: pointer;
-    }
-    .rating-stars .star.filled {
-      color: #f97316;
-    }
-    .rating-stars .star.unfilled {
-      color: #d1d5db;
-    }
   </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -265,6 +269,7 @@
           <i class="fas fa-map-marker-alt"></i>
           <span id="locationText">Restaurant Location</span>
         </p>
+        <button id="rateRestaurantBtn" class="rate-button mt-2">Rate Restaurant</button>
       </div>
     </div>
   </div>
@@ -340,7 +345,6 @@
         <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
         <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
         <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
-        <li><a href="#" id="rateRestaurantBtn" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-star mr-2"></i>Rate Restaurant</a></li>
       </ul>
     </div>
   </div>
