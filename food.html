@@ -186,16 +186,20 @@
     }
     /* Tab View */
     .tab-container {
-      @apply flex flex-col mb-4 space-y-2; /* Stack buttons vertically */
+      @apply flex flex-col gap-2 mb-4; /* Stack buttons, 8px gap */
+      /* Optional: @apply sticky top-0 z-30 bg-gray-50; for sticky tabs */
     }
     .tab-btn {
-      @apply w-full py-3 px-4 text-base font-semibold rounded-lg transition flex items-center justify-center gap-2; /* Full-width, larger padding */
+      @apply w-full py-4 px-6 text-base font-semibold rounded-lg shadow-sm transition-all duration-200 flex items-center justify-center gap-2; /* Full-width, large padding, shadow */
     }
     .tab-btn.active {
-      @apply bg-orange-500 text-white hover:bg-orange-600;
+      @apply bg-orange-500 text-white hover:bg-orange-600 shadow-md;
     }
     .tab-btn:not(.active) {
-      @apply bg-gray-100 text-gray-700 hover:bg-orange-100;
+      @apply bg-gray-100 text-gray-700 hover:bg-orange-100 hover:shadow-md;
+    }
+    .tab-btn i {
+      @apply text-lg; /* Larger icons for balance */
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -219,12 +223,10 @@
         @apply flex-wrap justify-center gap-2;
       }
       .tab-container {
-        @apply flex-col space-y-2; /* Keep stacked on desktop for full-width */
-        /* Alternative: @apply flex-row space-y-0 space-x-2; for side-by-side */
+        @apply flex-row gap-2; /* Side-by-side on desktop */
       }
       .tab-btn {
-        @apply w-full; /* Full-width on desktop */
-        /* Alternative: @apply w-1/2; for side-by-side */
+        @apply w-1/2; /* Half-width each */
       }
     }
   </style>
