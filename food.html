@@ -186,26 +186,28 @@
     }
     /* Tab View */
     .tab-container {
-      @apply flex relative bg-white rounded-lg shadow-sm p-1 mx-auto max-w-full mb-4; /* Container with shadow */
+      @apply flex bg-transparent rounded-lg overflow-hidden mx-auto max-w-full mb-4; /* Card-like container */
     }
     .tab-btn {
-      @apply w-1/2 px-6 py-3 text-base font-semibold text-gray-600 hover:text-orange-400 transition-colors duration-300 flex items-center justify-center gap-2 relative z-10; /* Equal width, centered */
+      @apply w-1/2 px-6 py-4 text-center transition-all duration-200 flex flex-col items-center justify-center; /* Card style, centered content */
     }
     .tab-btn.active {
+      @apply bg-white text-gray-900 shadow-md; /* Raised active tab */
+    }
+    .tab-btn.active i {
       @apply text-orange-500;
     }
+    .tab-btn:not(.active) {
+      @apply bg-gray-200 text-gray-600 shadow-sm hover:bg-gray-300; /* Muted inactive tab */
+    }
+    .tab-btn:not(.active) i {
+      @apply text-gray-400;
+    }
     .tab-btn i {
-      @apply text-lg mr-2; /* Larger icons with spacing */
+      @apply text-2xl block mb-1; /* Larger icons, centered above text */
     }
-    .tab-indicator {
-      @apply absolute bottom-0 left-0 h-1 bg-orange-500 rounded-full transition-transform duration-300; /* Sliding underline */
-      width: 50%; /* Matches w-1/2 of tab-btn */
-    }
-    .tab-indicator.restaurants {
-      transform: translateX(0%); /* Left for Restaurants */
-    }
-    .tab-indicator.shopping {
-      transform: translateX(100%); /* Right for Shopping */
+    .tab-btn span {
+      @apply text-base font-semibold; /* Bold text below icon */
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -337,12 +339,13 @@
     <!-- Tab View -->
     <div class="tab-container" role="tablist">
       <button id="restaurantsTab" class="tab-btn active" role="tab" aria-selected="true" aria-controls="restaurantsPanel">
-        <i class="fas fa-utensils"></i> Restaurants
+        <i class="fas fa-utensils"></i>
+        <span>Restaurants</span>
       </button>
       <button id="shoppingTab" class="tab-btn" role="tab" aria-selected="false" aria-controls="shoppingPanel">
-        <i class="fas fa-shopping-bag"></i> Shopping
+        <i class="fas fa-shopping-bag"></i>
+        <span>Shopping</span>
       </button>
-      <div class="tab-indicator restaurants"></div> <!-- Sliding indicator -->
     </div>
 
     <!-- Categories Section -->
@@ -483,7 +486,6 @@
     const shoppingTab = document.getElementById('shoppingTab');
     const restaurantsPanel = document.getElementById('restaurantsPanel');
     const shoppingPanel = document.getElementById('shoppingPanel');
-    const tabIndicator = document.querySelector('.tab-indicator');
 
     let userId = null;
     let cart = [];
@@ -781,8 +783,6 @@
       shoppingPanel.classList.add('hidden');
       restaurantsTab.setAttribute('aria-selected', 'true');
       shoppingTab.setAttribute('aria-selected', 'false');
-      tabIndicator.classList.remove('shopping');
-      tabIndicator.classList.add('restaurants');
       renderRestaurants();
     });
 
@@ -794,8 +794,6 @@
       restaurantsPanel.classList.add('hidden');
       shoppingTab.setAttribute('aria-selected', 'true');
       restaurantsTab.setAttribute('aria-selected', 'false');
-      tabIndicator.classList.remove('restaurants');
-      tabIndicator.classList.add('shopping');
       renderStores();
     });
 
