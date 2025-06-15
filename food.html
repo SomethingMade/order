@@ -88,7 +88,7 @@
       align-items: center;
       padding: 10px 0;
       z-index: 50;
-      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2); /* Increased shadow for visibility */
       height: 60px;
     }
     .bottom-nav a {
@@ -166,7 +166,7 @@
     }
     /* Dropdown Style */
     .dropdown {
-      @apply border border-gray-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500;
+      @apply border border-gray-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 w-40; /* Fixed width */
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -282,7 +282,7 @@
         <option value="restaurants">Restaurants</option>
         <option value="shopping">Shopping</option>
       </select>
-      <select id="sortSelect" class="border border-gray-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-orange-500">
+      <select id="sortSelect" class="dropdown">
         <option value="rating">Sort by Rating</option>
         <option value="distance">Sort by Distance</option>
         <option value="name">Sort by Name</option>
