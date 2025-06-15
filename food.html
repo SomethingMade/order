@@ -135,7 +135,7 @@
     }
     /* Card Style */
     .card {
-      @apply bg-white rounded-lg shadow-md p-4 mb-4;
+      @apply bg-white rounded-lg shadow-lg p-4 mb-4 cursor-pointer transition transform hover:scale-105 hover:shadow-xl;
     }
     /* Input Style */
     .input-field {
@@ -407,6 +407,7 @@
       filteredRestaurants.forEach(restaurant => {
         const card = document.createElement('div');
         card.className = 'card';
+        card.dataset.id = restaurant.id;
         card.innerHTML = `
           <img src="${restaurant.image || 'https://via.placeholder.com/150'}" alt="${restaurant.name || 'Restaurant'}" class="w-full h-40 object-cover rounded-t-lg">
           <div class="p-3">
@@ -416,16 +417,13 @@
               <span class="text-sm text-gray-600"><i class="fas fa-star text-orange-500"></i> ${restaurant.rating || 'N/A'}</span>
               <span class="text-sm text-gray-600">${restaurant.distance || 'N/A'} km</span>
             </div>
-            <button class="view-menu-btn btn-orange w-full mt-3 py-2 text-sm" data-id="${restaurant.id}">View Menu</button>
+            ${restaurant.priceRange ? `<p class="text-sm text-gray-600 mt-2">Price: ${restaurant.priceRange} (ZAR)</p>` : ''}
           </div>
         `;
-        restaurantList.appendChild(card);
-      });
-
-      document.querySelectorAll('.view-menu-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          window.location.href = `restaurant_menu.html?restaurantId=${btn.dataset.id}`;
+        card.addEventListener('click', () => {
+          window.location.href = `restaurant_menu.html?restaurantId=${restaurant.id}`;
         });
+        restaurantList.appendChild(card);
       });
     }
 
@@ -434,14 +432,17 @@
       const categoriesRef = ref(db, 'categories');
       onValue(categoriesRef, (snapshot) => {
         const data = snapshot.val();
-        console.log('Categories data:', data); // Debug log
+        console.log('Categories data:', data);
         if (data) {
           categories = [{ id: 'all', name: 'All', icon: 'fa-utensils' }, ...Object.keys(data).map(id => ({ id, ...data[id] }))];
+        } else {
+          console.warn('No categories found in database.');
+          showToast('No categories available.');
         }
         renderCategories();
       }, (error) => {
         console.error('Error loading categories:', error);
-        showToast('Failed to load categories.');
+        showToast('Failed to load categories: ' + error.message);
       });
     }
 
@@ -450,10 +451,10 @@
       const restaurantsRef = ref(db, 'restaurants');
       onValue(restaurantsRef, (snapshot) => {
         const data = snapshot.val();
-        console.log('Restaurants data:', data); // Debug log
+        console.log('Restaurants data:', data);
         restaurants = data ? Object.keys(data).map(id => ({ id, ...data[id] })) : [];
         if (restaurants.length === 0) {
-          console.log('No restaurants found in database.'); // Debug log
+          console.warn('No restaurants found in database.');
           loadingMessage.textContent = 'No restaurants available.';
           loadingMessage.style.display = 'block';
         } else {
@@ -463,9 +464,9 @@
         spinner.classList.add('hidden');
       }, (error) => {
         console.error('Error loading restaurants:', error);
-        loadingMessage.textContent = 'Failed to load restaurants.';
+        loadingMessage.textContent = 'Failed to load restaurants: ' + error.message;
         loadingMessage.style.display = 'block';
-        showToast('Failed to load restaurants.');
+        showToast('Failed to load restaurants: ' + error.message);
         spinner.classList.add('hidden');
       });
     }
@@ -475,7 +476,7 @@
       spinner.classList.remove('hidden');
       if (user) {
         userId = user.uid;
-        console.log('Authenticated user:', userId); // Debug log
+        console.log('Authenticated user:', userId);
         userName.textContent = user.displayName || 'User';
         userProfilePic.src = user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
         signOutBtn.style.display = 'inline-block';
@@ -484,13 +485,13 @@
         loadCategories();
         loadRestaurants();
       } else {
-        console.log('No authenticated user, redirecting to login.'); // Debug log
+        console.log('No authenticated user, redirecting to login.');
         window.location.href = 'login.html';
       }
     }, (error) => {
       console.error('Auth error:', error);
       spinner.classList.add('hidden');
-      showToast('Failed to authenticate. Please try again.');
+      showToast('Failed to authenticate: ' + error.message);
     });
 
     // Search
@@ -548,9 +549,9 @@
       signOut(auth).then(() => {
         window.location.href = 'login.html';
       }).catch((error) => {
-        console.error('Sign Out Error', error);
+        console.error('Sign Out Error:', error);
         spinner.classList.add('hidden');
-        showToast('Failed to sign out.');
+        showToast('Failed to sign out: ' + error.message);
       });
     }
     signOutBtn.addEventListener('click', handleSignOut);
