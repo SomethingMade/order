@@ -164,30 +164,9 @@
     .modal-content {
       @apply bg-white rounded-lg p-6 w-11/12 sm:w-96;
     }
-    /* Tab View */
-    .tab-container {
-      @apply flex bg-transparent rounded-lg overflow-hidden mx-auto max-w-full mb-4; /* Card-like container */
-    }
-    .tab-btn {
-      @apply w-1/2 px-6 py-4 text-center transition-all duration-200 flex flex-col items-center justify-center; /* Centered content */
-    }
-    .tab-btn.active {
-      @apply bg-white text-gray-900 shadow-md; /* Raised active tab */
-    }
-    .tab-btn.active i {
-      @apply text-orange-500;
-    }
-    .tab-btn:not(.active) {
-      @apply bg-gray-200 text-gray-600 shadow-sm hover:bg-gray-300; /* Muted inactive tab */
-    }
-    .tab-btn:not(.active) i {
-      @apply text-gray-400;
-    }
-    .tab-btn i {
-      @apply text-2xl block mb-1; /* Larger icons, centered above text */
-    }
-    .tab-btn span {
-      @apply text-base font-semibold; /* Bold text below icon */
+    /* Dropdown Style */
+    .dropdown {
+      @apply border border-gray-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500;
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -207,9 +186,6 @@
       #drawerBackdrop {
         display: none;
       }
-      .tab-container {
-        @apply max-w-md; /* Centered, fixed width on desktop */
-      }
     }
   </style>
 </head>
@@ -224,6 +200,10 @@
       </div>
     </div>
     <div class="flex items-center space-x-4">
+      <select id="switchView" class="dropdown">
+        <option value="restaurants">Restaurants</option>
+        <option value="shopping">Shopping</option>
+      </select>
       <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden">
         <i class="fas fa-shopping-cart text-lg"></i>
         <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
@@ -313,25 +293,13 @@
       </button>
     </div>
 
-    <!-- Tab View -->
-    <div class="tab-container" role="tablist">
-      <button id="restaurantsTab" class="tab-btn active" role="tab" aria-selected="true" aria-controls="restaurantsPanel">
-        <i class="fas fa-utensils"></i>
-        <span>Restaurants</span>
-      </button>
-      <button id="shoppingTab" class="tab-btn" role="tab" aria-selected="false" aria-controls="shoppingPanel">
-        <i class="fas fa-shopping-bag"></i>
-        <span>Shopping</span>
-      </button>
-    </div>
-
     <!-- Content Panels -->
-    <div id="restaurantsPanel" role="tabpanel" aria-labelledby="restaurantsTab">
+    <div id="restaurantsPanel" role="tabpanel" aria-labelledby="restaurantsPanel">
       <div id="restaurantList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <p id="loadingMessage" class="text-sm text-gray-500 text-center col-span-full">Loading restaurants...</p>
       </div>
     </div>
-    <div id="shoppingPanel" class="hidden" role="tabpanel" aria-labelledby="shoppingTab">
+    <div id="shoppingPanel" class="hidden" role="tabpanel" aria-labelledby="shoppingPanel">
       <div id="storeList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <p id="loadingStoresMessage" class="text-sm text-gray-500 text-center col-span-full">Loading stores...</p>
       </div>
@@ -431,6 +399,7 @@
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
     const filterBtn = document.getElementById('filterBtn');
+    const switchView = document.getElementById('switchView');
     const restaurantList = document.getElementById('restaurantList');
     const storeList = document.getElementById('storeList');
     const loadingMessage = document.getElementById('loadingMessage');
@@ -452,8 +421,6 @@
     const locationModal = document.getElementById('locationModal');
     const enableLocationBtn = document.getElementById('enableLocationBtn');
     const dismissLocationBtn = document.getElementById('dismissLocationBtn');
-    const restaurantsTab = document.getElementById('restaurantsTab');
-    const shoppingTab = document.getElementById('shoppingTab');
     const restaurantsPanel = document.getElementById('restaurantsPanel');
     const shoppingPanel = document.getElementById('shoppingPanel');
 
@@ -461,7 +428,7 @@
     let cart = [];
     let restaurants = [];
     let stores = [];
-    let activeTab = 'restaurants';
+    let activeView = 'restaurants';
 
     function showToast(message) {
       const toast = document.createElement('div');
@@ -546,7 +513,7 @@
     }
 
     function renderContent() {
-      if (activeTab === 'restaurants') {
+      if (activeView === 'restaurants') {
         renderRestaurants();
       } else {
         renderStores();
@@ -660,7 +627,7 @@
         } else {
           loadingMessage.style.display = 'none';
         }
-        if (activeTab === 'restaurants') {
+        if (activeView === 'restaurants') {
           renderRestaurants();
         }
         spinner.classList.add('hidden');
@@ -686,7 +653,7 @@
         } else {
           loadingStoresMessage.style.display = 'none';
         }
-        if (activeTab === 'shopping') {
+        if (activeView === 'shopping') {
           renderStores();
         }
         spinner.classList.add('hidden');
@@ -699,29 +666,16 @@
       });
     }
 
-    // Tab Switching
-    restaurantsTab.addEventListener('click', () => {
-      if (!restaurantsTab.classList.contains('active')) {
-        activeTab = 'restaurants';
-        restaurantsTab.classList.add('active');
-        shoppingTab.classList.remove('active');
+    // View Switching via Dropdown
+    switchView.addEventListener('change', () => {
+      activeView = switchView.value;
+      if (activeView === 'restaurants') {
         restaurantsPanel.classList.remove('hidden');
         shoppingPanel.classList.add('hidden');
-        restaurantsTab.setAttribute('aria-selected', 'true');
-        shoppingTab.setAttribute('aria-selected', 'false');
         renderRestaurants();
-      }
-    });
-
-    shoppingTab.addEventListener('click', () => {
-      if (!shoppingTab.classList.contains('active')) {
-        activeTab = 'shopping';
-        shoppingTab.classList.add('active');
-        restaurantsTab.classList.remove('active');
+      } else {
         shoppingPanel.classList.remove('hidden');
         restaurantsPanel.classList.add('hidden');
-        shoppingTab.setAttribute('aria-selected', 'true');
-        restaurantsTab.setAttribute('aria-selected', 'false');
         renderStores();
       }
     });
