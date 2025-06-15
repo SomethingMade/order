@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Menu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Hide Scrollbar */
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    /* Smooth transitions for modals */
+    .modal-enter {
+      transform: translateY(100%);
+      opacity: 0;
+      transition: all 0.3s ease-in-out;
+    }
+    .modal-enter-active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    /* Custom button hover effect */
+    .btn-orange {
+      @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out;
+    }
+    /* Black button style */
+    .btn-black {
+      @apply bg-black text-white hover:bg-gray-800 transition duration-200 ease-in-out;
+    }
+    /* Rounded add button */
+    .add-btn {
+      @apply rounded-full p-1.5 w-8 h-8 flex items-center justify-center;
+    }
+    /* Availability styling */
+    .available {
+      @apply text-green-500 font-semibold;
+    }
+    .not-available {
+      @apply text-red-500 font-semibold;
+    }
+    /* Disabled button */
+    .btn-disabled {
+      @apply bg-gray-300 text-gray-500 cursor-not-allowed;
+    }
+    /* Bottom Nav Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #ffffff;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0;
+      z-index: 50;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .bottom-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #6b7280;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .bottom-nav a.active {
+      color: #f97316;
+    }
+    .bottom-nav a:hover {
+      color: #f97316;
+    }
+    .bottom-nav i {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .bottom-nav .cart-icon {
+      position: relative;
+    }
+    .bottom-nav .cart-icon .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #ef4444;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      border-radius: 50%;
+      padding: 2px 6px;
+    }
+    .bottom-nav .home-icon {
+      background-color: #f97316;
+      color: white;
+      border-radius: 8px;
+      padding: 8px 16px;
+      transform: translateY(-4px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    .bottom-nav .home-icon i {
+      font-size: 20px;
+      margin-bottom: 0;
+      color: white;
+    }
+    .bottom-nav .home-icon span {
+      color: white;
+      margin-top: 4px;
+    }
+    /* Sidebar Drawer */
+    .sidebar-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 64;
+      height: 100%;
+      background-color: white;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      z-index: 60;
+    }
+    .sidebar-drawer.active {
+      transform: translateX(0);
+    }
+    /* Backdrop */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 55;
+      display: none;
+    }
+    .backdrop.active {
+      display: block;
+    }
+    /* Menu Item Card */
+    .menu-item-card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease-in-out;
+      height: 120px;
+    }
+    .menu-item-card:hover {
+      transform: translateY(-2px);
+    }
+    .menu-item-text {
+      flex: 1;
+      padding: 0.75rem;
+    }
+    .menu-item-image {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+    }
+    /* Menu Container */
+    .menu-container {
+      padding-bottom: 80px; /* Space for nav bar */
+    }
+    /* Cart Modal */
+    .cart-modal {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: white;
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 60;
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    .cart-modal.active {
+      transform: translateY(0);
+    }
+    /* Full-width Cart Button */
+    .cart-button {
+      width: calc(100% - 2rem); /* Full width minus margins */
+      margin-left: 1rem;
+      margin-right: 1rem;
+    }
+    @media (min-width: 640px) {
+      .bottom-nav {
+        display: none;
+      }
+      .sidebar-drawer {
+        width: 72;
+        transform: translateX(0);
+        display: block;
+      }
+      .backdrop {
+        display: none;
+      }
+      .menu-container {
+        padding-bottom: 0; /* No nav bar on desktop */
+      }
+      .cart-button {
+        width: auto; /* Revert to round button on desktop */
+        margin-left: 0;
+        margin-right: 1.5rem;
+      }
+      .cart-modal {
+        width: 400px;
+        left: auto;
+        border-radius: 1rem;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+  <!-- Shop Header -->
+  <div class="relative">
+    <img id="shopCover" src="https://via.placeholder.com/1200x300" class="w-full h-64 object-cover" alt="Shop Cover">
+    <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+      <div class="text-center text-white">
+        <h1 id="shopName" class="text-3xl sm:text-4xl font-bold">Shop Name</h1>
+        <p id="shopLocation" class="flex items-center justify-center gap-2 text-sm sm:text-base mt-2">
+          <i class="fas fa-map-marker-alt"></i>
+          <span id="locationText">Shop Location</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="sticky top-0 z-10 bg-white shadow-sm py-4 px-6">
+    <div id="categories" class="flex space-x-3 overflow-x-auto scrollbar-hide">
+      <!-- Category buttons go here -->
+    </div>
+  </div>
+
+  <!-- Menu Items -->
+  <div class="container mx-auto px-4 sm:px-6 py-8 menu-container">
+    <div id="shopMenu" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </div>
+
+  <!-- Cart Button -->
+  <button id="cartCount" class="cart-button fixed bottom-20 bg-orange-500 text-white py-3 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 btn-orange z-20 sm:w-16 sm:h-16 sm:p-0">
+    <i class="fas fa-shopping-cart text-xl"></i>
+    <span id="cartCountText" class="text-sm font-semibold hidden sm:inline">0</span>
+  </button>
+
+  <!-- Cart Bottom Modal -->
+  <div id="cartModal" class="cart-modal hidden">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-gray-800">Your Cart</h2>
+        <button id="closeCartModalBtn" class="text-2xl text-gray-600">×</button>
+      </div>
+      <div id="cartModalItems" class="space-y-4 mb-6"></div>
+      <div class="flex justify-between items-center mb-6">
+        <span class="text-lg font-semibold">Total:</span>
+        <span id="cartModalTotal" class="text-lg font-bold text-orange-500">R0.00</span>
+      </div>
+      <button id="clearCartModalBtn" class="w-full bg-black text-white py-3 rounded-lg btn-black mb-4">Clear Cart</button>
+      <button id="proceedToCheckoutBtn" class="w-full bg-orange-500 text-white py-3 rounded-lg btn-orange">Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <!-- Item Modal -->
+  <div id="itemModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white w-full sm:w-96 p-6 rounded-lg shadow-xl modal-enter">
+      <button id="closeModalBtn" class="text-2xl text-gray-600 mb-4">×</button>
+      <img id="itemImage" src="" alt="Item Image" class="w-full h-48 object-cover rounded-lg mb-4">
+      <h3 id="itemName" class="text-2xl font-semibold text-gray-800 mb-2"></h3>
+      <p id="itemDescription" class="text-gray-600 mb-4"></p>
+      <p id="itemPrice" class="text-orange-500 font-bold text-lg mb-4"></p>
+      <p id="itemAvailability" class="text-lg mb-4"></p>
+      <input id="quantity" type="number" class="border p-2 rounded-lg w-full mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500" value="1" min="1">
+      <button id="addToCartBtn" class="bg-orange-500 text-white py-3 px-6 rounded-lg w-full btn-orange">Add to Cart</button>
+    </div>
+  </div>
+
+  <!-- Sidebar Drawer Menu -->
+  <div id="sidebarDrawer" class="sidebar-drawer">
+    <div class="p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
+      <ul class="space-y-4">
+        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
+        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
+        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-user mr-2"></i>Profile</a></li>
+        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
+        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
+        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Backdrop -->
+  <div id="backdrop" class="backdrop"></div>
+
+  <!-- Firebase + Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.appspot.com",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
+      measurementId: "G-V4W97VMSKL"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth();
+
+    const shopMenu = document.getElementById('shopMenu');
+    const shopName = document.getElementById('shopName');
+    const shopLocation = document.getElementById('locationText');
+    const shopCover = document.getElementById('shopCover');
+    const categoriesContainer = document.getElementById('categories');
+    const cartCountBtn = document.getElementById('cartCount');
+    const cartCountText = document.getElementById('cartCountText');
+    const itemModal = document.getElementById('itemModal');
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const quantityInput = document.getElementById('quantity');
+    const cartModal = document.getElementById('cartModal');
+    const cartModalItems = document.getElementById('cartModalItems');
+    const closeCartModalBtn = document.getElementById('closeCartModalBtn');
+    const clearCartModalBtn = document.getElementById('clearCartModalBtn');
+    const proceedToCheckoutBtn = document.getElementById('proceedToCheckoutBtn');
+    const cartModalTotal = document.getElementById('cartModalTotal');
+    const itemAvailability = document.getElementById('itemAvailability');
+    const sidebarDrawer = document.getElementById('sidebarDrawer');
+    const backdrop = document.getElementById('backdrop');
+    const signOutDrawer = document.getElementById('signOutDrawer');
+    const cartNavCount = document.getElementById('cartNavCount');
+
+    let userId = null;
+    let cart = [];
+    let allMenuItems = [];
+    let currentItem = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const shopId = urlParams.get('shopId');
+
+    // Authentication
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        userId = user.uid;
+        loadCart();
+        loadShopMenu();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Sign Out
+    signOutDrawer.addEventListener('click', (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error('Sign Out Error', error);
+        showToast('Failed to sign out.');
+      });
+    });
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-32 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-70';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    function loadShopMenu() {
+      const shopRef = ref(db, `shops/${shopId}`);
+      onValue(shopRef, (snapshot) => {
+        const shop = snapshot.val();
+        if (!shop) {
+          showToast('Shop not found.');
+          window.location.href = 'index.html';
+          return;
+        }
+        shopName.textContent = shop.name;
+        shopLocation.textContent = shop.location || 'Location not available';
+        shopCover.src = shop.image || 'https://via.placeholder.com/1200x300';
+        allMenuItems = Object.entries(shop.menu || {}).map(([id, item]) => ({ id, ...item }));
+        renderCategories(allMenuItems);
+        renderMenuItems(allMenuItems);
+      }, (error) => {
+        console.error('Error loading shop:', error);
+        showToast('Failed to load menu.');
+      });
+    }
+
+    function renderCategories(menuItems) {
+      categoriesContainer.innerHTML = '';
+      const categories = ['All', ...new Set(menuItems.map(item => item.category))];
+      const categoryIcons = {
+        'All': 'fa-shopping-bag',
+        'Groceries': 'fa-shopping-basket',
+        'Electronics': 'fa-laptop',
+        'Clothing': 'fa-tshirt',
+        'Drinks': 'fa-coffee',
+        'Household': 'fa-home'
+      };
+
+      categories.forEach(category => {
+        const btn = document.createElement('button');
+        btn.className = `flex items-center px-4 py-2 rounded-full text-sm font-medium transition duration-200 ${category === 'All' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`;
+        btn.innerHTML = `<i class="fas ${categoryIcons[category] || 'fa-shopping-bag'} mr-2"></i>${category}`;
+        btn.onclick = () => {
+          document.querySelectorAll('#categories button').forEach(b => b.classList.remove('bg-orange-500', 'text-white'));
+          btn.classList.add('bg-orange-500', 'text-white');
+          renderMenuItems(category === 'All' ? allMenuItems : allMenuItems.filter(item => item.category === category));
+        };
+        categoriesContainer.appendChild(btn);
+      });
+    }
+
+    function renderMenuItems(items) {
+      shopMenu.innerHTML = '';
+      items.forEach(item => {
+        const isAvailable = item.isAvailable !== false;
+        const el = document.createElement('div');
+        el.className = `menu-item-card ${isAvailable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`;
+        el.innerHTML = `
+          <div class="menu-item-text">
+            <h3 class="text-md font-semibold text-gray-800">${item.name}</h3>
+            <p class="text-gray-600 text-xs mt-1 line-clamp-2">${item.description}</p>
+            <p class="text-orange-500 font-bold text-sm mt-1">R${item.price.toFixed(2)}</p>
+            <p class="${isAvailable ? 'available' : 'not-available'} text-xs mt-1">${isAvailable ? 'Available' : 'Not Available'}</p>
+            <button class="btn-orange add-btn mt-1 ${isAvailable ? '' : 'btn-disabled'}" ${isAvailable ? '' : 'disabled'}>
+              <i class="fas fa-plus text-xs"></i>
+            </button>
+          </div>
+          <img src="${item.image || 'https://via.placeholder.com/100x100'}" alt="${item.name}" class="menu-item-image">
+        `;
+        if (isAvailable) {
+          el.querySelector('button').addEventListener('click', (e) => {
+            e.stopPropagation();
+            openItemModal(item);
+          });
+          el.addEventListener('click', () => openItemModal(item));
+        }
+        shopMenu.appendChild(el);
+      });
+    }
+
+    function openItemModal(item) {
+      if (item.isAvailable === false) {
+        showToast(`${item.name} is not available.`);
+        return;
+      }
+      currentItem = item;
+      document.getElementById('itemName').textContent = item.name;
+      document.getElementById('itemDescription').textContent = item.description;
+      document.getElementById('itemPrice').textContent = `R${item.price.toFixed(2)}`;
+      document.getElementById('itemImage').src = item.image || 'https://via.placeholder.com/300x200';
+      itemAvailability.textContent = item.isAvailable !== false ? 'Available' : 'Not Available';
+      itemAvailability.className = item.isAvailable !== false ? 'available' : 'not-available';
+      addToCartBtn.disabled = item.isAvailable === false;
+      addToCartBtn.className = `bg-orange-500 text-white py-3 px-6 rounded-lg w-full ${item.isAvailable !== false ? 'btn-orange' : 'btn-disabled'}`;
+      quantityInput.disabled = item.isAvailable === false;
+      quantityInput.value = 1;
+      itemModal.classList.remove('hidden');
+      setTimeout(() => itemModal.querySelector('.modal-enter').classList.add('modal-enter-active'), 10);
+    }
+
+    function closeItemModal() {
+      itemModal.querySelector('.modal-enter').classList.remove('modal-enter-active');
+      setTimeout(() => itemModal.classList.add('hidden'), 300);
+    }
+
+    closeModalBtn.addEventListener('click', closeItemModal);
+
+    function addToCart(item) {
+      if (item.isAvailable === false) {
+        showToast(`${item.name} is not available.`);
+        return;
+      }
+      const quantity = parseInt(quantityInput.value);
+      if (!quantity || quantity < 1) {
+        showToast('Please select a valid quantity.');
+        return;
+      }
+      if (cart.length > 0 && cart[0].shopId !== shopId) {
+        showToast('You can only add items from one shop at a time.');
+        return;
+      }
+      const cartItem = { item, quantity, shopId };
+      const existing = cart.find(c => c.item.name === item.name);
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        cart.push(cartItem);
+      }
+      saveCart();
+      updateCartCount();
+      closeItemModal();
+      showToast(`${item.name} added to cart!`);
+    }
+
+    function saveCart() {
+      if (userId) {
+        localStorage.setItem(`cart-${userId}`, JSON.stringify(cart));
+      }
+    }
+
+    function loadCart() {
+      const storedCart = JSON.parse(localStorage.getItem(`cart-${userId}`));
+      if (storedCart) {
+        cart = storedCart.filter(item => item.shopId === shopId);
+        updateCartCount();
+      }
+    }
+
+    function updateCartCount() {
+      const count = cart.reduce((total, c) => total + c.quantity, 0);
+      cartCountText.textContent = count;
+      cartNavCount.textContent = count;
+      cartCountBtn.classList.toggle('bg-orange-600', count > 0);
+    }
+
+    function renderCartModalItems() {
+      cartModalItems.innerHTML = '';
+      let totalAmount = 0;
+      if (cart.length === 0) {
+        cartModalItems.innerHTML = '<p class="text-gray-600 text-center">Your cart is empty.</p>';
+      } else {
+        cart.forEach((c, index) => {
+          const el = document.createElement('div');
+          el.className = 'flex justify-between items-center mb-4 border-b pb-4';
+          el.innerHTML = `
+            <div>
+              <h4 class="text-lg font-semibold text-gray-800">${c.item.name} (x${c.quantity})</h4>
+              <p class="text-orange-500 font-bold">R${(c.item.price * c.quantity).toFixed(2)}</p>
+            </div>
+            <button class="text-red-500 hover:text-red-600" data-index="${index}">
+              <i class="fas fa-trash"></i>
+            </button>
+          `;
+          el.querySelector('button').addEventListener('click', () => {
+            cart.splice(index, 1);
+            saveCart();
+            renderCartModalItems();
+            updateCartCount();
+          });
+          totalAmount += c.item.price * c.quantity;
+          cartModalItems.appendChild(el);
+        });
+      }
+      cartModalTotal.textContent = `R${totalAmount.toFixed(2)}`;
+    }
+
+    function openCartModal() {
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      cartModal.classList.remove('hidden');
+      backdrop.classList.add('active');
+      renderCartModalItems();
+      setTimeout(() => cartModal.classList.add('active'), 10);
+    }
+
+    function closeCartModal() {
+      cartModal.classList.remove('active');
+      backdrop.classList.remove('active');
+      setTimeout(() => cartModal.classList.add('hidden'), 300);
+    }
+
+    cartCountBtn.addEventListener('click', openCartModal);
+    document.querySelector('#cartNavBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      openCartModal();
+    });
+    closeCartModalBtn.addEventListener('click', closeCartModal);
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) {
+        closeCartModal();
+        sidebarDrawer.classList.remove('active');
+        backdrop.classList.remove('active');
+      }
+    });
+
+    clearCartModalBtn.addEventListener('click', () => {
+      cart = [];
+      saveCart();
+      renderCartModalItems();
+      updateCartCount();
+      closeCartModal();
+      showToast('Cart cleared.');
+    });
+
+    proceedToCheckoutBtn.addEventListener('click', () => {
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        closeCartModal();
+        return;
+      }
+      closeCartModal();
+      window.location.href = `checkout.html?shopId=${shopId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
+    });
+
+    addToCartBtn.addEventListener('click', () => addToCart(currentItem));
+
+    // Sidebar Drawer Toggle
+    function toggleSidebarDrawer(e) {
+      e.preventDefault();
+      sidebarDrawer.classList.toggle('active');
+      backdrop.classList.toggle('active');
+    }
+
+    document.querySelector('#rideNavBtn').addEventListener('click', toggleSidebarDrawer);
+
+    loadShopMenu();
+  </script>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav sm:hidden">
+    <a href="status.html">
+      <i class="fas fa-clipboard-list"></i>
+      <span>Orders</span>
+    </a>
+    <a href="profile.html">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+    <a href="index.html" class="home-icon">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" id="cartNavBtn" class="cart-icon">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-count" id="cartNavCount">0</span>
+      <span>Cart</span>
+    </a>
+    <a href="#" id="rideNavBtn">
+      <i class="fas fa-car"></i>
+      <span>Ride</span>
+    </a>
+  </nav>
+</body>
+</html>
