@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Two Minutes Food - Restaurants</title>
+  <title>My Two Minutes Food - Restaurants & Shopping</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
@@ -184,6 +184,19 @@
     .modal-content {
       @apply bg-white rounded-lg p-6 w-11/12 sm:w-96;
     }
+    /* Tab View */
+    .tab-container {
+      @apply flex justify-center mb-4;
+    }
+    .tab-btn {
+      @apply px-6 py-2 text-sm font-medium rounded-full transition flex items-center gap-1 mx-1;
+    }
+    .tab-btn.active {
+      @apply bg-orange-500 text-white;
+    }
+    .tab-btn:not(.active) {
+      @apply bg-gray-100 text-gray-700 hover:bg-orange-100;
+    }
     @media (min-width: 640px) {
       .bottom-nav {
         display: none;
@@ -204,6 +217,9 @@
       }
       .categories-container {
         @apply flex-wrap justify-center gap-2;
+      }
+      .tab-container {
+        @apply justify-start;
       }
     }
   </style>
@@ -292,7 +308,7 @@
     <!-- Search and Filter -->
     <div class="mb-4">
       <div class="relative">
-        <input type="text" id="searchInput" placeholder="Search restaurants..." class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm">
+        <input type="text" id="searchInput" placeholder="Search restaurants or stores..." class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm">
         <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
       </div>
     </div>
@@ -308,15 +324,32 @@
       </button>
     </div>
 
+    <!-- Tab View -->
+    <div class="tab-container" role="tablist">
+      <button id="restaurantsTab" class="tab-btn active" role="tab" aria-selected="true" aria-controls="restaurantsPanel">
+        <i class="fas fa-utensils mr-1"></i>Restaurants
+      </button>
+      <button id="shoppingTab" class="tab-btn" role="tab" aria-selected="false" aria-controls="shoppingPanel">
+        <i class="fas fa-shopping-bag mr-1"></i>Shopping
+      </button>
+    </div>
+
     <!-- Categories Section -->
     <div class="categories-container mb-4">
       <button class="category-btn active" data-category="all"><i class="fas fa-utensils mr-1"></i>All</button>
       <!-- Categories will be dynamically populated -->
     </div>
 
-    <!-- Restaurant List -->
-    <div id="restaurantList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <p id="loadingMessage" class="text-sm text-gray-500 text-center col-span-full">Loading restaurants...</p>
+    <!-- Content Panels -->
+    <div id="restaurantsPanel" role="tabpanel" aria-labelledby="restaurantsTab">
+      <div id="restaurantList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <p id="loadingMessage" class="text-sm text-gray-500 text-center col-span-full">Loading restaurants...</p>
+      </div>
+    </div>
+    <div id="shoppingPanel" class="hidden" role="tabpanel" aria-labelledby="shoppingTab">
+      <div id="storeList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <p id="loadingStoresMessage" class="text-sm text-gray-500 text-center col-span-full">Loading stores...</p>
+      </div>
     </div>
   </div>
 
@@ -367,7 +400,7 @@
     const auth = getAuth();
 
     // Mapbox Configuration
-    mapboxgl.accessToken = 'pk.eyJ1Ijoia2F0bGVnb3BoYXNoYSIsImEiOiJjbTlpOTdzbmYwMGNsMmpzYWJtZzN4d3pqIn0.Zt-aSMEoahrV3zkiVVHbOw'; // Replace with your Mapbox token
+    mapboxgl.accessToken = 'pk.eyJ1Ijoia2F0bGVnb3BoYXNoYSIsImEiOiJjbTlpOTdzbmYwMGNsMmpzYWJtZzN4d3pqIn0.Zt-aSMEoahrV3zkiVVHbOw';
 
     // PWA Installation
     let deferredPrompt = null;
@@ -378,7 +411,6 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      // Show modal only if not shown in this session
       if (!localStorage.getItem('installPromptShown')) {
         installModal.classList.remove('hidden');
         localStorage.setItem('installPromptShown', 'true');
@@ -389,7 +421,7 @@
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        console.log('PWA Install:', outcome); // 'accepted' or 'dismissed'
+        console.log('PWA Install:', outcome);
         deferredPrompt = null;
         installModal.classList.add('hidden');
       }
@@ -415,7 +447,9 @@
     const sortSelect = document.getElementById('sortSelect');
     const filterBtn = document.getElementById('filterBtn');
     const restaurantList = document.getElementById('restaurantList');
+    const storeList = document.getElementById('storeList');
     const loadingMessage = document.getElementById('loadingMessage');
+    const loadingStoresMessage = document.getElementById('loadingStoresMessage');
     const categoriesContainer = document.querySelector('.categories-container');
     const cartBtn = document.getElementById('cartBtn');
     const cartCount = document.getElementById('cartCount');
@@ -434,12 +468,18 @@
     const locationModal = document.getElementById('locationModal');
     const enableLocationBtn = document.getElementById('enableLocationBtn');
     const dismissLocationBtn = document.getElementById('dismissLocationBtn');
+    const restaurantsTab = document.getElementById('restaurantsTab');
+    const shoppingTab = document.getElementById('shoppingTab');
+    const restaurantsPanel = document.getElementById('restaurantsPanel');
+    const shoppingPanel = document.getElementById('shoppingPanel');
 
     let userId = null;
     let cart = [];
     let restaurants = [];
+    let stores = [];
     let categories = [{ id: 'all', name: 'All', icon: 'fa-utensils' }];
     let selectedCategory = 'all';
+    let activeTab = 'restaurants';
 
     function showToast(message) {
       const toast = document.createElement('div');
@@ -534,10 +574,18 @@
           selectedCategory = category.id;
           document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          renderRestaurants();
+          renderContent();
         });
         categoriesContainer.appendChild(btn);
       });
+    }
+
+    function renderContent() {
+      if (activeTab === 'restaurants') {
+        renderRestaurants();
+      } else {
+        renderStores();
+      }
     }
 
     function renderRestaurants() {
@@ -591,6 +639,57 @@
       });
     }
 
+    function renderStores() {
+      storeList.innerHTML = '';
+      loadingStoresMessage.style.display = 'none';
+
+      let filteredStores = stores;
+
+      if (selectedCategory !== 'all') {
+        filteredStores = stores.filter(s => s.categoryId === selectedCategory);
+      }
+
+      const searchTerm = searchInput.value.toLowerCase();
+      filteredStores = filteredStores.filter(s => 
+        (s.name || '').toLowerCase().includes(searchTerm) || 
+        (s.location || '').toLowerCase().includes(searchTerm)
+      );
+
+      const sortBy = sortSelect.value;
+      filteredStores.sort((a, b) => {
+        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+        if (sortBy === 'distance') return (a.distance || 0) - (b.distance || 0);
+        return (a.name || '').localeCompare(b.name || '');
+      });
+
+      if (filteredStores.length === 0) {
+        storeList.innerHTML = '<p class="text-sm text-gray-500 text-center col-span-full">No stores found.</p>';
+        return;
+      }
+
+      filteredStores.forEach(store => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.id = store.id;
+        card.innerHTML = `
+          <img src="${store.image || 'https://via.placeholder.com/150'}" alt="${store.name || 'Store'}" class="w-full h-40 object-cover rounded-t-lg">
+          <div class="p-3">
+            <h3 class="text-lg font-semibold text-gray-800">${store.name || 'Unknown'}</h3>
+            <p class="text-sm text-gray-600">${store.location || 'No location'}</p>
+            <div class="flex justify-between items-center mt-2">
+              <span class="text-sm text-gray-600"><i class="fas fa-star text-orange-500"></i> ${store.rating || 'N/A'}</span>
+              <span class="text-sm text-gray-600">${store.distance || 'N/A'} km</span>
+            </div>
+            ${store.priceRange ? `<p class="text-sm text-gray-600 mt-2">Price: ${store.priceRange} (ZAR)</p>` : ''}
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          window.location.href = `store_menu.html?storeId=${store.id}`;
+        });
+        storeList.appendChild(card);
+      });
+    }
+
     function loadCategories() {
       const categoriesRef = ref(db, 'categories');
       onValue(categoriesRef, (snapshot) => {
@@ -622,7 +721,9 @@
         } else {
           loadingMessage.style.display = 'none';
         }
-        renderRestaurants();
+        if (activeTab === 'restaurants') {
+          renderRestaurants();
+        }
         spinner.classList.add('hidden');
       }, (error) => {
         console.error('Error loading restaurants:', error);
@@ -632,6 +733,55 @@
         spinner.classList.add('hidden');
       });
     }
+
+    function loadStores() {
+      const storesRef = ref(db, 'stores');
+      onValue(storesRef, (snapshot) => {
+        const data = snapshot.val();
+        console.log('Stores data:', data);
+        stores = data ? Object.keys(data).map(id => ({ id, ...data[id] })) : [];
+        if (stores.length === 0) {
+          console.warn('No stores found in database.');
+          loadingStoresMessage.textContent = 'No stores available.';
+          loadingStoresMessage.style.display = 'block';
+        } else {
+          loadingStoresMessage.style.display = 'none';
+        }
+        if (activeTab === 'shopping') {
+          renderStores();
+        }
+        spinner.classList.add('hidden');
+      }, (error) => {
+        console.error('Error loading stores:', error);
+        loadingStoresMessage.textContent = 'Failed to load stores: ' + error.message;
+        loadingStoresMessage.style.display = 'block';
+        showToast('Failed to load stores: ' + error.message);
+        spinner.classList.add('hidden');
+      });
+    }
+
+    // Tab Switching
+    restaurantsTab.addEventListener('click', () => {
+      activeTab = 'restaurants';
+      restaurantsTab.classList.add('active');
+      shoppingTab.classList.remove('active');
+      restaurantsPanel.classList.remove('hidden');
+      shoppingPanel.classList.add('hidden');
+      restaurantsTab.setAttribute('aria-selected', 'true');
+      shoppingTab.setAttribute('aria-selected', 'false');
+      renderRestaurants();
+    });
+
+    shoppingTab.addEventListener('click', () => {
+      activeTab = 'shopping';
+      shoppingTab.classList.add('active');
+      restaurantsTab.classList.remove('active');
+      shoppingPanel.classList.remove('hidden');
+      restaurantsPanel.classList.add('hidden');
+      shoppingTab.setAttribute('aria-selected', 'true');
+      restaurantsTab.setAttribute('aria-selected', 'false');
+      renderStores();
+    });
 
     onAuthStateChanged(auth, (user) => {
       spinner.classList.remove('hidden');
@@ -645,6 +795,7 @@
         loadCart();
         loadCategories();
         loadRestaurants();
+        loadStores();
         getUserLocation();
       } else {
         console.log('No authenticated user, redirecting to login.');
@@ -657,11 +808,11 @@
     });
 
     searchInput.addEventListener('input', () => {
-      renderRestaurants();
+      renderContent();
     });
 
     sortSelect.addEventListener('change', () => {
-      renderRestaurants();
+      renderContent();
     });
 
     filterBtn.addEventListener('click', () => {
@@ -673,8 +824,10 @@
         showToast('Your cart is empty.');
         return;
       }
-      const restaurantId = cart[0].restaurantId;
-      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
+      const item = cart[0];
+      const id = item.restaurantId || item.storeId;
+      const type = item.restaurantId ? 'restaurantId' : 'storeId';
+      window.location.href = `checkout.html?${type}=${id}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
     });
 
     cartNavBtn.addEventListener('click', (e) => {
@@ -683,8 +836,10 @@
         showToast('Your cart is empty.');
         return;
       }
-      const restaurantId = cart[0].restaurantId;
-      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
+      const item = cart[0];
+      const id = item.restaurantId || item.storeId;
+      const type = item.restaurantId ? 'restaurantId' : 'storeId';
+      window.location.href = `checkout.html?${type}=${id}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
     });
 
     rideNavBtn.addEventListener('click', (e) => {
