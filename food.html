@@ -186,13 +186,13 @@
     }
     /* Tab View */
     .tab-container {
-      @apply flex justify-center mb-4;
+      @apply flex flex-col mb-4 space-y-2; /* Stack buttons vertically */
     }
     .tab-btn {
-      @apply px-6 py-2 text-sm font-medium rounded-full transition flex items-center gap-1 mx-1;
+      @apply w-full py-3 px-4 text-base font-semibold rounded-lg transition flex items-center justify-center gap-2; /* Full-width, larger padding */
     }
     .tab-btn.active {
-      @apply bg-orange-500 text-white;
+      @apply bg-orange-500 text-white hover:bg-orange-600;
     }
     .tab-btn:not(.active) {
       @apply bg-gray-100 text-gray-700 hover:bg-orange-100;
@@ -219,7 +219,12 @@
         @apply flex-wrap justify-center gap-2;
       }
       .tab-container {
-        @apply justify-start;
+        @apply flex-col space-y-2; /* Keep stacked on desktop for full-width */
+        /* Alternative: @apply flex-row space-y-0 space-x-2; for side-by-side */
+      }
+      .tab-btn {
+        @apply w-full; /* Full-width on desktop */
+        /* Alternative: @apply w-1/2; for side-by-side */
       }
     }
   </style>
@@ -327,10 +332,10 @@
     <!-- Tab View -->
     <div class="tab-container" role="tablist">
       <button id="restaurantsTab" class="tab-btn active" role="tab" aria-selected="true" aria-controls="restaurantsPanel">
-        <i class="fas fa-utensils mr-1"></i>Restaurants
+        <i class="fas fa-utensils"></i> Restaurants
       </button>
       <button id="shoppingTab" class="tab-btn" role="tab" aria-selected="false" aria-controls="shoppingPanel">
-        <i class="fas fa-shopping-bag mr-1"></i>Shopping
+        <i class="fas fa-shopping-bag"></i> Shopping
       </button>
     </div>
 
