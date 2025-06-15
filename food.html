@@ -84,7 +84,7 @@
       padding: 10px 0;
       z-index: 50;
       box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-      height: 60px; /* Fixed height for padding calculation */
+      height: 60px;
     }
     .bottom-nav a {
       display: flex;
@@ -149,8 +149,8 @@
     }
     /* Content Container */
     .content-container {
-      @apply pb-[80px] sm:pb-8; /* Increased padding-bottom for mobile to clear nav bar */
-      scroll-padding-bottom: 80px; /* Smooth scroll offset */
+      @apply pb-[80px] sm:pb-8;
+      scroll-padding-bottom: 80px;
     }
     /* Categories */
     .categories-container {
@@ -171,6 +171,13 @@
     }
     .location-display i {
       @apply text-orange-500;
+    }
+    /* Location Modal */
+    .location-modal {
+      @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+    }
+    .location-modal-content {
+      @apply bg-white rounded-lg p-6 w-11/12 sm:w-96;
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -201,7 +208,6 @@
   <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
     <div class="flex items-center">
       <img src="logo.svg" alt="My Two Minutes Food Logo" class="w-8 h-8 rounded-full object-cover">
-      <!-- User Location -->
       <div id="userLocation" class="location-display ml-4 hidden">
         <i class="fas fa-map-marker-alt"></i>
         <span id="locationText">Fetching location...</span>
@@ -244,6 +250,21 @@
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
     </svg>
+  </div>
+
+  <!-- Location Alert Modal -->
+  <div id="locationModal" class="location-modal hidden">
+    <div class="location-modal-content">
+      <div class="flex items-center gap-2 mb-4">
+        <i class="fas fa-map-marker-alt text-orange-500 text-xl"></i>
+        <h3 class="text-lg font-semibold text-gray-800">Location Required</h3>
+      </div>
+      <p class="text-sm text-gray-600 mb-6">Please enable location services to find restaurants near you.</p>
+      <div class="flex gap-2">
+        <button id="enableLocationBtn" class="btn-orange flex-1 py-2 text-sm">Enable Location</button>
+        <button id="dismissLocationBtn" class="btn-secondary flex-1 py-2 text-sm">Dismiss</button>
+      </div>
+    </div>
   </div>
 
   <!-- Main Content -->
@@ -348,6 +369,9 @@
     const userProfilePic = document.getElementById('userProfilePic');
     const userLocation = document.getElementById('userLocation');
     const locationText = document.getElementById('locationText');
+    const locationModal = document.getElementById('locationModal');
+    const enableLocationBtn = document.getElementById('enableLocationBtn');
+    const dismissLocationBtn = document.getElementById('dismissLocationBtn');
 
     let userId = null;
     let cart = [];
@@ -364,7 +388,7 @@
     }
 
     // Fetch User Location with Mapbox
-    function getUserLocation() {
+    function getUserLocation(showModalOnError = true) {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
@@ -376,7 +400,7 @@
               const data = await response.json();
               if (data.features && data.features.length > 0) {
                 const placeName = data.features[0].place_name || 'Unknown location';
-                locationText.textContent = placeName.split(',')[0] + ', ZA'; // e.g., "Pretoria, ZA"
+                locationText.textContent = placeName.split(',')[0] + ', ZA';
                 userLocation.classList.remove('hidden');
               } else {
                 locationText.textContent = 'Location unavailable';
@@ -391,17 +415,37 @@
           },
           (error) => {
             console.error('Geolocation error:', error);
-            showToast('Location access denied.');
-            locationText.textContent = 'Location unavailable';
-            userLocation.classList.remove('hidden');
+            if (showModalOnError) {
+              locationModal.classList.remove('hidden'); // Show modal on error
+            } else {
+              showToast('Location access denied.');
+              locationText.textContent = 'Location unavailable';
+              userLocation.classList.remove('hidden');
+            }
           }
         );
       } else {
-        showToast('Geolocation not supported.');
-        locationText.textContent = 'Location unavailable';
-        userLocation.classList.remove('hidden');
+        if (showModalOnError) {
+          locationModal.classList.remove('hidden'); // Show modal if geolocation unsupported
+        } else {
+          showToast('Geolocation not supported.');
+          locationText.textContent = 'Location unavailable';
+          userLocation.classList.remove('hidden');
+        }
       }
     }
+
+    // Modal Button Handlers
+    enableLocationBtn.addEventListener('click', () => {
+      locationModal.classList.add('hidden');
+      getUserLocation(false); // Retry without showing modal again
+    });
+
+    dismissLocationBtn.addEventListener('click', () => {
+      locationModal.classList.add('hidden');
+      locationText.textContent = 'Location unavailable';
+      userLocation.classList.remove('hidden');
+    });
 
     function loadCart() {
       const storedCart = JSON.parse(localStorage.getItem(`cart-${userId}`)) || [];
