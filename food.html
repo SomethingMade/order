@@ -8,6 +8,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#f97316">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
     /* Hide Scrollbar */
     .scrollbar-hide {
@@ -172,11 +177,11 @@
     .location-display i {
       @apply text-orange-500;
     }
-    /* Location Modal */
-    .location-modal {
+    /* Modals */
+    .modal {
       @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
     }
-    .location-modal-content {
+    .modal-content {
       @apply bg-white rounded-lg p-6 w-11/12 sm:w-96;
     }
     @media (min-width: 640px) {
@@ -207,7 +212,7 @@
   <!-- Header -->
   <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
     <div class="flex items-center">
-      <img src="logo.svg" alt="My Two Minutes Food Logo" class="w-8 h-8 rounded-full object-cover">
+      <img src="logo.png" alt="My Two Minutes Food Logo" class="w-8 h-8 rounded-full object-cover">
       <div id="userLocation" class="location-display ml-4 hidden">
         <i class="fas fa-map-marker-alt"></i>
         <span id="locationText">Fetching location...</span>
@@ -253,8 +258,8 @@
   </div>
 
   <!-- Location Alert Modal -->
-  <div id="locationModal" class="location-modal hidden">
-    <div class="location-modal-content">
+  <div id="locationModal" class="modal hidden">
+    <div class="modal-content">
       <div class="flex items-center gap-2 mb-4">
         <i class="fas fa-map-marker-alt text-orange-500 text-xl"></i>
         <h3 class="text-lg font-semibold text-gray-800">Location Required</h3>
@@ -263,6 +268,21 @@
       <div class="flex gap-2">
         <button id="enableLocationBtn" class="btn-orange flex-1 py-2 text-sm">Enable Location</button>
         <button id="dismissLocationBtn" class="btn-secondary flex-1 py-2 text-sm">Dismiss</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PWA Installation Modal -->
+  <div id="installModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="flex items-center gap-2 mb-4">
+        <i class="fas fa-mobile-alt text-orange-500 text-xl"></i>
+        <h3 class="text-lg font-semibold text-gray-800">Install Our App</h3>
+      </div>
+      <p class="text-sm text-gray-600 mb-6">Install My Two Minutes Food for a faster, app-like experience!</p>
+      <div class="flex gap-2">
+        <button id="installAppBtn" class="btn-orange flex-1 py-2 text-sm">Install App</button>
+        <button id="dismissInstallBtn" class="btn-secondary flex-1 py-2 text-sm">Dismiss</button>
       </div>
     </div>
   </div>
@@ -325,7 +345,7 @@
     </a>
   </nav>
 
-  <!-- Firebase and Mapbox Script -->
+  <!-- Firebase, Mapbox, and PWA Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
@@ -348,6 +368,48 @@
 
     // Mapbox Configuration
     mapboxgl.accessToken = 'pk.eyJ1Ijoia2F0bGVnb3BoYXNoYSIsImEiOiJjbTlpOTdzbmYwMGNsMmpzYWJtZzN4d3pqIn0.Zt-aSMEoahrV3zkiVVHbOw'; // Replace with your Mapbox token
+
+    // PWA Installation
+    let deferredPrompt = null;
+    const installModal = document.getElementById('installModal');
+    const installAppBtn = document.getElementById('installAppBtn');
+    const dismissInstallBtn = document.getElementById('dismissInstallBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Show modal only if not shown in this session
+      if (!localStorage.getItem('installPromptShown')) {
+        installModal.classList.remove('hidden');
+        localStorage.setItem('installPromptShown', 'true');
+      }
+    });
+
+    installAppBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('PWA Install:', outcome); // 'accepted' or 'dismissed'
+        deferredPrompt = null;
+        installModal.classList.add('hidden');
+      }
+    });
+
+    dismissInstallBtn.addEventListener('click', () => {
+      installModal.classList.add('hidden');
+      deferredPrompt = null;
+    });
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+          console.log('Service Worker registered:', reg);
+        }).catch(err => {
+          console.error('Service Worker registration failed:', err);
+        });
+      });
+    }
 
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
@@ -416,7 +478,7 @@
           (error) => {
             console.error('Geolocation error:', error);
             if (showModalOnError) {
-              locationModal.classList.remove('hidden'); // Show modal on error
+              locationModal.classList.remove('hidden');
             } else {
               showToast('Location access denied.');
               locationText.textContent = 'Location unavailable';
@@ -426,7 +488,7 @@
         );
       } else {
         if (showModalOnError) {
-          locationModal.classList.remove('hidden'); // Show modal if geolocation unsupported
+          locationModal.classList.remove('hidden');
         } else {
           showToast('Geolocation not supported.');
           locationText.textContent = 'Location unavailable';
@@ -438,7 +500,7 @@
     // Modal Button Handlers
     enableLocationBtn.addEventListener('click', () => {
       locationModal.classList.add('hidden');
-      getUserLocation(false); // Retry without showing modal again
+      getUserLocation(false);
     });
 
     dismissLocationBtn.addEventListener('click', () => {
@@ -484,19 +546,16 @@
 
       let filteredRestaurants = restaurants;
 
-      // Filter by category
       if (selectedCategory !== 'all') {
         filteredRestaurants = restaurants.filter(r => r.categoryId === selectedCategory);
       }
 
-      // Search filter
       const searchTerm = searchInput.value.toLowerCase();
       filteredRestaurants = filteredRestaurants.filter(r => 
         (r.name || '').toLowerCase().includes(searchTerm) || 
         (r.location || '').toLowerCase().includes(searchTerm)
       );
 
-      // Sort
       const sortBy = sortSelect.value;
       filteredRestaurants.sort((a, b) => {
         if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
@@ -532,7 +591,6 @@
       });
     }
 
-    // Load Categories
     function loadCategories() {
       const categoriesRef = ref(db, 'categories');
       onValue(categoriesRef, (snapshot) => {
@@ -551,7 +609,6 @@
       });
     }
 
-    // Load Restaurants
     function loadRestaurants() {
       const restaurantsRef = ref(db, 'restaurants');
       onValue(restaurantsRef, (snapshot) => {
@@ -576,7 +633,6 @@
       });
     }
 
-    // Authentication
     onAuthStateChanged(auth, (user) => {
       spinner.classList.remove('hidden');
       if (user) {
@@ -589,7 +645,7 @@
         loadCart();
         loadCategories();
         loadRestaurants();
-        getUserLocation(); // Fetch location after auth
+        getUserLocation();
       } else {
         console.log('No authenticated user, redirecting to login.');
         window.location.href = 'login.html';
@@ -600,22 +656,18 @@
       showToast('Failed to authenticate: ' + error.message);
     });
 
-    // Search
     searchInput.addEventListener('input', () => {
       renderRestaurants();
     });
 
-    // Sort
     sortSelect.addEventListener('change', () => {
       renderRestaurants();
     });
 
-    // Filter Button (Placeholder)
     filterBtn.addEventListener('click', () => {
       showToast('Filters coming soon!');
     });
 
-    // Cart Button
     cartBtn.addEventListener('click', () => {
       if (cart.length === 0) {
         showToast('Your cart is empty.');
@@ -635,7 +687,6 @@
       window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
     });
 
-    // Drawer Toggle
     rideNavBtn.addEventListener('click', (e) => {
       e.preventDefault();
       drawer.classList.toggle('drawer-enter');
@@ -649,7 +700,6 @@
       drawerBackdrop.classList.add('hidden');
     });
 
-    // Sign Out
     function handleSignOut() {
       spinner.classList.remove('hidden');
       signOut(auth).then(() => {
