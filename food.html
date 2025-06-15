@@ -6,6 +6,8 @@
   <title>My Two Minutes Food - Restaurants</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
   <style>
     /* Hide Scrollbar */
     .scrollbar-hide {
@@ -82,6 +84,7 @@
       padding: 10px 0;
       z-index: 50;
       box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      height: 60px; /* Fixed height for padding calculation */
     }
     .bottom-nav a {
       display: flex;
@@ -146,7 +149,8 @@
     }
     /* Content Container */
     .content-container {
-      @apply pb-20 sm:pb-8;
+      @apply pb-[80px] sm:pb-8; /* Increased padding-bottom for mobile to clear nav bar */
+      scroll-padding-bottom: 80px; /* Smooth scroll offset */
     }
     /* Categories */
     .categories-container {
@@ -160,6 +164,13 @@
     }
     .category-btn.active i {
       @apply text-white;
+    }
+    /* Location Display */
+    .location-display {
+      @apply text-sm text-gray-600 flex items-center gap-1;
+    }
+    .location-display i {
+      @apply text-orange-500;
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -190,6 +201,11 @@
   <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
     <div class="flex items-center">
       <img src="logo.svg" alt="My Two Minutes Food Logo" class="w-8 h-8 rounded-full object-cover">
+      <!-- User Location -->
+      <div id="userLocation" class="location-display ml-4 hidden">
+        <i class="fas fa-map-marker-alt"></i>
+        <span id="locationText">Fetching location...</span>
+      </div>
     </div>
     <div class="flex items-center space-x-4">
       <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden">
@@ -288,7 +304,7 @@
     </a>
   </nav>
 
-  <!-- Firebase Script -->
+  <!-- Firebase and Mapbox Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
@@ -309,6 +325,9 @@
     const db = getDatabase(app);
     const auth = getAuth();
 
+    // Mapbox Configuration
+    mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN'; // Replace with your Mapbox token
+
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
     const filterBtn = document.getElementById('filterBtn');
@@ -327,6 +346,8 @@
     const spinner = document.getElementById('spinner');
     const userName = document.getElementById('userName');
     const userProfilePic = document.getElementById('userProfilePic');
+    const userLocation = document.getElementById('userLocation');
+    const locationText = document.getElementById('locationText');
 
     let userId = null;
     let cart = [];
@@ -340,6 +361,46 @@
       toast.textContent = message;
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Fetch User Location with Mapbox
+    function getUserLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+              const response = await fetch(
+                `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${mapboxgl.accessToken}`
+              );
+              const data = await response.json();
+              if (data.features && data.features.length > 0) {
+                const placeName = data.features[0].place_name || 'Unknown location';
+                locationText.textContent = placeName.split(',')[0] + ', ZA'; // e.g., "Pretoria, ZA"
+                userLocation.classList.remove('hidden');
+              } else {
+                locationText.textContent = 'Location unavailable';
+                userLocation.classList.remove('hidden');
+              }
+            } catch (error) {
+              console.error('Mapbox error:', error);
+              showToast('Failed to fetch location.');
+              locationText.textContent = 'Location unavailable';
+              userLocation.classList.remove('hidden');
+            }
+          },
+          (error) => {
+            console.error('Geolocation error:', error);
+            showToast('Location access denied.');
+            locationText.textContent = 'Location unavailable';
+            userLocation.classList.remove('hidden');
+          }
+        );
+      } else {
+        showToast('Geolocation not supported.');
+        locationText.textContent = 'Location unavailable';
+        userLocation.classList.remove('hidden');
+      }
     }
 
     function loadCart() {
@@ -484,6 +545,7 @@
         loadCart();
         loadCategories();
         loadRestaurants();
+        getUserLocation(); // Fetch location after auth
       } else {
         console.log('No authenticated user, redirecting to login.');
         window.location.href = 'login.html';
