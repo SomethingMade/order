@@ -157,26 +157,6 @@
       @apply pb-[80px] sm:pb-8;
       scroll-padding-bottom: 80px;
     }
-    /* Categories */
-    .categories-container {
-      @apply flex overflow-x-auto space-x-2 py-2 scrollbar-hide;
-    }
-    .category-btn {
-      @apply px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition flex items-center gap-1;
-    }
-    .category-btn.active {
-      @apply bg-orange-500 text-white;
-    }
-    .category-btn.active i {
-      @apply text-white;
-    }
-    /* Location Display */
-    .location-display {
-      @apply text-sm text-gray-600 flex items-center gap-1;
-    }
-    .location-display i {
-      @apply text-orange-500;
-    }
     /* Modals */
     .modal {
       @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
@@ -226,9 +206,6 @@
       }
       #drawerBackdrop {
         display: none;
-      }
-      .categories-container {
-        @apply flex-wrap justify-center gap-2;
       }
       .tab-container {
         @apply max-w-md; /* Centered, fixed width on desktop */
@@ -340,18 +317,12 @@
     <div class="tab-container" role="tablist">
       <button id="restaurantsTab" class="tab-btn active" role="tab" aria-selected="true" aria-controls="restaurantsPanel">
         <i class="fas fa-utensils"></i>
-        <span>Restaurants</span>
+        <span>Restaurants...</span>
       </button>
       <button id="shoppingTab" class="tab-btn" role="tab" aria-selected="false" aria-controls="shoppingPanel">
         <i class="fas fa-shopping-bag"></i>
         <span>Shopping</span>
       </button>
-    </div>
-
-    <!-- Categories Section -->
-    <div class="categories-container mb-4">
-      <button class="category-btn active" data-category="all"><i class="fas fa-utensils mr-1"></i>All</button>
-      <!-- Categories will be dynamically populated -->
     </div>
 
     <!-- Content Panels -->
@@ -414,7 +385,7 @@
     const auth = getAuth();
 
     // Mapbox Configuration
-    mapboxgl.accessToken = 'pk.eyJ1Ijoia2F0bGVnb3BoYXNoYSIsImEiOiJjbTlpOTdzbmYwMGNsMmpzYWJtZzN4d3pqIn0.Zt-aSMEoahrV3zkiVVHbOw';
+    mapboxgl.accessToken = 'pk.eyJ1Ijoia2F0bGVnb3BoYXNoYSIsImEiOiJjbTlpOTdznmYwMGNsMmpzYWJtZzN4d3pqIn0.Zt-aSMEoahrV3zkiVVHbOw';
 
     // PWA Installation
     let deferredPrompt = null;
@@ -464,7 +435,6 @@
     const storeList = document.getElementById('storeList');
     const loadingMessage = document.getElementById('loadingMessage');
     const loadingStoresMessage = document.getElementById('loadingStoresMessage');
-    const categoriesContainer = document.querySelector('.categories-container');
     const cartBtn = document.getElementById('cartBtn');
     const cartCount = document.getElementById('cartCount');
     const cartNavBtn = document.getElementById('cartNavBtn');
@@ -491,8 +461,6 @@
     let cart = [];
     let restaurants = [];
     let stores = [];
-    let categories = [{ id: 'all', name: 'All', icon: 'fa-utensils' }];
-    let selectedCategory = 'all';
     let activeTab = 'restaurants';
 
     function showToast(message) {
@@ -577,23 +545,6 @@
       cartNavBtn.classList.toggle('active', count > 0);
     }
 
-    function renderCategories() {
-      categoriesContainer.innerHTML = '';
-      categories.forEach(category => {
-        const btn = document.createElement('button');
-        btn.className = `category-btn ${category.id === selectedCategory ? 'active' : ''}`;
-        btn.innerHTML = `<i class="fas ${category.icon} mr-1"></i>${category.name}`;
-        btn.dataset.category = category.id;
-        btn.addEventListener('click', () => {
-          selectedCategory = category.id;
-          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          renderContent();
-        });
-        categoriesContainer.appendChild(btn);
-      });
-    }
-
     function renderContent() {
       if (activeTab === 'restaurants') {
         renderRestaurants();
@@ -607,10 +558,6 @@
       loadingMessage.style.display = 'none';
 
       let filteredRestaurants = restaurants;
-
-      if (selectedCategory !== 'all') {
-        filteredRestaurants = restaurants.filter(r => r.categoryId === selectedCategory);
-      }
 
       const searchTerm = searchInput.value.toLowerCase();
       filteredRestaurants = filteredRestaurants.filter(r => 
@@ -659,10 +606,6 @@
 
       let filteredStores = stores;
 
-      if (selectedCategory !== 'all') {
-        filteredStores = stores.filter(s => s.categoryId === selectedCategory);
-      }
-
       const searchTerm = searchInput.value.toLowerCase();
       filteredStores = filteredStores.filter(s => 
         (s.name || '').toLowerCase().includes(searchTerm) || 
@@ -701,24 +644,6 @@
           window.location.href = `store_menu.html?storeId=${store.id}`;
         });
         storeList.appendChild(card);
-      });
-    }
-
-    function loadCategories() {
-      const categoriesRef = ref(db, 'categories');
-      onValue(categoriesRef, (snapshot) => {
-        const data = snapshot.val();
-        console.log('Categories data:', data);
-        if (data) {
-          categories = [{ id: 'all', name: 'All', icon: 'fa-utensils' }, ...Object.keys(data).map(id => ({ id, ...data[id] }))];
-        } else {
-          console.warn('No categories found in database.');
-          showToast('No categories available.');
-        }
-        renderCategories();
-      }, (error) => {
-        console.error('Error loading categories:', error);
-        showToast('Failed to load categories: ' + error.message);
       });
     }
 
@@ -807,7 +732,6 @@
         signOutBtn.style.display = 'inline-block';
         signOutDrawer.style.display = 'block';
         loadCart();
-        loadCategories();
         loadRestaurants();
         loadStores();
         getUserLocation();
