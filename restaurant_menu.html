@@ -167,8 +167,13 @@
     }
     /* Menu Container */
     .menu-container {
-      padding-bottom: 100px; /* Increased to ensure no overlap with nav bar */
-      scroll-padding-bottom: 100px; /* Prevents content overlap */
+      padding-bottom: 100px; /* Space for nav bar and cart button */
+    }
+    .menu-scroll {
+      max-height: calc(100vh - 200px); /* Adjust based on header and nav height */
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding-bottom: 20px; /* Extra padding to ensure last item is visible */
     }
     /* Cart Modal */
     .cart-modal {
@@ -214,7 +219,7 @@
     }
     /* Rate Button */
     .rate-button {
-      @apply bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition duration-200 ease-in-out;
+      @apply bg-orange-500 text-white py-1 px-4 rounded-full hover:bg-orange-600 transition duration-200 ease-in-out;
     }
     /* Rating Stars */
     .rating-stars {
@@ -246,7 +251,10 @@
       }
       .menu-container {
         padding-bottom: 0; /* No nav bar on desktop */
-        scroll-padding-bottom: 0;
+      }
+      .menu-scroll {
+        max-height: none; /* Disable scroll on desktop */
+        overflow-y: visible;
       }
       .cart-button {
         bottom: 20px; /* Adjusted for desktop */
@@ -283,7 +291,7 @@
 
   <!-- Menu Items -->
   <div class="container mx-auto px-4 sm:px-6 py-8 menu-container">
-    <div id="restaurantMenu" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="restaurantMenu" class="menu-scroll grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </div>
 
   <!-- Cart Button -->
