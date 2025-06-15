@@ -23,7 +23,7 @@
     /* Toast Notification */
     .toast {
       position: fixed;
-      bottom: 80px;
+      bottom: 100px; /* Raised to avoid nav bar/buttons overlap */
       left: 50%;
       transform: translateX(-50%);
       background-color: #333;
@@ -137,14 +137,29 @@
     }
     /* Input Style */
     .input-field {
-      @apply mt-1 block w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500;
+      @apply mt-1 block w-full border border-gray-200 rounded-lg p-4 text-base shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition;
+    }
+    .input-field:invalid:focus {
+      @apply border-red-500 ring-2 ring-red-500;
+    }
+    .input-field::placeholder {
+      @apply text-gray-400;
+    }
+    .textarea-field {
+      @apply mt-1 block w-full border border-gray-200 rounded-lg p-3 text-base shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition;
+    }
+    .textarea-field:invalid:focus {
+      @apply border-red-500 ring-2 ring-red-500;
+    }
+    .textarea-field::placeholder {
+      @apply text-gray-400;
     }
     .input-label {
-      @apply block text-sm font-medium text-gray-700 mb-1;
+      @apply block text-sm font-medium text-gray-700 mb-1 transition hover:text-orange-500;
     }
     /* Content Container */
     .content-container {
-      @apply pb-20 sm:pb-8;
+      @apply pb-24 sm:pb-8; /* Increased padding to avoid nav bar overlap */
     }
     /* Payment Label */
     .payment-label {
@@ -157,12 +172,19 @@
     .modal-content {
       @apply bg-white rounded-lg p-6 w-11/12 sm:w-96;
     }
+    /* Action Buttons */
+    .action-buttons {
+      @apply flex flex-col sm:flex-row gap-4 mt-6;
+    }
     @media (min-width: 640px) {
       .bottom-nav {
         display: none;
       }
       .toast {
         bottom: 20px;
+      }
+      .action-buttons {
+        @apply sticky bottom-4 z-40; /* Sticky buttons on desktop */
       }
     }
   </style>
@@ -221,19 +243,19 @@
       <form id="deliveryForm" class="space-y-4">
         <div>
           <label for="name" class="input-label">Full Name</label>
-          <input type="text" id="name" class="input-field" required aria-required="true">
+          <input type="text" id="name" class="input-field" placeholder="Enter your full name" required aria-required="true">
         </div>
         <div>
           <label for="phone" class="input-label">Phone Number</label>
-          <input type="tel" id="phone" class="input-field" required aria-required="true">
+          <input type="tel" id="phone" class="input-field" placeholder="e.g. +27123456789" required aria-required="true">
         </div>
         <div>
           <label for="address" class="input-label">Delivery Address</label>
-          <textarea id="address" class="input-field" rows="4" required aria-required="true"></textarea>
+          <textarea id="address" class="textarea-field" rows="4" placeholder="Enter your delivery address" required aria-required="true"></textarea>
         </div>
         <div>
           <label for="notes" class="input-label">Delivery Notes (Optional)</label>
-          <textarea id="notes" class="input-field" rows="2"></textarea>
+          <textarea id="notes" class="textarea-field" rows="2" placeholder="e.g. Leave at gate"></textarea>
         </div>
       </form>
     </section>
@@ -256,7 +278,7 @@
     </section>
 
     <!-- Action Buttons -->
-    <div class="flex flex-col sm:flex-row gap-4">
+    <div class="action-buttons">
       <button id="placeOrderBtn" class="btn-orange py-3 px-6 rounded-lg font-semibold text-lg flex items-center justify-center gap-2" aria-label="Place Order">
         <i class="fas fa-check"></i> Place Order
       </button>
