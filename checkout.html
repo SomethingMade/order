@@ -6,6 +6,11 @@
   <title>Checkout - My Two Minutes Food</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#f97316">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
     /* Hide Scrollbar */
     .scrollbar-hide {
@@ -50,7 +55,7 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    /* Button Hover Effect */
+    /* Button Styles */
     .btn-orange {
       @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out;
     }
@@ -82,6 +87,7 @@
       padding: 10px 0;
       z-index: 50;
       box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      height: 60px;
     }
     .bottom-nav a {
       display: flex;
@@ -135,7 +141,7 @@
     }
     /* Card Style */
     .card {
-      @apply bg-white rounded-lg shadow-md p-4 mb-4;
+      @apply bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 transition hover:shadow-lg;
     }
     /* Input Style */
     .input-field {
@@ -148,15 +154,23 @@
     .content-container {
       @apply pb-20 sm:pb-8;
     }
+    /* Payment Method */
+    .payment-label {
+      @apply flex items-center p-3 rounded-md hover:bg-gray-50 cursor-pointer transition;
+    }
+    /* Modals */
+    .modal {
+      @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+    }
+    .modal-content {
+      @apply bg-white rounded-lg p-6 w-11/12 sm:w-96;
+    }
     @media (min-width: 640px) {
       .bottom-nav {
         display: none;
       }
       .toast {
         bottom: 20px;
-      }
-      .card {
-        @apply p-5;
       }
       #drawer {
         width: 288px;
@@ -173,10 +187,11 @@
   <!-- Header -->
   <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
     <div class="flex items-center">
-      <img src="logo.jpg" alt="Logo" class="w-8 h-8 rounded-full object-cover">
+      <img src="logo.jpg" alt="My Two Minutes Food Logo" class="w-8 h-8 rounded-full object-cover">
+      <span class="ml-2 text-lg font-semibold text-gray-800">Checkout</span>
     </div>
     <div class="flex items-center space-x-4">
-      <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden">
+      <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden" aria-label="Cart">
         <i class="fas fa-shopping-cart text-lg"></i>
         <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
       </button>
@@ -193,7 +208,7 @@
     <div class="p-6">
       <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
       <ul class="space-y-4">
-        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition active"><i class="fas fa-home mr-2"></i>Home</a></li>
+        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
         <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
         <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-user mr-2"></i>Profile</a></li>
         <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
@@ -214,58 +229,76 @@
     </svg>
   </div>
 
+  <!-- PWA Installation Modal -->
+  <div id="installModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="flex items-center gap-2 mb-4">
+        <i class="fas fa-mobile-alt text-orange-500 text-xl"></i>
+        <h3 class="text-lg font-semibold text-gray-800">Install Our App</h3>
+      </div>
+      <p class="text-sm text-gray-600 mb-6">Install My Two Minutes Food for a faster, app-like experience!</p>
+      <div class="flex gap-2">
+        <button id="installAppBtn" class="btn-orange flex-1 py-2 text-sm">Install App</button>
+        <button id="dismissInstallBtn" class="btn-secondary flex-1 py-2 text-sm">Dismiss</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Checkout Content -->
   <div class="container mx-auto px-4 sm:px-6 py-8 content-container">
     <!-- Restaurant Info -->
     <div class="card">
       <h2 id="restaurantName" class="text-xl font-bold text-gray-800 mb-2">Loading...</h2>
-      <p id="restaurantLocation" class="text-sm text-gray-600"><i class="fas fa-map-marker-alt mr-1"></i>Loading...</p>
+      <p id="restaurantLocation" class="text-sm text-gray-600 flex items-center">
+        <i class="fas fa-map-marker-alt mr-2 text-orange-500"></i>
+        <span>Loading...</span>
+      </p>
     </div>
 
     <!-- Cart Items -->
     <div class="card">
-      <h3 class="text-lg font-semibold text-gray-800 mb-3">Your Order</h3>
-      <div id="cartItems" class="space-y-3"></div>
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Your Order</h3>
+      <div id="cartItems" class="space-y-4"></div>
       <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
         <span class="text-sm font-semibold text-gray-800">Total</span>
-        <span id="cartTotal" class="text-sm font-semibold text-gray-800">$0.00</span>
+        <span id="cartTotal" class="text-sm font-semibold text-gray-800">R0.00</span>
       </div>
     </div>
 
     <!-- Delivery Details -->
     <div class="card">
-      <div class="flex justify-between items-center mb-3">
+      <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-800">Delivery Details</h3>
-        <button id="editDeliveryBtn" class="text-orange-500 hover:text-orange-600 text-sm font-medium transition">
+        <button id="editDeliveryBtn" class="text-orange-500 hover:text-orange-600 text-sm font-medium transition flex items-center">
           <i class="fas fa-edit mr-1"></i>Edit
         </button>
       </div>
-      <div id="deliveryDisplay" class="space-y-2">
+      <div id="deliveryDisplay" class="space-y-3">
         <div>
-          <p class="text-xs font-medium text-gray-500">Name</p>
+          <p class="text-xs font-medium text-gray-500 uppercase">Name</p>
           <p id="deliveryName" class="text-sm text-gray-800">Loading...</p>
         </div>
         <div>
-          <p class="text-xs font-medium text-gray-500">Phone</p>
+          <p class="text-xs font-medium text-gray-500 uppercase">Phone</p>
           <p id="deliveryPhone" class="text-sm text-gray-800">Loading...</p>
         </div>
         <div>
-          <p class="text-xs font-medium text-gray-500">Address</p>
+          <p class="text-xs font-medium text-gray-500 uppercase">Address</p>
           <p id="deliveryAddress" class="text-sm text-gray-800">Loading...</p>
         </div>
       </div>
       <form id="deliveryForm" class="hidden space-y-4 mt-4">
         <div>
           <label for="deliveryNameInput" class="input-label">Full Name</label>
-          <input type="text" id="deliveryNameInput" class="input-field" required>
+          <input type="text" id="deliveryNameInput" class="input-field" required aria-required="true">
         </div>
         <div>
           <label for="deliveryPhoneInput" class="input-label">Phone Number</label>
-          <input type="tel" id="deliveryPhoneInput" class="input-field" required>
+          <input type="tel" id="deliveryPhoneInput" class="input-field" required aria-required="true">
         </div>
         <div>
           <label for="deliveryAddressInput" class="input-label">Delivery Address</label>
-          <textarea id="deliveryAddressInput" class="input-field" rows="3" required></textarea>
+          <textarea id="deliveryAddressInput" class="input-field" rows="3" required aria-required="true"></textarea>
         </div>
         <div class="flex gap-3">
           <button type="submit" id="saveDeliveryBtn" class="btn-orange flex-1 py-3 text-sm">Save</button>
@@ -276,18 +309,21 @@
 
     <!-- Payment Method -->
     <div class="card">
-      <h3 class="text-lg font-semibold text-gray-800 mb-3">Payment Method</h3>
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Payment Method</h3>
       <div class="space-y-2">
-        <label class="flex items-center">
-          <input type="radio" name="paymentMethod" value="Cash" class="mr-2 text-orange-500 focus:ring-orange-500" checked>
+        <label class="payment-label">
+          <input type="radio" name="paymentMethod" value="Cash" class="mr-3 text-orange-500 focus:ring-orange-500" checked>
+          <i class="fas fa-money-bill mr-2 text-gray-600"></i>
           <span class="text-sm text-gray-800">Cash on Delivery</span>
         </label>
-        <label class="flex items-center">
-          <input type="radio" name="paymentMethod" value="Card" class="mr-2 text-orange-500 focus:ring-orange-500">
+        <label class="payment-label">
+          <input type="radio" name="paymentMethod" value="Card" class="mr-3 text-orange-500 focus:ring-orange-500">
+          <i class="fas fa-credit-card mr-2 text-gray-600"></i>
           <span class="text-sm text-gray-800">Credit/Debit Card</span>
         </label>
-        <label class="flex items-center">
-          <input type="radio" name="paymentMethod" value="PayPal" class="mr-2 text-orange-500 focus:ring-orange-500">
+        <label class="payment-label">
+          <input type="radio" name="paymentMethod" value="PayPal" class="mr-3 text-orange-500 focus:ring-orange-500">
+          <i class="fab fa-paypal mr-2 text-gray-600"></i>
           <span class="text-sm text-gray-800">PayPal</span>
         </label>
       </div>
@@ -295,7 +331,7 @@
 
     <!-- Place Order -->
     <div class="card">
-      <button id="placeOrderBtn" class="w-full btn-orange py-3 text-sm flex items-center justify-center gap-2">
+      <button id="placeOrderBtn" class="w-full btn-orange py-3 text-sm flex items-center justify-center gap-2" aria-label="Place Order">
         <i class="fas fa-check text-sm"></i>
         Place Order
       </button>
@@ -312,11 +348,11 @@
       <i class="fas fa-user"></i>
       <span>Profile</span>
     </a>
-    <a href="index.html" class="home-icon active">
+    <a href="index.html" class="home-icon">
       <i class="fas fa-home"></i>
       <span>Home</span>
     </a>
-    <a href="#" id="cartNavBtn" class="cart-icon">
+    <a href="#" id="cartNavBtn" class="cart-icon active">
       <i class="fas fa-shopping-cart"></i>
       <span class="cart-count" id="cartNavCount">0</span>
       <span>Cart</span>
@@ -327,7 +363,7 @@
     </a>
   </nav>
 
-  <!-- Firebase Script -->
+  <!-- Firebase, PWA Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, onValue, set, push } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
@@ -347,6 +383,47 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const auth = getAuth();
+
+    // PWA Installation
+    let deferredPrompt = null;
+    const installModal = document.getElementById('installModal');
+    const installAppBtn = document.getElementById('installAppBtn');
+    const dismissInstallBtn = document.getElementById('dismissInstallBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!localStorage.getItem('installPromptShown')) {
+        installModal.classList.remove('hidden');
+        localStorage.setItem('installPromptShown', 'true');
+      }
+    });
+
+    installAppBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('PWA Install:', outcome);
+        deferredPrompt = null;
+        installModal.classList.add('hidden');
+      }
+    });
+
+    dismissInstallBtn.addEventListener('click', () => {
+      installModal.classList.add('hidden');
+      deferredPrompt = null;
+    });
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+          console.log('Service Worker registered:', reg);
+        }).catch(err => {
+          console.error('Service Worker registration failed:', err);
+        });
+      });
+    }
 
     const restaurantName = document.getElementById('restaurantName');
     const restaurantLocation = document.getElementById('restaurantLocation');
@@ -420,33 +497,33 @@
       total = 0;
       if (cart.length === 0) {
         cartItems.innerHTML = '<p class="text-sm text-gray-500">Your cart is empty.</p>';
-        cartTotal.textContent = '$0.00';
+        cartTotal.textContent = 'R0.00';
         return;
       }
       cart.forEach((item, index) => {
         const itemTotal = item.price * item.quantity;
         total += itemTotal;
         const div = document.createElement('div');
-        div.className = 'flex justify-between items-center';
+        div.className = 'flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0';
         div.innerHTML = `
-          <div>
-            <p class="text-sm font-medium text-gray-800">${item.name} x${item.quantity}</p>
-            <p class="text-xs text-gray-600">$${item.price.toFixed(2)} each</p>
+          <div class="flex-1 pr-4">
+            <p class="text-sm font-medium text-gray-800">${item.name} <span class="text-gray-500">x${item.quantity}</span></p>
+            <p class="text-xs text-gray-600">R${item.price.toFixed(2)} each</p>
           </div>
-          <div class="flex items-center space-x-2">
-            <button class="decreaseQty text-gray-600 hover:text-orange-500" data-index="${index}">
-              <i class="fas fa-minus"></i>
+          <div class="flex items-center space-x-3">
+            <button class="decreaseQty text-gray-600 hover:text-orange-500 p-1 rounded-full" data-index="${index}" aria-label="Decrease quantity">
+              <i class="fas fa-minus text-xs"></i>
             </button>
-            <span class="text-sm text-gray-800">${item.quantity}</span>
-            <button class="increaseQty text-gray-600 hover:text-orange-500" data-index="${index}">
-              <i class="fas fa-plus"></i>
+            <span class="text-sm text-gray-800 w-6 text-center">${item.quantity}</span>
+            <button class="increaseQty text-gray-600 hover:text-orange-500 p-1 rounded-full" data-index="${index}" aria-label="Increase quantity">
+              <i class="fas fa-plus text-xs"></i>
             </button>
-            <span class="text-sm font-semibold text-gray-800">$${itemTotal.toFixed(2)}</span>
+            <span class="text-sm font-semibold text-gray-800 w-16 text-right">R${itemTotal.toFixed(2)}</span>
           </div>
         `;
         cartItems.appendChild(div);
       });
-      cartTotal.textContent = `$${total.toFixed(2)}`;
+      cartTotal.textContent = `R${total.toFixed(2)}`;
       document.querySelectorAll('.decreaseQty').forEach(btn => {
         btn.addEventListener('click', () => updateQuantity(btn.dataset.index, -1));
       });
@@ -470,7 +547,7 @@
       onValue(restaurantRef, (snapshot) => {
         restaurantData = snapshot.val() || {};
         restaurantName.textContent = restaurantData.name || 'Unknown Restaurant';
-        restaurantLocation.textContent = restaurantData.location || 'Unknown Location';
+        restaurantLocation.querySelector('span').textContent = restaurantData.location || 'Unknown Location';
       }, (error) => {
         console.error('Error loading restaurant:', error);
         showToast('Failed to load restaurant details.');
@@ -659,7 +736,7 @@
         showToast('Your cart is empty.');
         return;
       }
-      window.location.href = window.location.href; // Reload current page
+      window.location.href = window.location.href;
     });
 
     cartNavBtn.addEventListener('click', (e) => {
