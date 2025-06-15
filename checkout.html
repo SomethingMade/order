@@ -12,6 +12,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
+    /* Ensure Page Scrolling */
+    html, body {
+      @apply overflow-y-auto min-h-screen;
+    }
     /* Hide Scrollbar */
     .scrollbar-hide {
       -ms-overflow-style: none;
@@ -23,7 +27,7 @@
     /* Toast Notification */
     .toast {
       position: fixed;
-      bottom: 100px; /* Raised to avoid nav bar/buttons overlap */
+      bottom: 100px; /* Above nav bar/buttons */
       left: 50%;
       transform: translateX(-50%);
       background-color: #333;
@@ -159,7 +163,7 @@
     }
     /* Content Container */
     .content-container {
-      @apply pb-24 sm:pb-8; /* Increased padding to avoid nav bar overlap */
+      @apply pb-24 sm:pb-8; /* Clears nav bar */
     }
     /* Payment Label */
     .payment-label {
@@ -174,7 +178,7 @@
     }
     /* Action Buttons */
     .action-buttons {
-      @apply flex flex-col sm:flex-row gap-4 mt-6;
+      @apply flex flex-col sm:flex-row gap-4 mt-6 sticky bottom-20 sm:bottom-4 z-40 bg-gray-50 sm:bg-transparent p-4 sm:p-0; /* Sticky on mobile, above nav */
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -182,9 +186,6 @@
       }
       .toast {
         bottom: 20px;
-      }
-      .action-buttons {
-        @apply sticky bottom-4 z-40; /* Sticky buttons on desktop */
       }
     }
   </style>
@@ -195,7 +196,7 @@
     <button onclick="window.history.back()" class="text-gray-600 hover:text-orange-500 transition" aria-label="Go Back">
       <i class="fas fa-arrow-left text-xl"></i>
     </button>
-    <h1 id="restaurantName" class="text-xl font-bold text-gray-800">Checkout</h1>
+    <h1 id="restaurantName" class="text-xl font-bold text-gray-800 truncate">Checkout</h1>
     <div class="flex items-center space-x-4">
       <img id="userProfilePic" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="Profile" class="w-8 h-8 rounded-full hidden sm:block">
       <button id="signOutBtn" class="text-sm text-red-500 hover:text-red-600 focus:outline-none hidden sm:block">Sign Out</button>
@@ -240,7 +241,7 @@
     <!-- Delivery Details -->
     <section class="card">
       <h2 class="text-2xl font-bold text-gray-800 mb-4">Delivery Details</h2>
-      <form id="deliveryForm" class="space-y-4">
+      <form id="deliveryForm" class="space-y-4"> <!-- Vertical stack -->
         <div>
           <label for="name" class="input-label">Full Name</label>
           <input type="text" id="name" class="input-field" placeholder="Enter your full name" required aria-required="true">
