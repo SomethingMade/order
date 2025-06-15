@@ -62,6 +62,7 @@
       padding: 10px 0;
       z-index: 50;
       box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      height: 60px; /* Fixed height to reserve space */
     }
     .bottom-nav a {
       display: flex;
@@ -167,6 +168,7 @@
     /* Menu Container */
     .menu-container {
       padding-bottom: 80px; /* Space for nav bar */
+      scroll-padding-bottom: 80px; /* Prevents content overlap */
     }
     /* Cart Modal */
     .cart-modal {
@@ -189,9 +191,26 @@
     }
     /* Full-width Cart Button */
     .cart-button {
+      position: fixed;
+      bottom: 80px; /* Above nav bar */
+      left: 50%;
+      transform: translateX(-50%);
       width: calc(100% - 2rem); /* Full width minus margins */
-      margin-left: 1rem;
-      margin-right: 1rem;
+      max-width: 300px; /* Limit width for better visibility */
+      margin: 0;
+      background-color: #f97316;
+      color: white;
+      padding: 12px;
+      border-radius: 9999px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 40;
+      transition: transform 0.3s ease-in-out;
+    }
+    .cart-button:hover {
+      transform: translateX(-50%) scale(1.05);
+    }
+    .cart-button i {
+      margin-right: 8px;
     }
     @media (min-width: 640px) {
       .bottom-nav {
@@ -207,17 +226,30 @@
       }
       .menu-container {
         padding-bottom: 0; /* No nav bar on desktop */
+        scroll-padding-bottom: 0;
       }
       .cart-button {
-        width: auto; /* Revert to round button on desktop */
-        margin-left: 0;
-        margin-right: 1.5rem;
+        bottom: 20px; /* Adjusted for desktop */
+        width: auto;
+        padding: 8px 16px;
+        max-width: none;
       }
-      .cart-modal {
-        width: 400px;
-        left: auto;
-        border-radius: 1rem;
-      }
+    }
+    /* Rating Stars */
+    .rating-stars {
+      display: flex;
+      gap: 2px;
+      color: #f97316;
+      font-size: 1.2rem;
+    }
+    .rating-stars .star {
+      cursor: pointer;
+    }
+    .rating-stars .star.filled {
+      color: #f97316;
+    }
+    .rating-stars .star.unfilled {
+      color: #d1d5db;
     }
   </style>
 </head>
@@ -228,7 +260,8 @@
     <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
       <div class="text-center text-white">
         <h1 id="restaurantName" class="text-3xl sm:text-4xl font-bold">Restaurant Name</h1>
-        <p id="restaurantLocation" class="flex items-center justify-center gap-2 text-sm sm:text-base mt-2">
+        <div id="ratingDisplay" class="flex items-center justify-center gap-2 text-sm sm:text-base mt-2"></div>
+        <p id="restaurantLocation" class="flex items-center justify-center gap-2 text-sm sm:text-base mt-1">
           <i class="fas fa-map-marker-alt"></i>
           <span id="locationText">Restaurant Location</span>
         </p>
@@ -249,9 +282,9 @@
   </div>
 
   <!-- Cart Button -->
-  <button id="cartCount" class="cart-button fixed bottom-20 bg-orange-500 text-white py-3 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 btn-orange z-20 sm:w-16 sm:h-16 sm:p-0">
+  <button id="cartCount" class="cart-button flex items-center">
     <i class="fas fa-shopping-cart text-xl"></i>
-    <span id="cartCountText" class="text-sm font-semibold hidden sm:inline">0</span>
+    <span id="cartCountText" class="text-sm font-semibold ml-2">0</span>
   </button>
 
   <!-- Cart Bottom Modal -->
@@ -285,6 +318,17 @@
     </div>
   </div>
 
+  <!-- Rating Modal -->
+  <div id="ratingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white w-full sm:w-96 p-6 rounded-lg shadow-xl modal-enter">
+      <button id="closeRatingModalBtn" class="text-2xl text-gray-600 mb-4">×</button>
+      <h3 class="text-2xl font-semibold text-gray-800 mb-4">Rate This Restaurant</h3>
+      <div id="ratingStars" class="rating-stars mb-4"></div>
+      <textarea id="ratingComment" class="border p-2 rounded-lg w-full mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Add a comment (optional)" rows="3"></textarea>
+      <button id="submitRatingBtn" class="bg-orange-500 text-white py-3 px-6 rounded-lg w-full btn-orange">Submit Rating</button>
+    </div>
+  </div>
+
   <!-- Sidebar Drawer Menu -->
   <div id="sidebarDrawer" class="sidebar-drawer">
     <div class="p-6">
@@ -296,6 +340,7 @@
         <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
         <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
         <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
+        <li><a href="#" id="rateRestaurantBtn" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-star mr-2"></i>Rate Restaurant</a></li>
       </ul>
     </div>
   </div>
@@ -306,7 +351,7 @@
   <!-- Firebase + Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getDatabase, ref, onValue, set, push } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -346,6 +391,13 @@
     const backdrop = document.getElementById('backdrop');
     const signOutDrawer = document.getElementById('signOutDrawer');
     const cartNavCount = document.getElementById('cartNavCount');
+    const ratingDisplay = document.getElementById('ratingDisplay');
+    const ratingModal = document.getElementById('ratingModal');
+    const closeRatingModalBtn = document.getElementById('closeRatingModalBtn');
+    const ratingStars = document.getElementById('ratingStars');
+    const submitRatingBtn = document.getElementById('submitRatingBtn');
+    const ratingComment = document.getElementById('ratingComment');
+    const rateRestaurantBtn = document.getElementById('rateRestaurantBtn');
 
     let userId = null;
     let cart = [];
@@ -360,6 +412,7 @@
         userId = user.uid;
         loadCart();
         loadRestaurantMenu();
+        loadRatings();
       } else {
         window.location.href = 'login.html';
       }
@@ -402,6 +455,26 @@
       }, (error) => {
         console.error('Error loading restaurant:', error);
         showToast('Failed to load menu.');
+      });
+    }
+
+    function loadRatings() {
+      const ratingsRef = ref(db, `restaurants/${restaurantId}/ratings`);
+      onValue(ratingsRef, (snapshot) => {
+        const ratings = snapshot.val() || {};
+        const ratingsArray = Object.values(ratings);
+        if (ratingsArray.length > 0) {
+          const averageRating = ratingsArray.reduce((sum, r) => sum + r.rating, 0) / ratingsArray.length;
+          const stars = Math.round(averageRating);
+          ratingDisplay.innerHTML = `
+            <span class="text-sm">Rating: ${averageRating.toFixed(1)}/5</span>
+            <div class="rating-stars">
+              ${Array(5).fill().map((_, i) => `<i class="fas fa-star ${i < stars ? 'filled' : 'unfilled'}"></i>`).join('')}
+            </div>
+          `;
+        } else {
+          ratingDisplay.innerHTML = '<span class="text-sm">No ratings yet</span>';
+        }
       });
     }
 
@@ -592,6 +665,7 @@
       if (e.target === backdrop) {
         closeCartModal();
         sidebarDrawer.classList.remove('active');
+        ratingModal.classList.remove('active');
         backdrop.classList.remove('active');
       }
     });
@@ -625,6 +699,61 @@
     }
 
     document.querySelector('#rideNavBtn').addEventListener('click', toggleSidebarDrawer);
+
+    // Rating System
+    function openRatingModal() {
+      ratingModal.classList.remove('hidden');
+      setTimeout(() => ratingModal.querySelector('.modal-enter').classList.add('modal-enter-active'), 10);
+      renderRatingStars();
+    }
+
+    function closeRatingModal() {
+      ratingModal.querySelector('.modal-enter').classList.remove('modal-enter-active');
+      setTimeout(() => ratingModal.classList.add('hidden'), 300);
+    }
+
+    function renderRatingStars() {
+      ratingStars.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('i');
+        star.className = 'fas fa-star star';
+        star.dataset.value = i;
+        star.addEventListener('click', () => {
+          ratingStars.querySelectorAll('.star').forEach(s => {
+            s.classList.remove('filled');
+            if (s.dataset.value <= i) s.classList.add('filled');
+          });
+        });
+        ratingStars.appendChild(star);
+      }
+    }
+
+    rateRestaurantBtn.addEventListener('click', openRatingModal);
+    closeRatingModalBtn.addEventListener('click', closeRatingModal);
+
+    submitRatingBtn.addEventListener('click', () => {
+      const selectedStars = ratingStars.querySelectorAll('.filled').length;
+      const comment = ratingComment.value.trim();
+      if (selectedStars === 0) {
+        showToast('Please select a rating.');
+        return;
+      }
+      const ratingRef = push(ref(db, `restaurants/${restaurantId}/ratings`));
+      set(ratingRef, {
+        userId: userId,
+        rating: selectedStars,
+        comment: comment,
+        timestamp: Date.now()
+      }).then(() => {
+        showToast('Thank you for your rating!');
+        closeRatingModal();
+        ratingComment.value = '';
+        loadRatings();
+      }).catch((error) => {
+        console.error('Error submitting rating:', error);
+        showToast('Failed to submit rating.');
+      });
+    });
 
     loadRestaurantMenu();
   </script>
