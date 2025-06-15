@@ -12,53 +12,42 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
-    /* Ensure Page Scrolling */
+    /* Base Styles */
     html, body {
-      @apply overflow-y-auto min-h-screen bg-gray-50;
+      @apply overflow-y-auto min-h-screen bg-gray-100 font-sans;
     }
-    /* Hide Scrollbar */
-    .scrollbar-hide {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    .container {
+      @apply max-w-md mx-auto p-4;
     }
-    .scrollbar-hide::-webkit-scrollbar {
-      display: none;
+    /* Card Styles */
+    .card {
+      @apply bg-white rounded-2xl shadow-md p-6 mb-6;
     }
-    /* Toast Notification */
-    .toast {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #333;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      font-size: 14px;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s ease-in-out;
+    /* Header */
+    .header {
+      @apply flex justify-between items-center p-4 bg-white shadow-md sticky top-0 z-10;
     }
-    .toast.show {
-      opacity: 1;
+    /* Input Styles */
+    .input-field {
+      @apply w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500;
+    }
+    .input-label {
+      @apply block text-sm font-medium text-gray-700 mb-2;
+    }
+    /* Summary List */
+    .summary-item {
+      @apply flex justify-between text-sm text-gray-700 py-2 border-b border-gray-200 last:border-b-0;
+    }
+    /* Button */
+    .btn-continue {
+      @apply w-full bg-orange-500 text-white text-lg font-semibold py-4 rounded-xl mt-6 hover:bg-orange-600 transition;
     }
     /* Spinner */
     .spinner {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 20px;
-      border-radius: 50%;
+      @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white p-6 rounded-full;
     }
     .spinner.hidden {
-      display: none;
+      @apply hidden;
     }
     .animate-spin {
       animation: spin 1s linear infinite;
@@ -67,64 +56,35 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    /* Progress Indicator */
-    .progress-bar {
-      @apply w-full bg-gray-200 rounded-full h-2 mb-4;
+    /* Toast */
+    .toast {
+      @apply fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg z-50 opacity-0 transition-opacity;
     }
-    .progress {
-      @apply bg-orange-500 h-2 rounded-full transition-all duration-300;
+    .toast.show {
+      @apply opacity-100;
     }
-    /* Card Style */
-    .card {
-      @apply bg-white rounded-xl shadow-md p-5 mb-6 transition hover:shadow-lg;
+    /* Processing Screen */
+    .processing {
+      @apply fixed inset-0 bg-white flex flex-col items-center justify-center z-50;
     }
-    /* Input Styles */
-    .input-field, .textarea-field {
-      @apply w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition;
+    .processing.hidden {
+      @apply hidden;
     }
-    .input-field:invalid:focus, .textarea-field:invalid:focus {
-      @apply border-red-500 ring-2 ring-red-500;
-    }
-    .input-field::placeholder, .textarea-field::placeholder {
-      @apply text-gray-400;
-    }
-    .input-label {
-      @apply block text-sm font-medium text-gray-700 mb-2;
-    }
-    /* Payment Option */
-    .payment-option {
-      @apply flex items-center p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition;
-    }
-    /* Action Buttons */
-    .action-bar {
-      @apply fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 flex justify-between items-center z-40 shadow-lg sm:static sm:bg-transparent sm:shadow-none sm:p-0;
-    }
-    .btn {
-      @apply w-full py-3 px-6 rounded-lg font-semibold text-base flex items-center justify-center gap-2 transition;
-    }
-    .btn-orange { @apply bg-orange-500 text-white hover:bg-orange-600; }
-    .btn-green { @apply bg-green-500 text-white hover:bg-green-600; }
-    .btn-disabled { @apply bg-gray-300 text-gray-500 cursor-not-allowed; }
-    /* Responsive Adjustments */
+    /* Responsive */
     @media (min-width: 640px) {
-      .card { @apply p-6; }
-      .action-bar { @apply flex-row gap-4; }
-      .btn { @apply w-auto; }
-      .toast { bottom: 20px; }
+      .container { @apply max-w-lg; }
+      .card { @apply p-8; }
     }
   </style>
 </head>
-<body class="font-sans">
+<body>
   <!-- Header -->
-  <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-20">
-    <button onclick="window.history.back()" class="text-gray-600 hover:text-orange-500 transition" aria-label="Go Back">
+  <header class="header">
+    <button onclick="window.history.back()" class="text-gray-600 hover:text-orange-500">
       <i class="fas fa-arrow-left text-xl"></i>
     </button>
-    <h1 id="storeName" class="text-xl font-bold text-gray-800 truncate">Checkout</h1>
-    <div class="flex items-center space-x-4">
-      <img id="userProfilePic" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="Profile" class="w-8 h-8 rounded-full hidden sm:block">
-      <button id="signOutBtn" class="text-sm text-red-500 hover:text-red-600 focus:outline-none hidden sm:block">Sign Out</button>
-    </div>
+    <h1 id="storeName" class="text-lg font-bold text-gray-800">Checkout</h1>
+    <span></span> <!-- Placeholder for symmetry -->
   </header>
 
   <!-- Spinner -->
@@ -135,94 +95,60 @@
     </svg>
   </div>
 
-  <!-- PWA Installation Modal -->
-  <div id="installModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl p-6 w-11/12 sm:w-96">
-      <div class="flex items-center gap-3 mb-4">
-        <i class="fas fa-mobile-alt text-orange-500 text-2xl"></i>
-        <h3 class="text-lg font-semibold text-gray-800">Install My Two Minutes</h3>
-      </div>
-      <p class="text-sm text-gray-600 mb-6">Enhance your experience with our app!</p>
-      <div class="flex gap-3">
-        <button id="installAppBtn" class="btn-orange w-full py-2 text-sm">Install</button>
-        <button id="dismissInstallBtn" class="btn-secondary w-full py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100">Dismiss</button>
-      </div>
-    </div>
+  <!-- Processing Screen -->
+  <div id="processingScreen" class="processing hidden">
+    <img src="https://via.placeholder.com/150/FFFFFF/000000?text=Delivery+Illustration" alt="Processing Illustration" class="mb-6">
+    <h2 class="text-xl font-semibold text-gray-800">Processing Order...</h2>
+    <p class="text-sm text-gray-500 mt-2">Please wait while we process your order.</p>
   </div>
 
   <!-- Main Content -->
-  <div class="container mx-auto px-4 sm:px-6 py-6">
-    <!-- Progress Bar -->
-    <div class="progress-bar">
-      <div id="progress" class="progress" style="width: 0%"></div>
+  <div class="container">
+    <!-- Summary Card -->
+    <div class="card">
+      <h2 class="text-lg font-bold text-gray-800 mb-4">Summary</h2>
+      <div id="cartItems" class="space-y-4"></div>
+      <div class="summary-item">
+        <span>Subtotal</span>
+        <span id="subtotal" class="text-orange-500">R0.00</span>
+      </div>
+      <div class="summary-item">
+        <span>Tax</span>
+        <span id="tax" class="text-orange-500">R0.00</span>
+      </div>
+      <div class="summary-item">
+        <span>Delivery</span>
+        <span id="delivery" class="text-orange-500">R0.00</span>
+      </div>
+      <div class="summary-item">
+        <span class="font-semibold">Total</span>
+        <span id="totalAmount" class="font-semibold text-orange-500">R0.00</span>
+      </div>
+      <button id="applyVoucherBtn" class="text-orange-500 text-sm mt-4">Apply Voucher</button>
     </div>
 
-    <!-- Cart Summary -->
-    <section class="card">
-      <h2 class="text-xl font-bold text-gray-800 mb-4">Your Order</h2>
-      <div id="cartItems" class="space-y-4"></div>
-      <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
-        <span class="text-lg font-semibold text-gray-800">Total</span>
-        <span id="totalAmount" class="text-lg font-bold text-orange-500">R0.00</span>
+    <!-- Delivery Address Card -->
+    <div class="card">
+      <h2 class="text-lg font-bold text-gray-800 mb-4">Deliver Address</h2>
+      <div id="mapPlaceholder" class="w-full h-32 bg-gray-200 rounded-lg mb-4"></div>
+      <div>
+        <label for="address" class="input-label">Address</label>
+        <input type="text" id="address" class="input-field" placeholder="Enter delivery address" required>
       </div>
-    </section>
+    </div>
 
-    <!-- Delivery Details -->
-    <section class="card">
-      <h2 class="text-xl font-bold text-gray-800 mb-4">Delivery Information</h2>
-      <form id="deliveryForm" class="space-y-4">
-        <div>
-          <label for="name" class="input-label">Full Name</label>
-          <input type="text" id="name" class="input-field" placeholder="Enter your full name" required aria-required="true">
-        </div>
-        <div>
-          <label for="phone" class="input-label">Phone Number</label>
-          <input type="tel" id="phone" class="input-field" placeholder="e.g. +27123456789" required aria-required="true" pattern="\+[0-9]{11,12}">
-        </div>
-        <div>
-          <label for="address" class="input-label">Delivery Address</label>
-          <textarea id="address" class="textarea-field" rows="3" placeholder="Enter your delivery address" required aria-required="true"></textarea>
-        </div>
-        <div>
-          <label for="notes" class="input-label">Special Instructions (Optional)</label>
-          <textarea id="notes" class="textarea-field" rows="2" placeholder="e.g. Leave at gate"></textarea>
-        </div>
-      </form>
-    </section>
-
-    <!-- Payment Options -->
-    <section class="card">
-      <h2 class="text-xl font-bold text-gray-800 mb-4">Payment Method</h2>
-      <div class="space-y-3">
-        <label class="payment-option">
-          <input type="radio" name="payment" value="cash" class="h-5 w-5 text-orange-500 focus:ring-orange-500 mr-3" checked>
-          <i class="fas fa-money-bill text-lg text-gray-600 mr-2"></i>
-          <span class="text-sm text-gray-800">Cash on Delivery</span>
-        </label>
-        <label class="payment-option">
-          <input type="radio" name="payment" value="card" class="h-5 w-5 text-orange-500 focus:ring-orange-500 mr-3" disabled>
-          <i class="fas fa-credit-card text-lg text-gray-600 mr-2"></i>
-          <span class="text-sm text-gray-800">Credit/Debit Card (Coming Soon)</span>
-        </label>
-      </div>
-    </section>
+    <!-- Action Button -->
+    <button id="continueBtn" class="btn-continue">Continue</button>
   </div>
 
-  <!-- Action Bar -->
-  <div class="action-bar">
-    <button id="placeOrderBtn" class="btn btn-orange" aria-label="Place Order">
-      <i class="fas fa-check"></i> Place Order
-    </button>
-    <button id="whatsappOrderBtn" class="btn btn-green" aria-label="Order via WhatsApp">
-      <i class="fab fa-whatsapp"></i> WhatsApp Order
-    </button>
-  </div>
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
 
   <!-- Firebase + Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -239,61 +165,22 @@
     const db = getDatabase(app);
     const auth = getAuth();
 
-    // PWA Installation
-    let deferredPrompt = null;
-    const installModal = document.getElementById('installModal');
-    const installAppBtn = document.getElementById('installAppBtn');
-    const dismissInstallBtn = document.getElementById('dismissInstallBtn');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      if (!localStorage.getItem('installPromptShown')) {
-        installModal.classList.remove('hidden');
-        localStorage.setItem('installPromptShown', 'true');
-      }
-    });
-
-    installAppBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log('PWA Install:', outcome);
-        deferredPrompt = null;
-        installModal.classList.add('hidden');
-      }
-    });
-
-    dismissInstallBtn.addEventListener('click', () => {
-      installModal.classList.add('hidden');
-      deferredPrompt = null;
-    });
-
-    // Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then(reg => {
-          console.log('Service Worker registered:', reg);
-        }).catch(err => {
-          console.error('Service Worker registration failed:', err);
-        });
-      });
-    }
-
     const storeName = document.getElementById('storeName');
-    const cartItemsContainer = document.getElementById('cartItems');
+    const cartItems = document.getElementById('cartItems');
+    const subtotalEl = document.getElementById('subtotal');
+    const taxEl = document.getElementById('tax');
+    const deliveryEl = document.getElementById('delivery');
     const totalAmountEl = document.getElementById('totalAmount');
-    const deliveryForm = document.getElementById('deliveryForm');
-    const placeOrderBtn = document.getElementById('placeOrderBtn');
-    const whatsappOrderBtn = document.getElementById('whatsappOrderBtn');
+    const addressInput = document.getElementById('address');
+    const continueBtn = document.getElementById('continueBtn');
     const spinner = document.getElementById('spinner');
-    const userProfilePic = document.getElementById('userProfilePic');
-    const progressBar = document.getElementById('progress');
+    const processingScreen = document.getElementById('processingScreen');
+    const toast = document.getElementById('toast');
 
     let userId = null;
     let cart = [];
     let storeId = null;
-    let storeType = null; // 'restaurant' or 'shop'
+    let storeType = null;
 
     // Parse URL Parameters
     const urlParams = new URLSearchParams(window.location.search);
@@ -310,11 +197,8 @@
       spinner.classList.remove('hidden');
       if (user) {
         userId = user.uid;
-        userProfilePic.src = user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
         loadStoreDetails();
-        loadUserProfile();
         renderCartItems();
-        updateProgress(33); // Start at 33% (Cart loaded)
         spinner.classList.add('hidden');
       } else {
         spinner.classList.add('hidden');
@@ -323,19 +207,9 @@
     });
 
     function showToast(message) {
-      const toast = document.createElement('div');
-      toast.className = 'toast';
       toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.classList.add('show'), 10);
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-
-    function updateProgress(percentage) {
-      progressBar.style.width = `${percentage}%`;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     function loadStoreDetails() {
@@ -346,168 +220,67 @@
       const storeRef = ref(db, `${storeType}s/${storeId}`);
       onValue(storeRef, (snapshot) => {
         const store = snapshot.val();
-        if (!store) {
+        if (store) {
+          storeName.textContent = `${store.name} - Checkout`;
+        } else {
           showToast(`${storeType.charAt(0).toUpperCase() + storeType.slice(1)} not found.`);
           storeName.textContent = 'Checkout';
-          return;
         }
-        storeName.textContent = `${store.name} - Checkout`;
       }, (error) => {
         console.error(`Error loading ${storeType} details:`, error);
         showToast(`Failed to load ${storeType} details.`);
       });
     }
 
-    function loadUserProfile() {
-      const userRef = ref(db, `users/${userId}`);
-      onValue(userRef, (snapshot) => {
-        const userData = snapshot.val() || {};
-        document.getElementById('name').value = userData.name || '';
-        document.getElementById('phone').value = userData.phone || '';
-        document.getElementById('address').value = userData.address || '';
-        document.getElementById('notes').value = userData.notes || '';
-      }, (error) => {
-        console.error('Error loading profile:', error);
-        showToast('Failed to load user details.');
-      });
-    }
-
     function renderCartItems() {
-      cartItemsContainer.innerHTML = '';
-      let totalAmount = 0;
+      cartItems.innerHTML = '';
+      let subtotal = 0;
       if (cart.length === 0) {
-        cartItemsContainer.innerHTML = '<p class="text-sm text-gray-500">Your cart is empty.</p>';
-        totalAmountEl.textContent = 'R0.00';
+        cartItems.innerHTML = '<p class="text-sm text-gray-500">Your cart is empty.</p>';
+        updateSummary(0, 0, 0);
         return;
       }
-      cart.forEach((c, index) => {
+      cart.forEach((item, index) => {
+        const itemTotal = item.item.price * item.quantity;
+        subtotal += itemTotal;
         const el = document.createElement('div');
-        el.className = 'flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0';
+        el.className = 'flex justify-between items-center';
         el.innerHTML = `
-          <div class="flex-1 pr-4">
-            <h4 class="text-sm font-medium text-gray-800">${c.item.name} <span class="text-gray-500">x${c.quantity}</span></h4>
-            <p class="text-xs text-orange-500 font-semibold">R${(c.item.price * c.quantity).toFixed(2)}</p>
+          <div>
+            <span class="text-sm text-gray-700">${item.item.name}</span>
+            <span class="text-xs text-gray-500"> x${item.quantity}</span>
           </div>
-          <button class="text-red-500 hover:text-red-600 p-2 rounded-full" data-index="${index}" aria-label="Remove item">
-            <i class="fas fa-trash text-sm"></i>
-          </button>
+          <span class="text-sm text-orange-500">R${itemTotal.toFixed(2)}</span>
         `;
-        el.querySelector('button').addEventListener('click', () => {
-          cart.splice(index, 1);
-          saveCart();
-          renderCartItems();
-          updateProgress(Math.max(33, 33 + (33 * (cart.length / (cart.length + 1)))));
-        });
-        totalAmount += c.item.price * c.quantity;
-        cartItemsContainer.appendChild(el);
+        cartItems.appendChild(el);
       });
-      totalAmountEl.textContent = `R${totalAmount.toFixed(2)}`;
-      updateProgress(66); // Move to 66% when cart is rendered
+      const tax = subtotal * 0.05; // 5% tax as an example
+      const delivery = 10.00; // Fixed delivery fee as an example
+      updateSummary(subtotal, tax, delivery);
     }
 
-    function saveCart() {
-      if (userId) {
-        localStorage.setItem(`cart-${userId}`, JSON.stringify(cart));
-      }
+    function updateSummary(subtotal, tax, delivery) {
+      subtotalEl.textContent = `R${subtotal.toFixed(2)}`;
+      taxEl.textContent = `R${tax.toFixed(2)}`;
+      deliveryEl.textContent = `R${delivery.toFixed(2)}`;
+      totalAmountEl.textContent = `R${(subtotal + tax + delivery).toFixed(2)}`;
     }
 
-    async function placeOrder() {
-      if (cart.length === 0) {
-        showToast('Your cart is empty.');
+    continueBtn.addEventListener('click', () => {
+      if (!addressInput.value.trim()) {
+        showToast('Please enter a delivery address.');
         return;
       }
-      const name = document.getElementById('name').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const address = document.getElementById('address').value.trim();
-      const notes = document.getElementById('notes').value.trim();
-      const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-
-      if (!name || !phone.match(/^\+[0-9]{11,12}$/) || !address) {
-        showToast('Please fill in all required fields with valid data.');
-        return;
-      }
-
-      placeOrderBtn.disabled = true;
-      placeOrderBtn.classList.add('btn-disabled');
       spinner.classList.remove('hidden');
-
-      try {
-        await set(ref(db, `users/${userId}`), {
-          name,
-          phone,
-          address,
-          notes,
-          email: auth.currentUser.email
-        });
-
-        const orderRef = push(ref(db, `orders/${userId}`));
-        const order = {
-          userId,
-          storeId,
-          storeType,
-          items: cart,
-          deliveryDetails: { name, phone, address, notes },
-          paymentMethod,
-          total: cart.reduce((sum, c) => sum + c.item.price * c.quantity, 0),
-          status: 'pending',
-          timestamp: Date.now()
-        };
-        await set(orderRef, order);
-
-        cart = [];
-        saveCart();
-        updateProgress(100); // Complete progress
-        showToast('Order placed successfully!');
+      setTimeout(() => {
+        spinner.classList.add('hidden');
+        processingScreen.classList.remove('hidden');
         setTimeout(() => {
+          processingScreen.classList.add('hidden');
+          showToast('Order placed successfully!');
           window.location.href = `status.html?${storeType}Id=${storeId}`;
         }, 2000);
-      } catch (error) {
-        console.error('Error placing order:', error);
-        showToast('Failed to place order.');
-      } finally {
-        placeOrderBtn.disabled = false;
-        placeOrderBtn.classList.remove('btn-disabled');
-        spinner.classList.add('hidden');
-      }
-    }
-
-    function orderViaWhatsApp() {
-      if (cart.length === 0) {
-        showToast('Your cart is empty.');
-        return;
-      }
-      const name = document.getElementById('name').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const address = document.getElementById('address').value.trim();
-      const notes = document.getElementById('notes').value.trim();
-
-      if (!name || !phone.match(/^\+[0-9]{11,12}$/) || !address) {
-        showToast('Please fill in all required fields with valid data.');
-        return;
-      }
-
-      const orderDetails = cart.map(c => `${c.item.name} (x${c.quantity}) - R${(c.item.price * c.quantity).toFixed(2)}`).join('\n');
-      const total = cart.reduce((sum, c) => sum + c.item.price * c.quantity, 0).toFixed(2);
-      const message = `New ${storeType} Order from ${name}\nPhone: ${phone}\nAddress: ${address}\nNotes: ${notes || 'None'}\n\nItems:\n${orderDetails}\n\nTotal: R${total}`;
-      const whatsappNumber = '+27681774253'; // Replace with actual number
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-    }
-
-    placeOrderBtn.addEventListener('click', placeOrder);
-    whatsappOrderBtn.addEventListener('click', orderViaWhatsApp);
-    deliveryForm.addEventListener('submit', (e) => e.preventDefault());
-
-    // Sign Out
-    signOutBtn.addEventListener('click', () => {
-      spinner.classList.remove('hidden');
-      signOut(auth).then(() => {
-        window.location.href = 'login.html';
-      }).catch((error) => {
-        console.error('Sign Out Error:', error);
-        showToast('Failed to sign out.');
-        spinner.classList.add('hidden');
-      });
+      }, 2000);
     });
   </script>
 </body>
