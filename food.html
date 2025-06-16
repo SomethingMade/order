@@ -436,6 +436,7 @@
     let restaurants = [];
     let shops = [];
     let activeView = 'restaurants';
+    let userStoreType = null; // To store the user's store type
 
     function showToast(message) {
       const toast = document.createElement('div');
@@ -664,7 +665,7 @@
         } else {
           loadingMessage.style.display = 'none';
         }
-        if (activeView === 'restaurants') {
+        if (activeView === 'restaurants' && userStoreType === 'restaurant') {
           renderRestaurants();
         }
         spinner.classList.add('hidden');
@@ -690,7 +691,7 @@
         } else {
           loadingShopsMessage.style.display = 'none';
         }
-        if (activeView === 'shopping') {
+        if (activeView === 'shopping' && userStoreType === 'shop') {
           renderShops();
         }
         spinner.classList.add('hidden');
@@ -706,14 +707,19 @@
     // View Switching via Dropdown
     switchView.addEventListener('change', () => {
       activeView = switchView.value;
-      if (activeView === 'restaurants') {
+      if (activeView === 'restaurants' && userStoreType === 'restaurant') {
         restaurantsPanel.classList.remove('hidden');
         shoppingPanel.classList.add('hidden');
         renderRestaurants();
-      } else {
+      } else if (activeView === 'shopping' && userStoreType === 'shop') {
         shoppingPanel.classList.remove('hidden');
         restaurantsPanel.classList.add('hidden');
         renderShops();
+      } else {
+        // Hide both panels if the user shouldn't see this view
+        restaurantsPanel.classList.add('hidden');
+        shoppingPanel.classList.add('hidden');
+        showToast(`You are not authorized to view ${activeView}.`);
       }
     });
 
@@ -726,10 +732,44 @@
         userProfilePic.src = user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
         signOutBtn.style.display = 'inline-block';
         signOutDrawer.style.display = 'block';
-        loadCart();
-        loadRestaurants();
-        loadShops();
-        getUserLocation();
+
+        // Fetch user data to determine store type
+        const userRef = ref(db, `users/${userId}`);
+        onValue(userRef, (snapshot) => {
+          const userData = snapshot.val();
+          if (userData && userData.accountType === 'business') {
+            userStoreType = userData.storeType; // Set storeType (e.g., "restaurant" or "shop")
+            console.log('User store type:', userStoreType);
+
+            // Initialize view based on store type
+            if (userStoreType === 'restaurant') {
+              restaurantsPanel.classList.remove('hidden');
+              shoppingPanel.classList.add('hidden');
+              switchView.value = 'restaurants';
+              activeView = 'restaurants';
+              loadRestaurants();
+            } else if (userStoreType === 'shop') {
+              shoppingPanel.classList.remove('hidden');
+              restaurantsPanel.classList.add('hidden');
+              switchView.value = 'shopping';
+              activeView = 'shopping';
+              loadShops();
+            } else {
+              restaurantsPanel.classList.add('hidden');
+              shoppingPanel.classList.add('hidden');
+              showToast('Invalid store type. Contact support.');
+            }
+          } else {
+            showToast('Access denied. You must be a business account.');
+            window.location.href = 'login.html';
+          }
+          loadCart();
+          getUserLocation();
+        }, (error) => {
+          console.error('Error loading user data:', error);
+          showToast('Failed to load user data: ' + error.message);
+          spinner.classList.add('hidden');
+        });
       } else {
         console.log('No authenticated user, redirecting to login.');
         window.location.href = 'login.html';
