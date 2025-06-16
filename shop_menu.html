@@ -48,99 +48,6 @@
     .btn-disabled {
       @apply bg-gray-300 text-gray-500 cursor-not-allowed;
     }
-    /* Bottom Nav Bar */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: #ffffff;
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 10px 0;
-      z-index: 50;
-      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-      height: 60px; /* Fixed height to reserve space */
-    }
-    .bottom-nav a {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #6b7280;
-      font-size: 12px;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .bottom-nav a.active {
-      color: #f97316;
-    }
-    .bottom-nav a:hover {
-      color: #f97316;
-    }
-    .bottom-nav i {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-    .bottom-nav .cart-icon {
-      position: relative;
-    }
-    .bottom-nav .cart-icon .cart-count {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background-color: #ef4444;
-      color: white;
-      font-size: 10px;
-      font-weight: bold;
-      border-radius: 50%;
-      padding: 2px 6px;
-    }
-    .bottom-nav .home-icon {
-      background-color: #f97316;
-      color: white;
-      border-radius: 8px;
-      padding: 8px 16px;
-      transform: translateY(-4px);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-    .bottom-nav .home-icon i {
-      font-size: 20px;
-      margin-bottom: 0;
-      color: white;
-    }
-    .bottom-nav .home-icon span {
-      color: white;
-      margin-top: 4px;
-    }
-    /* Sidebar Drawer */
-    .sidebar-drawer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 64;
-      height: 100%;
-      background-color: white;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-      transform: translateX(-100%);
-      transition: transform 0.3s ease-in-out;
-      z-index: 60;
-    }
-    .sidebar-drawer.active {
-      transform: translateX(0);
-    }
-    /* Backdrop */
-    .backdrop {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 55;
-      display: none;
-    }
-    .backdrop.active {
-      display: block;
-    }
     /* Menu Item Card */
     .menu-item-card {
       display: flex;
@@ -167,10 +74,10 @@
     }
     /* Menu Container */
     .menu-container {
-      padding-bottom: 100px; /* Space for nav bar and cart button */
+      padding-bottom: 80px; /* Space for cart button only */
     }
     .menu-scroll {
-      max-height: calc(100vh - 260px); /* Adjust based on header, tabs, and nav height */
+      max-height: calc(100vh - 240px); /* Adjusted for header, tabs, and cart button */
       overflow-y: auto;
       scroll-behavior: smooth;
       padding-bottom: 20px; /* Extra padding to ensure last item is visible */
@@ -197,7 +104,7 @@
     /* Full-width Cart Button */
     .cart-button {
       position: fixed;
-      bottom: 80px; /* Above nav bar */
+      bottom: 20px; /* Adjusted for no nav bar */
       left: 50%;
       transform: translateX(-50%);
       width: calc(100% - 2rem); /* Full width minus margins */
@@ -266,17 +173,6 @@
       background-color: #ffdab9;
     }
     @media (min-width: 640px) {
-      .bottom-nav {
-        display: none;
-      }
-      .sidebar-drawer {
-        width: 72;
-        transform: translateX(0);
-        display: block;
-      }
-      .backdrop {
-        display: none;
-      }
       .menu-container {
         padding-bottom: 0; /* No nav bar on desktop */
       }
@@ -381,21 +277,6 @@
     </div>
   </div>
 
-  <!-- Sidebar Drawer Menu -->
-  <div id="sidebarDrawer" class="sidebar-drawer">
-    <div class="p-6">
-      <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
-      <ul class="space-y-4">
-        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
-        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
-        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-user mr-2"></i>Profile</a></li>
-        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
-        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
-        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
-      </ul>
-    </div>
-  </div>
-
   <!-- Backdrop -->
   <div id="backdrop" class="backdrop"></div>
 
@@ -438,10 +319,7 @@
     const proceedToCheckoutBtn = document.getElementById('proceedToCheckoutBtn');
     const cartModalTotal = document.getElementById('cartModalTotal');
     const itemAvailability = document.getElementById('itemAvailability');
-    const sidebarDrawer = document.getElementById('sidebarDrawer');
     const backdrop = document.getElementById('backdrop');
-    const signOutDrawer = document.getElementById('signOutDrawer');
-    const cartNavCount = document.getElementById('cartNavCount');
     const ratingDisplay = document.getElementById('ratingDisplay');
     const ratingModal = document.getElementById('ratingModal');
     const closeRatingModalBtn = document.getElementById('closeRatingModalBtn');
@@ -470,17 +348,6 @@
       } else {
         window.location.href = 'login.html';
       }
-    });
-
-    // Sign Out
-    signOutDrawer.addEventListener('click', (e) => {
-      e.preventDefault();
-      signOut(auth).then(() => {
-        window.location.href = 'login.html';
-      }).catch((error) => {
-        console.error('Sign Out Error', error);
-        showToast('Failed to sign out.');
-      });
     });
 
     function showToast(message) {
@@ -657,7 +524,6 @@
     function updateCartCount() {
       const count = cart.reduce((total, c) => total + c.quantity, 0);
       cartCountText.textContent = count;
-      cartNavCount.textContent = count;
       cartCountBtn.classList.toggle('bg-orange-600', count > 0);
     }
 
@@ -715,17 +581,12 @@
       setTimeout(() => cartModal.classList.add('hidden'), 300);
     }
 
-    // Ensure cart button event listeners are properly set
+    // Ensure cart button event listener is properly set
     cartCountBtn.addEventListener('click', openCartModal);
-    document.querySelector('#cartNavBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      openCartModal();
-    });
     closeCartModalBtn.addEventListener('click', closeCartModal);
     backdrop.addEventListener('click', (e) => {
       if (e.target === backdrop) {
         closeCartModal();
-        sidebarDrawer.classList.remove('active');
         ratingModal.classList.remove('active');
         backdrop.classList.remove('active');
       }
@@ -751,15 +612,6 @@
     });
 
     addToCartBtn.addEventListener('click', () => addToCart(currentItem));
-
-    // Sidebar Drawer Toggle
-    function toggleSidebarDrawer(e) {
-      e.preventDefault();
-      sidebarDrawer.classList.toggle('active');
-      backdrop.classList.toggle('active');
-    }
-
-    document.querySelector('#rideNavBtn').addEventListener('click', toggleSidebarDrawer);
 
     // Tab View Logic
     deliveryTab.addEventListener('click', () => {
@@ -833,30 +685,5 @@
 
     loadShopMenu();
   </script>
-
-  <!-- Bottom Navigation Bar -->
-  <nav class="bottom-nav sm:hidden">
-    <a href="status.html">
-      <i class="fas fa-clipboard-list"></i>
-      <span>Orders</span>
-    </a>
-    <a href="profile.html">
-      <i class="fas fa-user"></i>
-      <span>Profile</span>
-    </a>
-    <a href="index.html" class="home-icon">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
-    </a>
-    <a href="#" id="cartNavBtn" class="cart-icon">
-      <i class="fas fa-shopping-cart"></i>
-      <span class="cart-count" id="cartNavCount">0</span>
-      <span>Cart</span>
-    </a>
-    <a href="#" id="rideNavBtn">
-      <i class="fas fa-car"></i>
-      <span>Ride</span>
-    </a>
-  </nav>
 </body>
 </html>
