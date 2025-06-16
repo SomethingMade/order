@@ -48,78 +48,12 @@
     .btn-disabled {
       @apply bg-gray-300 text-gray-500 cursor-not-allowed;
     }
-    /* Bottom Nav Bar */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: #ffffff;
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 10px 0;
-      z-index: 50;
-      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-      height: 60px; /* Fixed height to reserve space */
-    }
-    .bottom-nav a {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #6b7280;
-      font-size: 12px;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .bottom-nav a.active {
-      color: #f97316;
-    }
-    .bottom-nav a:hover {
-      color: #f97316;
-    }
-    .bottom-nav i {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-    .bottom-nav .cart-icon {
-      position: relative;
-    }
-    .bottom-nav .cart-icon .cart-count {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background-color: #ef4444;
-      color: white;
-      font-size: 10px;
-      font-weight: bold;
-      border-radius: 50%;
-      padding: 2px 6px;
-    }
-    .bottom-nav .home-icon {
-      background-color: #f97316;
-      color: white;
-      border-radius: 8px;
-      padding: 8px 16px;
-      transform: translateY(-4px);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-    .bottom-nav .home-icon i {
-      font-size: 20px;
-      margin-bottom: 0;
-      color: white;
-    }
-    .bottom-nav .home-icon span {
-      color: white;
-      margin-top: 4px;
-    }
     /* Sidebar Drawer */
     .sidebar-drawer {
       position: fixed;
       top: 0;
       left: 0;
-      width: 64;
+      width: 64px;
       height: 100%;
       background-color: white;
       box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
@@ -167,10 +101,10 @@
     }
     /* Menu Container */
     .menu-container {
-      padding-bottom: 100px; /* Space for nav bar and cart button */
+      padding-bottom: 80px; /* Space for cart button */
     }
     .menu-scroll {
-      max-height: calc(100vh - 200px); /* Adjust based on header and nav height */
+      max-height: calc(100vh - 200px); /* Adjust based on header and tabs height */
       overflow-y: auto;
       scroll-behavior: smooth;
       padding-bottom: 20px; /* Extra padding to ensure last item is visible */
@@ -194,10 +128,10 @@
     .cart-modal.active {
       transform: translateY(0);
     }
-    /* Full-width Cart Button */
+    /* Floating Cart Button */
     .cart-button {
-      position: fixed;
-      bottom: 80px; /* Above nav bar */
+      position: absolute;
+      bottom: 20px; /* Adjusted to float below last item */
       left: 50%;
       transform: translateX(-50%);
       width: calc(100% - 2rem); /* Full width minus margins */
@@ -237,12 +171,37 @@
     .rating-stars .star.unfilled {
       color: #d1d5db;
     }
+    /* Tab View */
+    .tab-view {
+      display: flex;
+      justify-content: space-around;
+      background-color: #f97316;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 0.5rem;
+    }
+    .tab-view button {
+      flex: 1;
+      padding: 0.5rem 1rem;
+      background-color: white;
+      color: #f97316;
+      border: none;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .tab-view button.active {
+      background-color: #f97316;
+      color: white;
+    }
+    .tab-view button:hover:not(.active) {
+      background-color: #ffdab9;
+    }
     @media (min-width: 640px) {
-      .bottom-nav {
-        display: none;
-      }
       .sidebar-drawer {
-        width: 72;
+        width: 72px;
         transform: translateX(0);
         display: block;
       }
@@ -250,7 +209,7 @@
         display: none;
       }
       .menu-container {
-        padding-bottom: 0; /* No nav bar on desktop */
+        padding-bottom: 0; /* No extra padding on desktop */
       }
       .menu-scroll {
         max-height: none; /* Disable scroll on desktop */
@@ -266,6 +225,12 @@
   </style>
 </head>
 <body class="bg-gray-50 font-sans">
+  <!-- Tab View for Delivery/Pickup -->
+  <div class="tab-view">
+    <button id="deliveryTab" class="active">Delivery</button>
+    <button id="pickupTab">Pickup</button>
+  </div>
+
   <!-- Restaurant Header -->
   <div class="relative">
     <img id="restaurantCover" src="https://via.placeholder.com/1200x300" class="w-full h-64 object-cover" alt="Restaurant Cover">
@@ -283,7 +248,7 @@
   </div>
 
   <!-- Categories -->
-  <div class="sticky top-0 z-10 bg-white shadow-sm py-4 px-6">
+  <div class="sticky top-12 z-10 bg-white shadow-sm py-4 px-6">
     <div id="categories" class="flex space-x-3 overflow-x-auto scrollbar-hide">
       <!-- Category buttons go here -->
     </div>
@@ -294,7 +259,7 @@
     <div id="restaurantMenu" class="menu-scroll grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </div>
 
-  <!-- Cart Button -->
+  <!-- Floating Cart Button -->
   <button id="cartCount" class="cart-button flex items-center">
     <i class="fas fa-shopping-cart text-xl"></i>
     <span id="cartCountText" class="text-sm font-semibold ml-2">0</span>
@@ -402,7 +367,6 @@
     const sidebarDrawer = document.getElementById('sidebarDrawer');
     const backdrop = document.getElementById('backdrop');
     const signOutDrawer = document.getElementById('signOutDrawer');
-    const cartNavCount = document.getElementById('cartNavCount');
     const ratingDisplay = document.getElementById('ratingDisplay');
     const ratingModal = document.getElementById('ratingModal');
     const closeRatingModalBtn = document.getElementById('closeRatingModalBtn');
@@ -410,11 +374,14 @@
     const submitRatingBtn = document.getElementById('submitRatingBtn');
     const ratingComment = document.getElementById('ratingComment');
     const rateRestaurantBtn = document.getElementById('rateRestaurantBtn');
+    const deliveryTab = document.getElementById('deliveryTab');
+    const pickupTab = document.getElementById('pickupTab');
 
     let userId = null;
     let cart = [];
     let allMenuItems = [];
     let currentItem = null;
+    let selectedOrderType = 'delivery'; // Default to delivery
     const urlParams = new URLSearchParams(window.location.search);
     const restaurantId = urlParams.get('restaurantId');
 
@@ -542,7 +509,21 @@
         }
         restaurantMenu.appendChild(el);
       });
+      // Position cart button below the last menu item
+      positionCartButton();
     }
+
+    function positionCartButton() {
+      const lastMenuItem = restaurantMenu.lastElementChild;
+      if (lastMenuItem) {
+        const rect = lastMenuItem.getBoundingClientRect();
+        cartCountBtn.style.bottom = `${window.innerHeight - rect.bottom + 20}px`; // 20px padding
+      } else {
+        cartCountBtn.style.bottom = '20px'; // Default position if no items
+      }
+    }
+
+    window.addEventListener('resize', positionCartButton);
 
     function openItemModal(item) {
       if (item.isAvailable === false) {
@@ -585,7 +566,7 @@
         showToast('You can only add items from one restaurant at a time.');
         return;
       }
-      const cartItem = { item, quantity, restaurantId };
+      const cartItem = { item, quantity, restaurantId, orderType: selectedOrderType };
       const existing = cart.find(c => c.item.name === item.name);
       if (existing) {
         existing.quantity += quantity;
@@ -615,7 +596,6 @@
     function updateCartCount() {
       const count = cart.reduce((total, c) => total + c.quantity, 0);
       cartCountText.textContent = count;
-      cartNavCount.textContent = count;
       cartCountBtn.classList.toggle('bg-orange-600', count > 0);
     }
 
@@ -632,6 +612,7 @@
             <div>
               <h4 class="text-lg font-semibold text-gray-800">${c.item.name} (x${c.quantity})</h4>
               <p class="text-orange-500 font-bold">R${(c.item.price * c.quantity).toFixed(2)}</p>
+              <p class="text-gray-600 text-sm">Order Type: ${c.orderType.charAt(0).toUpperCase() + c.orderType.slice(1)}</p>
             </div>
             <button class="text-red-500 hover:text-red-600" data-index="${index}">
               <i class="fas fa-trash"></i>
@@ -668,10 +649,6 @@
     }
 
     cartCountBtn.addEventListener('click', openCartModal);
-    document.querySelector('#cartNavBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      openCartModal();
-    });
     closeCartModalBtn.addEventListener('click', closeCartModal);
     backdrop.addEventListener('click', (e) => {
       if (e.target === backdrop) {
@@ -698,7 +675,7 @@
         return;
       }
       closeCartModal();
-      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
+      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}&orderType=${selectedOrderType}`;
     });
 
     addToCartBtn.addEventListener('click', () => addToCart(currentItem));
@@ -767,32 +744,32 @@
       });
     });
 
+    // Tab View Logic
+    deliveryTab.addEventListener('click', () => {
+      selectedOrderType = 'delivery';
+      deliveryTab.classList.add('active');
+      pickupTab.classList.remove('active');
+      updateCartOrderType();
+    });
+
+    pickupTab.addEventListener('click', () => {
+      selectedOrderType = 'pickup';
+      pickupTab.classList.add('active');
+      deliveryTab.classList.remove('active');
+      updateCartOrderType();
+    });
+
+    function updateCartOrderType() {
+      cart.forEach(item => {
+        item.orderType = selectedOrderType;
+      });
+      saveCart();
+      if (cartModal.classList.contains('active')) {
+        renderCartModalItems();
+      }
+    }
+
     loadRestaurantMenu();
   </script>
-
-  <!-- Bottom Navigation Bar -->
-  <nav class="bottom-nav sm:hidden">
-    <a href="status.html">
-      <i class="fas fa-clipboard-list"></i>
-      <span>Orders</span>
-    </a>
-    <a href="profile.html">
-      <i class="fas fa-user"></i>
-      <span>Profile</span>
-    </a>
-    <a href="index.html" class="home-icon">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
-    </a>
-    <a href="#" id="cartNavBtn" class="cart-icon">
-      <i class="fas fa-shopping-cart"></i>
-      <span class="cart-count" id="cartNavCount">0</span>
-      <span>Cart</span>
-    </a>
-    <a href="#" id="rideNavBtn">
-      <i class="fas fa-car"></i>
-      <span>Ride</span>
-    </a>
-  </nav>
 </body>
 </html>
