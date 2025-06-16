@@ -148,6 +148,20 @@
     .content-container {
       @apply pb-20 sm:pb-8;
     }
+    /* Collapse/Expand Section */
+    .collapsible {
+      @apply border-t border-gray-200 pt-4 mt-4;
+    }
+    .collapsible-header {
+      @apply flex justify-between items-center cursor-pointer text-sm font-medium text-gray-700 hover:text-orange-500;
+    }
+    .collapsible-content {
+      @apply mt-2 space-y-3 overflow-hidden transition-max-height duration-300 ease-in-out;
+      max-height: 0;
+    }
+    .collapsible-content.open {
+      max-height: 500px; /* Adjust based on content */
+    }
     @media (min-width: 640px) {
       .bottom-nav {
         display: none;
@@ -216,18 +230,21 @@
 
   <!-- Profile Content -->
   <div class="container mx-auto px-4 sm:px-6 py-8 content-container">
-    <!-- User Profile Card -->
+    <!-- Personal Information -->
     <div class="card">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-gray-800">Your Profile</h2>
+        <h2 class="text-xl font-bold text-gray-800">Personal Information</h2>
         <button id="editProfileBtn" class="text-orange-500 hover:text-orange-600 text-sm font-medium transition">
           <i class="fas fa-edit mr-1"></i>Edit
         </button>
       </div>
       <div id="profileDisplay" class="space-y-3">
-        <div>
-          <p class="text-xs font-medium text-gray-500">Name</p>
-          <p id="displayName" class="text-sm text-gray-800">Loading...</p>
+        <div class="flex items-center space-x-3">
+          <img id="profileImage" src="" alt="Profile Picture" class="w-16 h-16 rounded-full object-cover">
+          <div>
+            <p class="text-xs font-medium text-gray-500">Name</p>
+            <p id="displayName" class="text-sm text-gray-800">Loading...</p>
+          </div>
         </div>
         <div>
           <p class="text-xs font-medium text-gray-500">Email</p>
@@ -236,10 +253,6 @@
         <div>
           <p class="text-xs font-medium text-gray-500">Phone</p>
           <p id="displayPhone" class="text-sm text-gray-800">Loading...</p>
-        </div>
-        <div>
-          <p class="text-xs font-medium text-gray-500">Address</p>
-          <p id="displayAddress" class="text-sm text-gray-800">Loading...</p>
         </div>
       </div>
       <form id="profileForm" class="hidden space-y-4">
@@ -252,14 +265,96 @@
           <input type="tel" id="phone" class="input-field" required>
         </div>
         <div>
-          <label for="address" class="input-label">Delivery Address</label>
-          <textarea id="address" class="input-field" rows="3" required></textarea>
+          <label class="input-label">Profile Picture</label>
+          <input type="file" id="profileImageInput" class="input-field">
         </div>
         <div class="flex gap-3">
           <button type="submit" id="saveProfileBtn" class="btn-orange flex-1 py-3 text-sm">Save</button>
           <button type="button" id="cancelEditBtn" class="btn-secondary flex-1 py-3 text-sm">Cancel</button>
         </div>
       </form>
+      <div class="mt-4">
+        <a href="change_password.html" class="text-orange-500 hover:text-orange-600 text-sm font-medium">Change Password</a>
+      </div>
+    </div>
+
+    <!-- Order History -->
+    <div class="card collapsible">
+      <div class="collapsible-header" data-target="orderHistory">
+        <h2 class="text-xl font-bold text-gray-800">Order History</h2>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <div id="orderHistory" class="collapsible-content">
+        <div id="pastOrders" class="space-y-3"></div>
+        <div id="currentOrders" class="space-y-3 mt-4"></div>
+      </div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="card collapsible">
+      <div class="collapsible-header" data-target="paymentMethods">
+        <h2 class="text-xl font-bold text-gray-800">Payment Methods</h2>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <div id="paymentMethods" class="collapsible-content">
+        <div id="addedCards" class="space-y-3"></div>
+        <button id="addCardBtn" class="btn-orange w-full py-2 mt-4 text-sm">Add New Card</button>
+      </div>
+    </div>
+
+    <!-- Saved Addresses -->
+    <div class="card collapsible">
+      <div class="collapsible-header" data-target="savedAddresses">
+        <h2 class="text-xl font-bold text-gray-800">Saved Addresses</h2>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <div id="savedAddresses" class="collapsible-content">
+        <div id="deliveryLocations" class="space-y-3"></div>
+        <button id="addAddressBtn" class="btn-orange w-full py-2 mt-4 text-sm">Add New Address</button>
+      </div>
+    </div>
+
+    <!-- Help & Support -->
+    <div class="card collapsible">
+      <div class="collapsible-header" data-target="helpSupport">
+        <h2 class="text-xl font-bold text-gray-800">Help & Support</h2>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <div id="helpSupport" class="collapsible-content">
+        <a href="faq.html" class="block text-orange-500 hover:text-orange-600 text-sm font-medium mb-2">FAQs</a>
+        <a href="contact_support.html" class="block text-orange-500 hover:text-orange-600 text-sm font-medium mb-2">Contact Support</a>
+        <a href="feedback.html" class="block text-orange-500 hover:text-orange-600 text-sm font-medium">Provide Feedback</a>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="card collapsible">
+      <div class="collapsible-header" data-target="settings">
+        <h2 class="text-xl font-bold text-gray-800">Settings</h2>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <div id="settings" class="collapsible-content">
+        <div>
+          <label class="input-label">Notifications</label>
+          <select id="notificationSettings" class="input-field">
+            <option value="all">All Updates</option>
+            <option value="order">Order Updates Only</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div>
+          <label class="input-label">Language</label>
+          <select id="languageSettings" class="input-field">
+            <option value="en">English</option>
+            <option value="af">Afrikaans</option>
+            <option value="zu">Zulu</option>
+          </select>
+        </div>
+        <div>
+          <label class="input-label">Privacy Settings</label>
+          <button id="privacySettingsBtn" class="btn-secondary w-full py-2 text-sm">Manage Privacy</button>
+        </div>
+      </div>
     </div>
 
     <!-- Sign Out Card -->
@@ -299,8 +394,9 @@
   <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -315,17 +411,18 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const auth = getAuth();
+    const auth = getAuth(app);
+    const storage = getStorage(app);
 
     const displayName = document.getElementById('displayName');
     const displayEmail = document.getElementById('displayEmail');
     const displayPhone = document.getElementById('displayPhone');
-    const displayAddress = document.getElementById('displayAddress');
+    const profileImage = document.getElementById('profileImage');
     const profileDisplay = document.getElementById('profileDisplay');
     const profileForm = document.getElementById('profileForm');
     const nameInput = document.getElementById('name');
     const phoneInput = document.getElementById('phone');
-    const addressInput = document.getElementById('address');
+    const profileImageInput = document.getElementById('profileImageInput');
     const editProfileBtn = document.getElementById('editProfileBtn');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
@@ -342,6 +439,15 @@
     const spinner = document.getElementById('spinner');
     const userName = document.getElementById('userName');
     const userProfilePic = document.getElementById('userProfilePic');
+    const pastOrders = document.getElementById('pastOrders');
+    const currentOrders = document.getElementById('currentOrders');
+    const addedCards = document.getElementById('addedCards');
+    const addCardBtn = document.getElementById('addCardBtn');
+    const deliveryLocations = document.getElementById('deliveryLocations');
+    const addAddressBtn = document.getElementById('addAddressBtn');
+    const notificationSettings = document.getElementById('notificationSettings');
+    const languageSettings = document.getElementById('languageSettings');
+    const privacySettingsBtn = document.getElementById('privacySettingsBtn');
 
     let userId = null;
     let userData = {};
@@ -377,10 +483,15 @@
         displayName.textContent = userData.name || 'Not set';
         displayEmail.textContent = auth.currentUser.email || 'Not set';
         displayPhone.textContent = userData.phone || 'Not set';
-        displayAddress.textContent = userData.address || 'Not set';
+        profileImage.src = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+        userProfilePic.src = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
         nameInput.value = userData.name || '';
         phoneInput.value = userData.phone || '';
-        addressInput.value = userData.address || '';
+        notificationSettings.value = userData.notificationSettings || 'all';
+        languageSettings.value = userData.languageSettings || 'en';
+        loadOrderHistory();
+        loadPaymentMethods();
+        loadSavedAddresses();
         spinner.classList.add('hidden');
       }, (error) => {
         console.error('Error loading profile:', error);
@@ -389,27 +500,72 @@
       });
     }
 
-    // Authentication
-    onAuthStateChanged(auth, (user) => {
-      spinner.classList.remove('hidden');
-      if (user) {
-        userId = user.uid;
-        userName.textContent = user.displayName || 'User';
-        userProfilePic.src = user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
-        signOutBtn.style.display = 'inline-block';
-        signOutDrawer.style.display = 'block';
-        loadCart();
-        loadUserProfile();
-        spinner.classList.add('hidden');
-      } else {
-        spinner.classList.add('hidden');
-        window.location.href = 'login.html';
-      }
-    }, (error) => {
-      console.error('Auth error:', error);
-      spinner.classList.add('hidden');
-      showToast('Failed to authenticate. Please try again.');
-    });
+    function loadOrderHistory() {
+      const ordersRef = ref(db, `orders/${userId}`);
+      onValue(ordersRef, (snapshot) => {
+        const orders = snapshot.val() || {};
+        pastOrders.innerHTML = '';
+        currentOrders.innerHTML = '';
+        Object.entries(orders).forEach(([orderId, order]) => {
+          const orderCard = document.createElement('div');
+          orderCard.className = 'border border-gray-200 rounded-lg p-3';
+          const status = order.status || 'delivered';
+          const isCurrent = ['preparing', 'out for delivery'].includes(status.toLowerCase());
+          const targetDiv = isCurrent ? currentOrders : pastOrders;
+          orderCard.innerHTML = `
+            <p class="text-sm text-gray-700">Order #${orderId}</p>
+            <p class="text-xs text-gray-500">${new Date(order.date).toLocaleString()} - ${status}</p>
+            <p class="text-xs text-gray-500">Items: ${order.items.join(', ') || 'N/A'}</p>
+            <p class="text-xs text-gray-500">Cost: $${order.cost || '0.00'}</p>
+            <p class="text-xs text-gray-500">Address: ${order.address || 'N/A'}</p>
+          `;
+          targetDiv.appendChild(orderCard);
+        });
+      }, (error) => {
+        console.error('Error loading orders:', error);
+        showToast('Failed to load order history.');
+      });
+    }
+
+    function loadPaymentMethods() {
+      const paymentRef = ref(db, `paymentMethods/${userId}`);
+      onValue(paymentRef, (snapshot) => {
+        const cards = snapshot.val() || {};
+        addedCards.innerHTML = '';
+        Object.entries(cards).forEach(([cardId, card]) => {
+          const cardItem = document.createElement('div');
+          cardItem.className = 'border border-gray-200 rounded-lg p-2 flex justify-between items-center';
+          cardItem.innerHTML = `
+            <span class="text-sm text-gray-700">**** ${card.last4} (Exp: ${card.expiry})</span>
+            <button class="text-red-500 hover:text-red-600 text-sm" data-card-id="${cardId}">Remove</button>
+          `;
+          addedCards.appendChild(cardItem);
+        });
+      }, (error) => {
+        console.error('Error loading payment methods:', error);
+        showToast('Failed to load payment methods.');
+      });
+    }
+
+    function loadSavedAddresses() {
+      const addressesRef = ref(db, `addresses/${userId}`);
+      onValue(addressesRef, (snapshot) => {
+        const addresses = snapshot.val() || {};
+        deliveryLocations.innerHTML = '';
+        Object.entries(addresses).forEach(([addressId, address]) => {
+          const addressItem = document.createElement('div');
+          addressItem.className = 'border border-gray-200 rounded-lg p-2 flex justify-between items-center';
+          addressItem.innerHTML = `
+            <span class="text-sm text-gray-700">${address.label}: ${address.address}</span>
+            <button class="text-red-500 hover:text-red-600 text-sm" data-address-id="${addressId}">Remove</button>
+          `;
+          deliveryLocations.appendChild(addressItem);
+        });
+      }, (error) => {
+        console.error('Error loading addresses:', error);
+        showToast('Failed to load saved addresses.');
+      });
+    }
 
     // Edit Profile
     editProfileBtn.addEventListener('click', () => {
@@ -425,7 +581,6 @@
       editProfileBtn.classList.remove('hidden');
       nameInput.value = userData.name || '';
       phoneInput.value = userData.phone || '';
-      addressInput.value = userData.address || '';
     });
 
     // Save Profile
@@ -433,10 +588,9 @@
       e.preventDefault();
       const name = nameInput.value.trim();
       const phone = phoneInput.value.trim();
-      const address = addressInput.value.trim();
 
-      if (!name || !phone || !address) {
-        showToast('Please fill in all fields.');
+      if (!name || !phone) {
+        showToast('Please fill in all required fields.');
         return;
       }
 
@@ -444,12 +598,22 @@
       saveProfileBtn.classList.add('btn-disabled');
       spinner.classList.remove('hidden');
 
+      let photoURL = userData.photoURL || null;
+      if (profileImageInput.files[0]) {
+        const storageRefPath = storageRef(storage, `profile_images/${userId}/${Date.now()}_${profileImageInput.files[0].name}`);
+        await uploadBytes(storageRefPath, profileImageInput.files[0]);
+        photoURL = await getDownloadURL(storageRefPath);
+        await updateProfile(auth.currentUser, { photoURL });
+      }
+
       try {
         await set(ref(db, `users/${userId}`), {
           name,
           phone,
-          address,
-          email: auth.currentUser.email
+          photoURL,
+          email: auth.currentUser.email,
+          notificationSettings: userData.notificationSettings || 'all',
+          languageSettings: userData.languageSettings || 'en'
         });
         showToast('Profile updated successfully!');
         profileDisplay.classList.remove('hidden');
@@ -471,7 +635,7 @@
       signOut(auth).then(() => {
         window.location.href = 'login.html';
       }).catch((error) => {
-        console.error('Sign Out Error', error);
+        console.error('Sign Out Error:', error);
         spinner.classList.add('hidden');
         showToast('Failed to sign out.');
       });
@@ -515,6 +679,58 @@
       }
       const restaurantId = cart[0].restaurantId;
       window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
+    });
+
+    // Collapsible Sections
+    document.querySelectorAll('.collapsible-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const contentId = header.getAttribute('data-target');
+        const content = document.getElementById(contentId);
+        content.classList.toggle('open');
+        header.querySelector('i').classList.toggle('fa-chevron-down');
+        header.querySelector('i').classList.toggle('fa-chevron-up');
+      });
+    });
+
+    // Settings Updates
+    notificationSettings.addEventListener('change', () => {
+      update(ref(db, `users/${userId}/notificationSettings`), { notificationSettings: notificationSettings.value });
+      showToast('Notification settings updated.');
+    });
+
+    languageSettings.addEventListener('change', () => {
+      update(ref(db, `users/${userId}/languageSettings`), { languageSettings: languageSettings.value });
+      showToast('Language settings updated.');
+    });
+
+    privacySettingsBtn.addEventListener('click', () => {
+      window.location.href = 'privacy_settings.html';
+    });
+
+    // Add Card and Address (Placeholder)
+    addCardBtn.addEventListener('click', () => {
+      window.location.href = 'add_card.html';
+    });
+
+    addAddressBtn.addEventListener('click', () => {
+      window.location.href = 'add_address.html';
+    });
+
+    // Remove Card and Address (Placeholder)
+    addedCards.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON') {
+        const cardId = e.target.getAttribute('data-card-id');
+        update(ref(db, `paymentMethods/${userId}`), { [cardId]: null });
+        showToast('Card removed.');
+      }
+    });
+
+    deliveryLocations.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON') {
+        const addressId = e.target.getAttribute('data-address-id');
+        update(ref(db, `addresses/${userId}`), { [addressId]: null });
+        showToast('Address removed.');
+      }
     });
   </script>
 </body>
