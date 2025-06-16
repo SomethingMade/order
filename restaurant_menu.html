@@ -48,33 +48,6 @@
     .btn-disabled {
       @apply bg-gray-300 text-gray-500 cursor-not-allowed;
     }
-    /* Sidebar Drawer */
-    .sidebar-drawer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 64px;
-      height: 100%;
-      background-color: white;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-      transform: translateX(-100%);
-      transition: transform 0.3s ease-in-out;
-      z-index: 60;
-    }
-    .sidebar-drawer.active {
-      transform: translateX(0);
-    }
-    /* Backdrop */
-    .backdrop {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 55;
-      display: none;
-    }
-    .backdrop.active {
-      display: block;
-    }
     /* Menu Item Card */
     .menu-item-card {
       display: flex;
@@ -200,14 +173,6 @@
       background-color: #ffdab9;
     }
     @media (min-width: 640px) {
-      .sidebar-drawer {
-        width: 72px;
-        transform: translateX(0);
-        display: block;
-      }
-      .backdrop {
-        display: none;
-      }
       .menu-container {
         padding-bottom: 0; /* No extra padding on desktop */
       }
@@ -307,21 +272,6 @@
     </div>
   </div>
 
-  <!-- Sidebar Drawer Menu -->
-  <div id="sidebarDrawer" class="sidebar-drawer">
-    <div class="p-6">
-      <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
-      <ul class="space-y-4">
-        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
-        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
-        <li><a href="profile.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-user mr-2"></i>Profile</a></li>
-        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
-        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
-        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
-      </ul>
-    </div>
-  </div>
-
   <!-- Backdrop -->
   <div id="backdrop" class="backdrop"></div>
 
@@ -364,7 +314,6 @@
     const proceedToCheckoutBtn = document.getElementById('proceedToCheckoutBtn');
     const cartModalTotal = document.getElementById('cartModalTotal');
     const itemAvailability = document.getElementById('itemAvailability');
-    const sidebarDrawer = document.getElementById('sidebarDrawer');
     const backdrop = document.getElementById('backdrop');
     const signOutDrawer = document.getElementById('signOutDrawer');
     const ratingDisplay = document.getElementById('ratingDisplay');
@@ -653,7 +602,6 @@
     backdrop.addEventListener('click', (e) => {
       if (e.target === backdrop) {
         closeCartModal();
-        sidebarDrawer.classList.remove('active');
         ratingModal.classList.remove('active');
         backdrop.classList.remove('active');
       }
@@ -679,15 +627,6 @@
     });
 
     addToCartBtn.addEventListener('click', () => addToCart(currentItem));
-
-    // Sidebar Drawer Toggle
-    function toggleSidebarDrawer(e) {
-      e.preventDefault();
-      sidebarDrawer.classList.toggle('active');
-      backdrop.classList.toggle('active');
-    }
-
-    document.querySelector('#rideNavBtn').addEventListener('click', toggleSidebarDrawer);
 
     // Rating System
     function openRatingModal() {
