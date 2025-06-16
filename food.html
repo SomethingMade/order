@@ -168,6 +168,13 @@
     .dropdown {
       @apply border border-gray-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 w-40; /* Fixed width */
     }
+    /* Unavailable Overlay */
+    .unavailable-overlay {
+      @apply absolute inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center rounded-lg;
+    }
+    .unavailable-text {
+      @apply text-white text-lg font-semibold;
+    }
     @media (min-width: 640px) {
       .bottom-nav {
         display: none;
@@ -401,9 +408,9 @@
     const filterBtn = document.getElementById('filterBtn');
     const switchView = document.getElementById('switchView');
     const restaurantList = document.getElementById('restaurantList');
-    const shopList = document.getElementById('shopList'); // Updated from storeList
+    const shopList = document.getElementById('shopList');
     const loadingMessage = document.getElementById('loadingMessage');
-    const loadingShopsMessage = document.getElementById('loadingShopsMessage'); // Updated from loadingStoresMessage
+    const loadingShopsMessage = document.getElementById('loadingShopsMessage');
     const cartBtn = document.getElementById('cartBtn');
     const cartCount = document.getElementById('cartCount');
     const cartNavBtn = document.getElementById('cartNavBtn');
@@ -427,7 +434,7 @@
     let userId = null;
     let cart = [];
     let restaurants = [];
-    let shops = []; // Updated from stores
+    let shops = [];
     let activeView = 'restaurants';
 
     function showToast(message) {
@@ -516,7 +523,7 @@
       if (activeView === 'restaurants') {
         renderRestaurants();
       } else {
-        renderShops(); // Updated from renderStores
+        renderShops();
       }
     }
 
@@ -546,28 +553,58 @@
 
       filteredRestaurants.forEach(restaurant => {
         const card = document.createElement('div');
-        card.className = 'card';
+        card.className = 'card relative'; // Added relative for overlay positioning
         card.dataset.id = restaurant.id;
-        card.innerHTML = `
+
+        let content = `
           <img src="${restaurant.image || 'https://via.placeholder.com/150'}" alt="${restaurant.name || 'Restaurant'}" class="w-full h-40 object-cover rounded-t-lg">
           <div class="p-3">
             <h3 class="text-lg font-semibold text-gray-800">${restaurant.name || 'Unknown'}</h3>
             <p class="text-sm text-gray-600">${restaurant.location || 'No location'}</p>
             <div class="flex justify-between items-center mt-2">
-              <span class="text-sm text-gray-600"><i class="fas fa-star text-orange-500"></i> ${restaurant.rating || 'N/A'}</span>
-              <span class="text-sm text-gray-600">${restaurant.distance || 'N/A'} km</span>
+        `;
+
+        // Check availability and display rating or "Not Available"
+        if (restaurant.available === false) {
+          content += `
+            <span class="text-sm text-gray-600">Status: <span class="text-red-500">Not Available</span></span>
+            <span class="text-sm text-gray-600">N/A</span>
+          `;
+        } else {
+          content += `
+            <span class="text-sm text-gray-600"><i class="fas fa-star text-orange-500"></i> ${restaurant.rating ? restaurant.rating.toFixed(1) : 'N/A'}</span>
+            <span class="text-sm text-gray-600">${restaurant.distance || 'N/A'} km</span>
+          `;
+        }
+
+        content += `
             </div>
             ${restaurant.priceRange ? `<p class="text-sm text-gray-600 mt-2">Price: ${restaurant.priceRange} (ZAR)</p>` : ''}
           </div>
         `;
+
+        // Add unavailable overlay if not available
+        if (restaurant.available === false) {
+          content += `
+            <div class="unavailable-overlay">
+              <span class="unavailable-text">Not Available</span>
+            </div>
+          `;
+        }
+
+        card.innerHTML = content;
         card.addEventListener('click', () => {
-          window.location.href = `restaurant_menu.html?restaurantId=${restaurant.id}`;
+          if (restaurant.available !== false) {
+            window.location.href = `restaurant_menu.html?restaurantId=${restaurant.id}`;
+          } else {
+            showToast('This restaurant is currently not available.');
+          }
         });
         restaurantList.appendChild(card);
       });
     }
 
-    function renderShops() { // Updated from renderStores
+    function renderShops() {
       shopList.innerHTML = '';
       loadingShopsMessage.style.display = 'none';
 
@@ -601,14 +638,14 @@
             <h3 class="text-lg font-semibold text-gray-800">${shop.name || 'Unknown'}</h3>
             <p class="text-sm text-gray-600">${shop.location || 'No location'}</p>
             <div class="flex justify-between items-center mt-2">
-              <span class="text-sm text-gray-600"><i class="fas fa-star text-orange-500"></i> ${shop.rating || 'N/A'}</span>
+              <span class="text-sm text-gray-600"><i class="fas fa-star text-orange-500"></i> ${shop.rating ? shop.rating.toFixed(1) : 'N/A'}</span>
               <span class="text-sm text-gray-600">${shop.distance || 'N/A'} km</span>
             </div>
             ${shop.priceRange ? `<p class="text-sm text-gray-600 mt-2">Price: ${shop.priceRange} (ZAR)</p>` : ''}
           </div>
         `;
         card.addEventListener('click', () => {
-          window.location.href = `shop_menu.html?shopId=${shop.id}`; // Updated from store_menu.html
+          window.location.href = `shop_menu.html?shopId=${shop.id}`;
         });
         shopList.appendChild(card);
       });
@@ -619,7 +656,7 @@
       onValue(restaurantsRef, (snapshot) => {
         const data = snapshot.val();
         console.log('Restaurants data:', data);
-        restaurants = data ? Object.keys(data).map(id => ({ id, ...data[id] })) : [];
+        restaurants = data ? Object.keys(data).map(id => ({ id, ...data[id], available: data[id].available !== false })) : [];
         if (restaurants.length === 0) {
           console.warn('No restaurants found in database.');
           loadingMessage.textContent = 'No restaurants available.';
@@ -640,8 +677,8 @@
       });
     }
 
-    function loadShops() { // Updated from loadStores
-      const shopsRef = ref(db, 'shops'); // Updated from stores
+    function loadShops() {
+      const shopsRef = ref(db, 'shops');
       onValue(shopsRef, (snapshot) => {
         const data = snapshot.val();
         console.log('Shops data:', data);
@@ -691,7 +728,7 @@
         signOutDrawer.style.display = 'block';
         loadCart();
         loadRestaurants();
-        loadShops(); // Updated from loadStores
+        loadShops();
         getUserLocation();
       } else {
         console.log('No authenticated user, redirecting to login.');
@@ -721,8 +758,8 @@
         return;
       }
       const item = cart[0];
-      const id = item.restaurantId || item.shopId; // Updated from storeId
-      const type = item.restaurantId ? 'restaurantId' : 'shopId'; // Updated from storeId
+      const id = item.restaurantId || item.shopId;
+      const type = item.restaurantId ? 'restaurantId' : 'shopId';
       window.location.href = `checkout.html?${type}=${id}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
     });
 
@@ -733,8 +770,8 @@
         return;
       }
       const item = cart[0];
-      const id = item.restaurantId || item.shopId; // Updated from storeId
-      const type = item.restaurantId ? 'restaurantId' : 'shopId'; // Updated from storeId
+      const id = item.restaurantId || item.shopId;
+      const type = item.restaurantId ? 'restaurantId' : 'shopId';
       window.location.href = `checkout.html?${type}=${id}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
     });
 
