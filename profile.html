@@ -7,27 +7,45 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Hide Scrollbar */
-    .scrollbar-hide {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    /* Custom Styles */
+    .gradient-bg {
+      background: linear-gradient(135deg, #ff6f61, #ff8a65);
     }
-    .scrollbar-hide::-webkit-scrollbar {
-      display: none;
+    .profile-card {
+      @apply bg-white rounded-2xl shadow-2xl p-6 max-w-md mx-auto transform transition-all duration-300 hover:shadow-lg;
     }
-    /* Toast Notification */
+    .profile-pic {
+      @apply w-36 h-36 rounded-full object-cover border-4 border-white ring-4 ring-orange-400 mx-auto mb-4 transition-transform duration-300 hover:scale-105;
+    }
+    .input-field {
+      @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200;
+    }
+    .btn-primary {
+      @apply bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition duration-200 font-semibold;
+    }
+    .btn-secondary {
+      @apply bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold;
+    }
+    .status-message {
+      @apply text-sm font-medium mt-2;
+    }
+    .success-message {
+      @apply text-green-500;
+    }
+    .error-message {
+      @apply text-red-500;
+    }
+    .spinner {
+      @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 flex items-center justify-center bg-white rounded-full p-4 shadow-lg;
+    }
+    .spinner.hidden {
+      @apply hidden;
+    }
+    .animate-spin {
+      @apply w-8 h-8 text-orange-500 animate-spin;
+    }
     .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #333;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      font-size: 14px;
-      z-index: 1000;
+      @apply fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50;
       animation: fadeInOut 3s ease-in-out forwards;
     }
     @keyframes fadeInOut {
@@ -36,223 +54,107 @@
       90% { opacity: 1; }
       100% { opacity: 0; }
     }
-    /* Spinner */
-    .spinner {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 50%;
-      padding: 20px;
-    }
-    .spinner.hidden {
-      display: none;
-    }
-    .animate-spin {
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    /* Button Styles */
-    .btn-orange {
-      @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out py-2 px-4 rounded-lg font-medium;
-    }
-    .btn-secondary {
-      @apply bg-gray-100 text-gray-700 hover:bg-gray-200 transition duration-200 ease-in-out py-2 px-4 rounded-lg font-medium;
-    }
-    .btn-disabled {
-      @apply bg-gray-300 text-gray-500 cursor-not-allowed py-2 px-4 rounded-lg font-medium;
-    }
-    /* Card Styles */
-    .card {
-      @apply bg-white rounded-xl shadow-lg p-6 mb-6 max-w-md mx-auto transform transition duration-300 hover:shadow-xl;
-    }
-    /* Input Styles */
-    .input-field {
-      @apply mt-1 block w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200;
-    }
-    .input-label {
-      @apply block text-sm font-medium text-gray-700 mb-2;
-    }
-    /* Profile Picture */
-    .profile-pic {
-      @apply w-32 h-32 rounded-full object-cover border-4 border-white ring-4 ring-orange-500 mb-4 transform transition duration-300 hover:scale-105 mx-auto;
-    }
-    /* MyTwoPass Card */
-    .my-two-pass-card {
-      @apply bg-white rounded-xl shadow-lg p-6 mb-6 max-w-md mx-auto transform transition duration-300 hover:shadow-xl;
-    }
-    .my-two-pass-input {
-      @apply mt-1 block w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200;
-    }
-    .my-two-pass-label {
-      @apply block text-sm font-medium text-gray-700 mb-2;
-    }
-    /* Success/Error Messages */
-    .success-message {
-      @apply text-green-500 text-sm mt-2 font-medium;
-    }
-    .error-message {
-      @apply text-red-500 text-sm mt-2 font-medium;
-    }
-    /* Header Styles */
-    header {
-      @apply bg-white shadow-md p-4 flex items-center justify-between sticky top-0 z-20;
-    }
-    header img {
-      @apply w-10 h-10 rounded-full object-cover;
-    }
-    #userProfile {
-      @apply flex items-center space-x-3;
-    }
-    #userProfilePic {
-      @apply w-10 h-10 rounded-full;
-    }
-    #signOutBtn {
-      @apply text-sm text-red-500 hover:text-red-600 focus:outline-none;
-    }
-    /* Drawer Menu */
-    #drawer {
-      @apply fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72 hidden sm:block;
-    }
-    #drawer a {
-      @apply flex items-center text-gray-700 hover:text-orange-500 transition;
-    }
-    /* Content Container */
-    .content-container {
-      @apply pb-8 pt-4 max-w-2xl mx-auto px-4 sm:px-6;
-    }
-    /* Responsive Design */
     @media (min-width: 640px) {
-      .card, .my-two-pass-card {
+      .profile-card {
         @apply p-8;
       }
       .profile-pic {
-        @apply w-40 h-40;
+        @apply w-48 h-48;
       }
     }
   </style>
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="bg-gray-100 font-sans min-h-screen">
   <!-- Header -->
-  <header>
-    <div class="flex items-center">
-      <img src="logo.jpg" alt="Logo" class="w-10 h-10 rounded-full object-cover">
+  <header class="gradient-bg text-white p-4 flex items-center justify-between shadow-md sticky top-0 z-10">
+    <div>
+      <img src="logo.jpg" alt="Logo" class="w-12 h-12 rounded-full object-cover">
     </div>
     <div class="flex items-center space-x-4">
-      <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden">
+      <button id="cartBtn" class="relative btn-primary p-2 rounded-full">
         <i class="fas fa-shopping-cart text-lg"></i>
-        <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
+        <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
       </button>
       <div id="userProfile" class="flex items-center space-x-3">
-        <span id="userName" class="text-sm font-semibold text-gray-800 hidden sm:block"></span>
-        <img id="userProfilePic" src="" alt="Profile" class="w-10 h-10 rounded-full">
-        <button id="signOutBtn" class="text-sm text-red-500 hover:text-red-600 focus:outline-none hidden sm:block">Sign Out</button>
+        <span id="userName" class="text-sm font-semibold"></span>
+        <img id="userProfilePic" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="Profile" class="w-10 h-10 rounded-full">
+        <button id="signOutBtn" class="text-sm hover:text-gray-200">Sign Out</button>
       </div>
     </div>
   </header>
 
-  <!-- Drawer Menu -->
-  <div id="drawer" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72 hidden sm:block">
-    <div class="p-6">
-      <h2 class="text-xl font-bold text-gray-800 mb-6">Menu</h2>
-      <ul class="space-y-4">
-        <li><a href="index.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-home mr-2"></i>Home</a></li>
-        <li><a href="status.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-clipboard-list mr-2"></i>Orders</a></li>
-        <li><a href="profile.html" class="flex items-center text-orange-500 transition active"><i class="fas fa-user mr-2"></i>Profile</a></li>
-        <li><a href="settings.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-cog mr-2"></i>Settings</a></li>
-        <li><a href="history.html" class="flex items-center text-gray-700 hover:text-orange-500 transition"><i class="fas fa-car mr-2"></i>My Orders</a></li>
-        <li><a href="#" id="signOutDrawer" class="flex items-center text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Backdrop -->
-  <div id="drawerBackdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
-
   <!-- Spinner -->
   <div id="spinner" class="spinner hidden">
-    <svg class="animate-spin h-12 w-12 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
     </svg>
   </div>
 
   <!-- Profile Content -->
-  <div class="content-container">
-    <!-- User Profile Card -->
-    <div class="card card-gradient">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Profile Card -->
+    <div class="profile-card">
       <img id="profilePic" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="Profile Picture" class="profile-pic">
-      <div class="text-center mb-6">
-        <h2 class="text-xl font-bold text-gray-800">Your Profile</h2>
-        <button id="editProfileBtn" class="btn-orange mt-4">
-          <i class="fas fa-edit mr-2"></i>Edit Profile
-        </button>
-      </div>
-      <div id="profileDisplay" class="space-y-4">
+      <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">Your Profile</h2>
+      <div id="profileDisplay" class="space-y-3">
         <div>
           <p class="text-xs font-medium text-gray-500">Name</p>
-          <p id="displayName" class="text-sm text-gray-800">Loading...</p>
+          <p id="displayName" class="text-lg text-gray-800">Loading...</p>
         </div>
         <div>
           <p class="text-xs font-medium text-gray-500">Email</p>
-          <p id="displayEmail" class="text-sm text-gray-800">Loading...</p>
+          <p id="displayEmail" class="text-lg text-gray-800">Loading...</p>
         </div>
         <div>
           <p class="text-xs font-medium text-gray-500">Phone</p>
-          <p id="displayPhone" class="text-sm text-gray-800">Loading...</p>
+          <p id="displayPhone" class="text-lg text-gray-800">Loading...</p>
         </div>
         <div>
           <p class="text-xs font-medium text-gray-500">Address</p>
-          <p id="displayAddress" class="text-sm text-gray-800">Loading...</p>
+          <p id="displayAddress" class="text-lg text-gray-800">Loading...</p>
         </div>
       </div>
       <form id="profileForm" class="hidden space-y-4 mt-6">
         <div>
-          <label for="name" class="input-label">Full Name</label>
+          <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
           <input type="text" id="name" class="input-field" required>
         </div>
         <div>
-          <label for="phone" class="input-label">Phone Number</label>
+          <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
           <input type="tel" id="phone" class="input-field" required>
         </div>
         <div>
-          <label for="address" class="input-label">Delivery Address</label>
-          <textarea id="address" class="input-field" rows="3" required></textarea>
+          <label for="address" class="block text-sm font-medium text-gray-700">Delivery Address</label>
+          <textarea id="address" class="input-field h-20 resize-none" required></textarea>
         </div>
-        <div class="flex gap-3">
-          <button type="submit" id="saveProfileBtn" class="btn-orange flex-1">Save Changes</button>
-          <button type="button" id="cancelEditBtn" class="btn-secondary flex-1">Cancel</button>
+        <div class="flex justify-between">
+          <button type="submit" id="saveProfileBtn" class="btn-primary w-5/12">Save</button>
+          <button type="button" id="cancelEditBtn" class="btn-secondary w-5/12">Cancel</button>
         </div>
       </form>
+      <button id="editProfileBtn" class="btn-primary w-full mt-6">Edit Profile</button>
     </div>
 
-    <!-- MyTwoPass Activation Card -->
-    <div class="my-two-pass-card">
-      <h3 class="text-lg font-semibold text-gray-800 mb-4">Activate MyTwoPass</h3>
-      <p class="text-sm text-gray-600 mb-4">Enter your 8-character MyTwoPass code to enjoy 15% off all cart items and free delivery every month!</p>
+    <!-- MyTwoPass Card -->
+    <div class="profile-card mt-6">
+      <h3 class="text-xl font-semibold text-gray-800 mb-4">Activate MyTwoPass</h3>
+      <p class="text-gray-600 mb-4">Unlock 15% off all items and free delivery with your unique 8-character code!</p>
       <form id="myTwoPassForm" class="space-y-4">
         <div>
-          <label for="myTwoPassCode" class="my-two-pass-label">MyTwoPass Code</label>
-          <input type="text" id="myTwoPassCode" class="my-two-pass-input" maxlength="8" placeholder="XXXX-XXXX" required>
+          <label for="myTwoPassCode" class="block text-sm font-medium text-gray-700">MyTwoPass Code</label>
+          <input type="text" id="myTwoPassCode" class="input-field" maxlength="8" placeholder="XXXX-XXXX" required>
         </div>
-        <button type="submit" id="activateMyTwoPassBtn" class="btn-orange w-full">Activate</button>
+        <button type="submit" id="activateMyTwoPassBtn" class="btn-primary w-full">Activate</button>
       </form>
-      <p id="myTwoPassStatus" class="success-message hidden"></p>
-      <p id="myTwoPassError" class="error-message hidden"></p>
+      <p id="myTwoPassStatus" class="status-message success-message hidden"></p>
+      <p id="myTwoPassError" class="status-message error-message hidden"></p>
     </div>
 
-    <!-- Sign Out Card -->
-    <div class="card text-center">
-      <button id="signOutBtnMobile" class="w-full btn-orange py-3 text-sm flex items-center justify-center gap-2">
-        <i class="fas fa-sign-out-alt text-sm"></i>Sign Out
+    <!-- Sign Out Button -->
+    <div class="profile-card mt-6 text-center">
+      <button id="signOutBtnMobile" class="btn-primary w-full py-3 flex items-center justify-center gap-2">
+        <i class="fas fa-sign-out-alt"></i> Sign Out
       </button>
     </div>
   </div>
@@ -292,14 +194,8 @@
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     const signOutBtn = document.getElementById('signOutBtn');
     const signOutBtnMobile = document.getElementById('signOutBtnMobile');
-    const signOutDrawer = document.getElementById('signOutDrawer');
-    const drawer = document.getElementById('drawer');
-    const drawerBackdrop = document.getElementById('drawerBackdrop');
     const cartBtn = document.getElementById('cartBtn');
     const cartCount = document.getElementById('cartCount');
-    const cartNavBtn = document.getElementById('cartNavBtn');
-    const cartNavCount = document.getElementById('cartNavCount');
-    const rideNavBtn = document.getElementById('rideNavBtn');
     const spinner = document.getElementById('spinner');
     const userName = document.getElementById('userName');
     const userProfilePic = document.getElementById('userProfilePic');
@@ -331,15 +227,20 @@
     function updateCartCount() {
       const count = cart.reduce((total, c) => total + (c.quantity || 0), 0);
       cartCount.textContent = count;
-      cartNavCount.textContent = count;
       cartBtn.classList.toggle('bg-orange-600', count > 0);
-      cartNavBtn.classList.toggle('active', count > 0);
     }
 
     function loadUserProfile() {
       spinner.classList.remove('hidden');
       const userRef = ref(db, `users/${userId}`);
+      const timeoutId = setTimeout(() => {
+        spinner.classList.add('hidden');
+        showToast('Failed to load profile. Check your connection or contact support.');
+        console.error('Profile load timed out after 10 seconds');
+      }, 10000);
+
       onValue(userRef, (snapshot) => {
+        clearTimeout(timeoutId);
         userData = snapshot.val() || {};
         displayName.textContent = userData.name || 'Not set';
         displayEmail.textContent = auth.currentUser.email || 'Not set';
@@ -358,9 +259,10 @@
         }
         spinner.classList.add('hidden');
       }, (error) => {
+        clearTimeout(timeoutId);
         console.error('Error loading profile:', error);
         spinner.classList.add('hidden');
-        showToast('Failed to load profile.');
+        showToast('Failed to load profile. Check your connection or contact support.');
       });
     }
 
@@ -368,9 +270,8 @@
       spinner.classList.remove('hidden');
       if (user) {
         userId = user.uid;
+        console.log('Authenticated user ID:', userId);
         userName.textContent = user.displayName || 'User';
-        signOutBtn.style.display = 'inline-block';
-        signOutDrawer.style.display = 'block';
         loadCart();
         loadUserProfile();
         spinner.classList.add('hidden');
@@ -411,7 +312,6 @@
       }
 
       saveProfileBtn.disabled = true;
-      saveProfileBtn.classList.add('btn-disabled');
       spinner.classList.remove('hidden');
 
       try {
@@ -431,7 +331,6 @@
         showToast('Failed to save profile.');
       } finally {
         saveProfileBtn.disabled = false;
-        saveProfileBtn.classList.remove('btn-disabled');
         spinner.classList.add('hidden');
       }
     });
@@ -441,42 +340,15 @@
       signOut(auth).then(() => {
         window.location.href = 'login.html';
       }).catch((error) => {
-        console.error('Sign Out Error', error);
+        console.error('Sign Out Error:', error);
         spinner.classList.add('hidden');
         showToast('Failed to sign out.');
       });
     }
     signOutBtn.addEventListener('click', handleSignOut);
     signOutBtnMobile.addEventListener('click', handleSignOut);
-    signOutDrawer.addEventListener('click', (e) => {
-      e.preventDefault();
-      handleSignOut();
-    });
-
-    rideNavBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      drawer.classList.toggle('drawer-enter');
-      drawer.classList.toggle('drawer-enter-active');
-      drawerBackdrop.classList.toggle('hidden');
-    });
-
-    drawerBackdrop.addEventListener('click', () => {
-      drawer.classList.remove('drawer-enter-active');
-      drawer.classList.add('drawer-enter');
-      drawerBackdrop.classList.add('hidden');
-    });
 
     cartBtn.addEventListener('click', () => {
-      if (cart.length === 0) {
-        showToast('Your cart is empty.');
-        return;
-      }
-      const restaurantId = cart[0].restaurantId;
-      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
-    });
-
-    cartNavBtn.addEventListener('click', (e) => {
-      e.preventDefault();
       if (cart.length === 0) {
         showToast('Your cart is empty.');
         return;
@@ -498,7 +370,6 @@
       }
 
       activateMyTwoPassBtn.disabled = true;
-      activateMyTwoPassBtn.classList.add('btn-disabled');
       spinner.classList.remove('hidden');
 
       const userEmail = auth.currentUser.email;
@@ -535,14 +406,12 @@
         }
 
         activateMyTwoPassBtn.disabled = false;
-        activateMyTwoPassBtn.classList.remove('btn-disabled');
         spinner.classList.add('hidden');
         myTwoPassCode.value = '';
       }, (error) => {
         console.error('Error loading codes:', error);
         showToast('Failed to validate code.');
         activateMyTwoPassBtn.disabled = false;
-        activateMyTwoPassBtn.classList.remove('btn-disabled');
         spinner.classList.add('hidden');
       });
     });
@@ -561,8 +430,6 @@
       }
       return cart.reduce((total, item) => total + (item.price * item.quantity), 0) + (selectedOrderType === 'delivery' ? 20 : 0);
     }
-
-    loadUserProfile();
   </script>
 </body>
 </html>
