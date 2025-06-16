@@ -698,6 +698,7 @@
     }
 
     function openCartModal() {
+      console.log('Cart button clicked'); // Debug log
       if (cart.length === 0) {
         showToast('Your cart is empty.');
         return;
@@ -714,6 +715,7 @@
       setTimeout(() => cartModal.classList.add('hidden'), 300);
     }
 
+    // Ensure cart button event listeners are properly set
     cartCountBtn.addEventListener('click', openCartModal);
     document.querySelector('#cartNavBtn').addEventListener('click', (e) => {
       e.preventDefault();
