@@ -61,87 +61,93 @@
       100% { transform: rotate(360deg); }
     }
     /* Button Styles */
-    .btn-primary {
-      @apply bg-gray-100 text-gray-800 hover:bg-gray-200 transition duration-200 ease-in-out py-2 px-4 rounded-lg font-medium;
+    .btn-orange {
+      @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out py-2 px-4 rounded-lg font-medium;
     }
     .btn-secondary {
-      @apply bg-gray-100 text-gray-800 hover:bg-gray-200 transition duration-200 ease-in-out py-2 px-4 rounded-lg font-medium;
+      @apply bg-gray-100 text-gray-700 hover:bg-gray-200 transition duration-200 ease-in-out py-2 px-4 rounded-lg font-medium;
     }
     .btn-disabled {
       @apply bg-gray-300 text-gray-500 cursor-not-allowed py-2 px-4 rounded-lg font-medium;
     }
     /* Card Styles */
     .card {
-      @apply bg-white rounded-lg shadow-sm p-4 mb-4 flex items-center justify-between;
+      @apply bg-white rounded-xl shadow-lg p-6 mb-6 max-w-md mx-auto transform transition duration-300 hover:shadow-xl;
     }
-    .card:hover {
-      @apply bg-gray-50;
+    .card-gradient {
+      @apply bg-gradient-to-r from-orange-100 to-white;
     }
-    .card-icon {
-      @apply w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600;
+    /* Input Styles */
+    .input-field {
+      @apply mt-1 block w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200;
     }
-    /* Header Tabs */
-    .tab-nav {
-      @apply bg-white shadow-sm p-2 flex justify-around sticky top-16 z-10;
+    .input-label {
+      @apply block text-sm font-medium text-gray-700 mb-2;
     }
-    .tab-nav button {
-      @apply text-sm font-medium text-gray-600 px-4 py-2 rounded-t-lg;
-    }
-    .tab-nav button.active {
-      @apply bg-gray-100 text-black border-b-2 border-orange-500;
-    }
-    /* Profile Section */
-    .profile-header {
-      @apply bg-white p-4 flex items-center space-x-4 mb-4 shadow-sm;
-    }
+    /* Profile Picture */
     .profile-pic {
-      @apply w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center;
+      @apply w-32 h-32 rounded-full object-cover border-4 border-white ring-4 ring-orange-500 mb-4 transform transition duration-300 hover:scale-105 mx-auto;
     }
-    .profile-info {
-      @apply flex-1;
+    /* MyTwoPass Card */
+    .my-two-pass-card {
+      @apply bg-white rounded-xl shadow-lg p-6 mb-6 max-w-md mx-auto transform transition duration-300 hover:shadow-xl;
     }
-    .profile-name {
-      @apply text-lg font-semibold text-gray-800;
+    .my-two-pass-input {
+      @apply mt-1 block w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200;
     }
-    .profile-email {
-      @apply text-sm text-gray-500;
+    .my-two-pass-label {
+      @apply block text-sm font-medium text-gray-700 mb-2;
     }
-    /* Suggestions Card */
-    .suggestion-card {
-      @apply bg-white rounded-lg shadow-sm p-4 mt-4;
+    /* Success Message */
+    .success-message {
+      @apply text-green-500 text-sm mt-2 font-medium;
     }
-    .suggestion-card button {
-      @apply btn-primary mt-2 w-full;
+    /* Header Styles */
+    header {
+      @apply bg-white shadow-md p-4 flex items-center justify-between sticky top-0 z-20;
+    }
+    header img {
+      @apply w-10 h-10 rounded-full object-cover;
+    }
+    #userProfile {
+      @apply flex items-center space-x-3;
+    }
+    #userProfilePic {
+      @apply w-10 h-10 rounded-full;
+    }
+    #signOutBtn {
+      @apply text-sm text-red-500 hover:text-red-600 focus:outline-none;
+    }
+    /* Drawer Menu */
+    #drawer {
+      @apply fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72 hidden sm:block;
+    }
+    #drawer a {
+      @apply flex items-center text-gray-700 hover:text-orange-500 transition;
     }
     /* Content Container */
     .content-container {
-      @apply pb-8 pt-4;
+      @apply pb-8 pt-4 max-w-2xl mx-auto px-4 sm:px-6;
     }
     /* Responsive Design */
     @media (min-width: 640px) {
-      .content-container {
-        @apply max-w-2xl mx-auto px-6;
+      .card, .my-two-pass-card {
+        @apply p-8;
       }
-      .profile-header {
-        @apply p-6;
-      }
-      .card {
-        @apply p-6;
-      }
-      .tab-nav {
-        @apply top-0;
+      .profile-pic {
+        @apply w-40 h-40;
       }
     }
   </style>
 </head>
 <body class="bg-gray-50 font-sans">
   <!-- Header -->
-  <header class="bg-white shadow-md p-4 flex items-center justify-between sticky top-0 z-20">
+  <header>
     <div class="flex items-center">
       <img src="logo.jpg" alt="Logo" class="w-10 h-10 rounded-full object-cover">
     </div>
     <div class="flex items-center space-x-4">
-      <button id="cartBtn" class="relative btn-primary p-2 rounded-full sm:block hidden">
+      <button id="cartBtn" class="relative btn-orange p-2 rounded-full sm:block hidden">
         <i class="fas fa-shopping-cart text-lg"></i>
         <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
       </button>
@@ -152,14 +158,6 @@
       </div>
     </div>
   </header>
-
-  <!-- Tab Navigation -->
-  <div class="tab-nav">
-    <button id="tabHome" class="active">Home</button>
-    <button id="tabPersonalInfo">Personal Info</button>
-    <button id="tabSecurity">Security</button>
-    <button id="tabPrivacy">Privacy & Data</button>
-  </div>
 
   <!-- Drawer Menu -->
   <div id="drawer" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg drawer-enter z-50 sm:w-72 hidden sm:block">
@@ -189,82 +187,75 @@
 
   <!-- Profile Content -->
   <div class="content-container">
-    <!-- Profile Header -->
-    <div class="profile-header">
-      <div class="profile-pic">
-        <img id="profilePic" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="Profile Picture" class="w-full h-full rounded-full object-cover">
+    <!-- User Profile Card -->
+    <div class="card card-gradient">
+      <img id="profilePic" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="Profile Picture" class="profile-pic">
+      <div class="text-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Your Profile</h2>
+        <button id="editProfileBtn" class="btn-orange mt-4">
+          <i class="fas fa-edit mr-2"></i>Edit Profile
+        </button>
       </div>
-      <div class="profile-info">
-        <div id="profileName" class="profile-name">Katlego</div>
-        <div id="profileEmail" class="profile-email">lordmade100@gmail.com</div>
-      </div>
-    </div>
-
-    <!-- Profile Cards -->
-    <div class="card">
-      <div class="card-icon"><i class="fas fa-user"></i></div>
-      <span>Personal Info</span>
-    </div>
-    <div class="card">
-      <div class="card-icon"><i class="fas fa-shield-alt"></i></div>
-      <span>Security</span>
-    </div>
-    <div class="card">
-      <div class="card-icon"><i class="fas fa-lock"></i></div>
-      <span>Privacy & Data</span>
-    </div>
-
-    <!-- MyTwoPass Activation Card (Hidden by Default, Shown on Personal Info Tab) -->
-    <div id="myTwoPassCard" class="card hidden">
-      <h3 class="text-lg font-semibold text-gray-800 mb-2">MyTwoPass Activation</h3>
-      <p class="text-sm text-gray-600 mb-2">Unlock 15% off all cart items and free monthly delivery with a unique 8-character code from your admin.</p>
-      <form id="myTwoPassForm" class="space-y-2">
+      <div id="profileDisplay" class="space-y-4">
         <div>
-          <input type="text" id="myTwoPassCode" class="input-field" maxlength="8" placeholder="XXXX-XXXX" required>
+          <p class="text-xs font-medium text-gray-500">Name</p>
+          <p id="displayName" class="text-sm text-gray-800">Loading...</p>
         </div>
-        <button type="submit" id="activateMyTwoPassBtn" class="btn-primary w-full">Activate</button>
+        <div>
+          <p class="text-xs font-medium text-gray-500">Email</p>
+          <p id="displayEmail" class="text-sm text-gray-800">Loading...</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-gray-500">Phone</p>
+          <p id="displayPhone" class="text-sm text-gray-800">Loading...</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-gray-500">Address</p>
+          <p id="displayAddress" class="text-sm text-gray-800">Loading...</p>
+        </div>
+      </div>
+      <form id="profileForm" class="hidden space-y-4 mt-6">
+        <div>
+          <label for="name" class="input-label">Full Name</label>
+          <input type="text" id="name" class="input-field" required>
+        </div>
+        <div>
+          <label for="phone" class="input-label">Phone Number</label>
+          <input type="tel" id="phone" class="input-field" required>
+        </div>
+        <div>
+          <label for="address" class="input-label">Delivery Address</label>
+          <textarea id="address" class="input-field" rows="3" required></textarea>
+        </div>
+        <div class="flex gap-3">
+          <button type="submit" id="saveProfileBtn" class="btn-orange flex-1">Save Changes</button>
+          <button type="button" id="cancelEditBtn" class="btn-secondary flex-1">Cancel</button>
+        </div>
       </form>
-      <p id="myTwoPassStatus" class="success-message hidden mt-2"></p>
-      <p id="myTwoPassError" class="error-message hidden mt-2"></p>
     </div>
 
-    <!-- Suggestions Card -->
-    <div class="suggestion-card">
-      <h3 class="text-lg font-semibold text-gray-800 mb-2">Suggestions</h3>
-      <div class="card">
-        <div class="flex items-center justify-between">
-          <div>
-            <h4 class="text-md font-medium text-gray-800">Complete your account checkup</h4>
-            <p class="text-sm text-gray-600">Complete your account checkup to make My Two Minutes Food better for you and keep you secure.</p>
-          </div>
-          <div class="card-icon"><i class="fas fa-check-circle"></i></div>
+    <!-- MyTwoPass Activation Card -->
+    <div class="my-two-pass-card">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Activate MyTwoPass</h3>
+      <p class="text-sm text-gray-600 mb-4">Enter your 8-character MyTwoPass code to enjoy 15% off all cart items and free delivery every month!</p>
+      <form id="myTwoPassForm" class="space-y-4">
+        <div>
+          <label for="myTwoPassCode" class="my-two-pass-label">MyTwoPass Code</label>
+          <input type="text" id="myTwoPassCode" class="my-two-pass-input" maxlength="8" placeholder="XXXX-XXXX" required>
         </div>
-        <button id="beginCheckupBtn" class="btn-primary mt-2">Begin checkup</button>
-      </div>
+        <button type="submit" id="activateMyTwoPassBtn" class="btn-orange w-full">Activate</button>
+      </form>
+      <p id="myTwoPassStatus" class="success-message hidden"></p>
     </div>
 
-    <!-- Edit Profile Form (Hidden by Default) -->
-    <form id="profileForm" class="hidden space-y-4 mt-6">
-      <div>
-        <label for="name" class="input-label">Full Name</label>
-        <input type="text" id="name" class="input-field" required>
-      </div>
-      <div>
-        <label for="phone" class="input-label">Phone Number</label>
-        <input type="tel" id="phone" class="input-field" required>
-      </div>
-      <div>
-        <label for="address" class="input-label">Delivery Address</label>
-        <textarea id="address" class="input-field" rows="3" required></textarea>
-      </div>
-      <div class="flex gap-3">
-        <button type="submit" id="saveProfileBtn" class="btn-primary flex-1">Save Changes</button>
-        <button type="button" id="cancelEditBtn" class="btn-secondary flex-1">Cancel</button>
-      </div>
-    </form>
+    <!-- Sign Out Card -->
+    <div class="card text-center">
+      <button id="signOutBtnMobile" class="w-full btn-orange py-3 text-sm flex items-center justify-center gap-2">
+        <i class="fas fa-sign-out-alt text-sm"></i>Sign Out
+      </button>
+    </div>
   </div>
 
-  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
@@ -286,8 +277,6 @@
     const auth = getAuth();
 
     const profilePic = document.getElementById('profilePic');
-    const profileName = document.getElementById('profileName');
-    const profileEmail = document.getElementById('profileEmail');
     const displayName = document.getElementById('displayName');
     const displayEmail = document.getElementById('displayEmail');
     const displayPhone = document.getElementById('displayPhone');
@@ -317,18 +306,11 @@
     const myTwoPassCode = document.getElementById('myTwoPassCode');
     const activateMyTwoPassBtn = document.getElementById('activateMyTwoPassBtn');
     const myTwoPassStatus = document.getElementById('myTwoPassStatus');
-    const myTwoPassError = document.getElementById('myTwoPassError');
-    const myTwoPassCard = document.getElementById('myTwoPassCard');
-    const tabHome = document.getElementById('tabHome');
-    const tabPersonalInfo = document.getElementById('tabPersonalInfo');
-    const tabSecurity = document.getElementById('tabSecurity');
-    const tabPrivacy = document.getElementById('tabPrivacy');
-    const beginCheckupBtn = document.getElementById('beginCheckupBtn');
 
     let userId = null;
     let userData = {};
     let cart = [];
-    let isMyTwoPassActive = false;
+    let isMyTwoPassActive = false; // Tracks MyTwoPass status
 
     function showToast(message) {
       const toast = document.createElement('div');
@@ -349,6 +331,7 @@
       cartCount.textContent = count;
       cartNavCount.textContent = count;
       cartBtn.classList.toggle('bg-orange-600', count > 0);
+      cartNavBtn.classList.toggle('active', count > 0);
     }
 
     function loadUserProfile() {
@@ -356,8 +339,6 @@
       const userRef = ref(db, `users/${userId}`);
       onValue(userRef, (snapshot) => {
         userData = snapshot.val() || {};
-        profileName.textContent = userData.name || 'Katlego';
-        profileEmail.textContent = auth.currentUser.email || 'lordmade100@gmail.com';
         displayName.textContent = userData.name || 'Not set';
         displayEmail.textContent = auth.currentUser.email || 'Not set';
         displayPhone.textContent = userData.phone || 'Not set';
@@ -367,11 +348,10 @@
         nameInput.value = userData.name || '';
         phoneInput.value = userData.phone || '';
         addressInput.value = userData.address || '';
-        isMyTwoPassActive = userData.myTwoPassActive || false;
+        isMyTwoPassActive = userData.myTwoPassActive || false; // Load MyTwoPass status
         if (isMyTwoPassActive) {
           myTwoPassStatus.textContent = 'MyTwoPass activated! Enjoy 15% off and free delivery.';
           myTwoPassStatus.classList.remove('hidden');
-          myTwoPassError.classList.add('hidden');
         }
         spinner.classList.add('hidden');
       }, (error) => {
@@ -381,6 +361,7 @@
       });
     }
 
+    // Authentication
     onAuthStateChanged(auth, (user) => {
       spinner.classList.remove('hidden');
       if (user) {
@@ -401,12 +382,14 @@
       showToast('Failed to authenticate. Please try again.');
     });
 
+    // Edit Profile
     editProfileBtn.addEventListener('click', () => {
       profileDisplay.classList.add('hidden');
       profileForm.classList.remove('hidden');
       editProfileBtn.classList.add('hidden');
     });
 
+    // Cancel Edit
     cancelEditBtn.addEventListener('click', () => {
       profileDisplay.classList.remove('hidden');
       profileForm.classList.add('hidden');
@@ -416,6 +399,7 @@
       addressInput.value = userData.address || '';
     });
 
+    // Save Profile
     profileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = nameInput.value.trim();
@@ -437,7 +421,7 @@
           phone,
           address,
           email: auth.currentUser.email,
-          myTwoPassActive: isMyTwoPassActive
+          myTwoPassActive: isMyTwoPassActive // Save MyTwoPass status
         });
         showToast('Profile updated successfully!');
         profileDisplay.classList.remove('hidden');
@@ -453,6 +437,7 @@
       }
     });
 
+    // Sign Out
     function handleSignOut() {
       spinner.classList.remove('hidden');
       signOut(auth).then(() => {
@@ -470,6 +455,7 @@
       handleSignOut();
     });
 
+    // Drawer Toggle
     rideNavBtn.addEventListener('click', (e) => {
       e.preventDefault();
       drawer.classList.toggle('drawer-enter');
@@ -483,6 +469,7 @@
       drawerBackdrop.classList.add('hidden');
     });
 
+    // Cart Button
     cartBtn.addEventListener('click', () => {
       if (cart.length === 0) {
         showToast('Your cart is empty.');
@@ -502,15 +489,13 @@
       window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
     });
 
+    // MyTwoPass Activation
     myTwoPassForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const code = myTwoPassCode.value.trim().replace(/[^A-Za-z0-9]/g, '').toUpperCase();
 
       if (code.length !== 8) {
-        myTwoPassError.textContent = 'Please enter a valid 8-character code.';
-        myTwoPassError.classList.remove('hidden');
-        myTwoPassStatus.classList.add('hidden');
-        showToast('Invalid code format.');
+        showToast('Please enter a valid 8-character code.');
         return;
       }
 
@@ -518,7 +503,8 @@
       activateMyTwoPassBtn.classList.add('btn-disabled');
       spinner.classList.remove('hidden');
 
-      const validCodes = ['ABC123XY', 'DEF456PQ', 'GHI789RS'];
+      // Simulate admin-generated codes (replace with Firebase/server check)
+      const validCodes = ['ABC123XY', 'DEF456PQ', 'GHI789RS']; // Admin-generated codes
       if (validCodes.includes(code)) {
         isMyTwoPassActive = true;
         await set(ref(db, `users/${userId}`), {
@@ -527,13 +513,9 @@
         });
         myTwoPassStatus.textContent = 'MyTwoPass activated! Enjoy 15% off and free delivery.';
         myTwoPassStatus.classList.remove('hidden');
-        myTwoPassError.classList.add('hidden');
         showToast('MyTwoPass activated successfully!');
       } else {
-        myTwoPassError.textContent = 'Invalid MyTwoPass code. Contact support for assistance.';
-        myTwoPassError.classList.remove('hidden');
-        myTwoPassStatus.classList.add('hidden');
-        showToast('Invalid code.');
+        showToast('Invalid MyTwoPass code. Please try again or contact support.');
       }
 
       activateMyTwoPassBtn.disabled = false;
@@ -542,35 +524,23 @@
       myTwoPassCode.value = '';
     });
 
-    // Tab Switching
-    tabPersonalInfo.addEventListener('click', () => {
-      tabHome.classList.remove('active');
-      tabPersonalInfo.classList.add('active');
-      tabSecurity.classList.remove('active');
-      tabPrivacy.classList.remove('active');
-      myTwoPassCard.classList.remove('hidden');
-      profileForm.classList.add('hidden');
-    });
-    tabSecurity.addEventListener('click', () => {
-      tabHome.classList.remove('active');
-      tabPersonalInfo.classList.remove('active');
-      tabSecurity.classList.add('active');
-      tabPrivacy.classList.remove('active');
-      myTwoPassCard.classList.add('hidden');
-      profileForm.classList.add('hidden');
-    });
-    tabPrivacy.addEventListener('click', () => {
-      tabHome.classList.remove('active');
-      tabPersonalInfo.classList.remove('active');
-      tabSecurity.classList.remove('active');
-      tabPrivacy.classList.add('active');
-      myTwoPassCard.classList.add('hidden');
-      profileForm.classList.add('hidden');
-    });
-    beginCheckupBtn.addEventListener('click', () => {
-      showToast('Account checkup feature coming soon!');
-    });
+    // Update cart logic to apply MyTwoPass benefits (to be synced with checkout.html)
+    function applyMyTwoPassDiscount(cart) {
+      if (isMyTwoPassActive) {
+        let total = 0;
+        cart.forEach(item => {
+          const itemTotal = item.price * item.quantity;
+          const discount = itemTotal * 0.15; // 15% off
+          item.discountedTotal = itemTotal - discount; // Store discounted total
+          total += item.discountedTotal;
+        });
+        if (total > 0) total -= 20; // Waive R20 delivery fee
+        return total;
+      }
+      return cart.reduce((total, item) => total + (item.price * item.quantity), 0) + (selectedOrderType === 'delivery' ? 20 : 0);
+    }
 
+    // Load initial state
     loadUserProfile();
   </script>
 </body>
