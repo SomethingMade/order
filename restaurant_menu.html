@@ -77,7 +77,7 @@
       padding-bottom: 80px; /* Space for floating cart button */
     }
     .menu-scroll {
-      max-height: calc(100vh - 200px); /* Adjust based on header height */
+      max-height: calc(100vh - 200px); /* Adjust based on header and tabs height */
       overflow-y: auto;
       scroll-behavior: smooth;
       padding-bottom: 20px; /* Extra padding to ensure last item is visible */
@@ -144,6 +144,34 @@
     .rating-stars .star.unfilled {
       color: #d1d5db;
     }
+    /* Tab View */
+    .tab-view {
+      display: flex;
+      justify-content: space-around;
+      background-color: #f97316;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 0.5rem;
+    }
+    .tab-view button {
+      flex: 1;
+      padding: 0.5rem 1rem;
+      background-color: white;
+      color: #f97316;
+      border: none;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .tab-view button.active {
+      background-color: #f97316;
+      color: white;
+    }
+    .tab-view button:hover:not(.active) {
+      background-color: #ffdab9;
+    }
     @media (min-width: 640px) {
       .menu-container {
         padding-bottom: 0; /* No extra padding on desktop */
@@ -162,6 +190,12 @@
   </style>
 </head>
 <body class="bg-gray-50 font-sans">
+  <!-- Tab View for Delivery/Pickup -->
+  <div class="tab-view">
+    <button id="deliveryTab" class="active">Delivery</button>
+    <button id="pickupTab">Pickup</button>
+  </div>
+
   <!-- Restaurant Header -->
   <div class="relative">
     <img id="restaurantCover" src="https://via.placeholder.com/1200x300" class="w-full h-64 object-cover" alt="Restaurant Cover">
@@ -179,7 +213,7 @@
   </div>
 
   <!-- Categories -->
-  <div class="sticky top-0 z-10 bg-white shadow-sm py-4 px-6">
+  <div class="sticky top-12 z-10 bg-white shadow-sm py-4 px-6">
     <div id="categories" class="flex space-x-3 overflow-x-auto scrollbar-hide">
       <!-- Category buttons go here -->
     </div>
@@ -288,11 +322,14 @@
     const submitRatingBtn = document.getElementById('submitRatingBtn');
     const ratingComment = document.getElementById('ratingComment');
     const rateRestaurantBtn = document.getElementById('rateRestaurantBtn');
+    const deliveryTab = document.getElementById('deliveryTab');
+    const pickupTab = document.getElementById('pickupTab');
 
     let userId = null;
     let cart = [];
     let allMenuItems = [];
     let currentItem = null;
+    let selectedOrderType = 'delivery'; // Default to delivery
     const urlParams = new URLSearchParams(window.location.search);
     const restaurantId = urlParams.get('restaurantId');
 
@@ -452,7 +489,7 @@
         showToast('You can only add items from one restaurant at a time.');
         return;
       }
-      const cartItem = { item, quantity, restaurantId };
+      const cartItem = { item, quantity, restaurantId, orderType: selectedOrderType };
       const existing = cart.find(c => c.item.name === item.name);
       if (existing) {
         existing.quantity += quantity;
@@ -498,6 +535,7 @@
             <div>
               <h4 class="text-lg font-semibold text-gray-800">${c.item.name} (x${c.quantity})</h4>
               <p class="text-orange-500 font-bold">R${(c.item.price * c.quantity).toFixed(2)}</p>
+              <p class="text-gray-600 text-sm">Order Type: ${c.orderType.charAt(0).toUpperCase() + c.orderType.slice(1)}</p>
             </div>
             <button class="text-red-500 hover:text-red-600" data-index="${index}">
               <i class="fas fa-trash"></i>
@@ -512,6 +550,10 @@
           totalAmount += c.item.price * c.quantity;
           cartModalItems.appendChild(el);
         });
+      }
+      // Add R20 delivery fee if order type is delivery
+      if (selectedOrderType === 'delivery') {
+        totalAmount += 20;
       }
       cartModalTotal.textContent = `R${totalAmount.toFixed(2)}`;
     }
@@ -559,10 +601,25 @@
         return;
       }
       closeCartModal();
-      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}`;
+      window.location.href = `checkout.html?restaurantId=${restaurantId}&cart=${encodeURIComponent(JSON.stringify(cart))}&orderType=${selectedOrderType}`;
     });
 
     addToCartBtn.addEventListener('click', () => addToCart(currentItem));
+
+    // Tab View Logic
+    deliveryTab.addEventListener('click', () => {
+      selectedOrderType = 'delivery';
+      deliveryTab.classList.add('active');
+      pickupTab.classList.remove('active');
+      renderCartModalItems(); // Update total when switching to delivery
+    });
+
+    pickupTab.addEventListener('click', () => {
+      selectedOrderType = 'pickup';
+      pickupTab.classList.add('active');
+      deliveryTab.classList.remove('active');
+      renderCartModalItems(); // Update total when switching to pickup
+    });
 
     // Rating System
     function openRatingModal() {
