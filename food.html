@@ -435,6 +435,7 @@
     let cart = [];
     let restaurants = [];
     let shops = [];
+    let ratings = {}; // Store ratings data
     let activeView = 'restaurants';
     let userCoords = null; // Store user's coordinates
 
@@ -457,6 +458,24 @@
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       const distance = R * c; // Distance in kilometers
       return distance.toFixed(2); // Return distance rounded to 2 decimal places
+    }
+
+    // Geocode location to get coordinates
+    async function geocodeLocation(location) {
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxgl.accessToken}`
+        );
+        const data = await response.json();
+        if (data.features && data.features.length > 0) {
+          const [longitude, latitude] = data.features[0].center;
+          return { latitude, longitude };
+        }
+        return null;
+      } catch (error) {
+        console.error('Geocoding error for', location, ':', error);
+        return null;
+      }
     }
 
     // Fetch User Location with Mapbox
@@ -508,24 +527,6 @@
       }
     }
 
-    // Geocode restaurant location to get coordinates
-    async function geocodeLocation(location) {
-      try {
-        const response = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxgl.accessToken}`
-        );
-        const data = await response.json();
-        if (data.features && data.features.length > 0) {
-          const [longitude, latitude] = data.features[0].center;
-          return { latitude, longitude };
-        }
-        return null;
-      } catch (error) {
-        console.error('Geocoding error for', location, ':', error);
-        return null;
-      }
-    }
-
     // Modal Button Handlers
     enableLocationBtn.addEventListener('click', () => {
       locationModal.classList.add('hidden');
@@ -564,7 +565,10 @@
       restaurantList.innerHTML = '';
       loadingMessage.style.display = 'none';
 
-      let filteredRestaurants = restaurants;
+      let filteredRestaurants = restaurants.map(restaurant => ({
+        ...restaurant,
+        rating: ratings[restaurant.id]?.average || restaurant.rating || 0 // Use ratings node if available
+      }));
 
       // Filter by search term
       const searchTerm = searchInput.value.toLowerCase();
@@ -708,10 +712,17 @@
 
     function loadRestaurants() {
       const restaurantsRef = ref(db, 'restaurants');
-      onValue(restaurantsRef, (snapshot) => {
-        const data = snapshot.val();
-        console.log('Restaurants data:', data);
-        restaurants = data ? Object.keys(data).map(id => ({ id, ...data[id], available: data[id].available !== false })) : [];
+      const ratingsRef = ref(db, 'ratings'); // Fetch ratings node
+      spinner.classList.remove('hidden');
+
+      Promise.all([
+        new Promise((resolve) => onValue(restaurantsRef, (snapshot) => resolve(snapshot.val()), { onlyOnce: true })),
+        new Promise((resolve) => onValue(ratingsRef, (snapshot) => resolve(snapshot.val()), { onlyOnce: true }))
+      ]).then(([restaurantsData, ratingsData]) => {
+        console.log('Restaurants data:', restaurantsData);
+        console.log('Ratings data:', ratingsData);
+        restaurants = restaurantsData ? Object.keys(restaurantsData).map(id => ({ id, ...restaurantsData[id], available: restaurantsData[id].available !== false })) : [];
+        ratings = ratingsData || {}; // Store ratings data
         if (restaurants.length === 0) {
           console.warn('No restaurants found in database.');
           loadingMessage.textContent = 'No restaurants available.';
@@ -723,8 +734,8 @@
           renderRestaurants();
         }
         spinner.classList.add('hidden');
-      }, (error) => {
-        console.error('Error loading restaurants:', error);
+      }).catch((error) => {
+        console.error('Error loading restaurants or ratings:', error);
         loadingMessage.textContent = 'Failed to load restaurants: ' + error.message;
         loadingMessage.style.display = 'block';
         showToast('Failed to load restaurants: ' + error.message);
