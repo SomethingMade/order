@@ -33,6 +33,10 @@
     .btn-orange {
       @apply bg-orange-500 text-white hover:bg-orange-600 transition duration-200 ease-in-out;
     }
+    /* Discount Info */
+    .discount-info {
+      @apply text-green-500 text-sm font-medium mt-2;
+    }
   </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -52,6 +56,11 @@
       <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Cart</h2>
       <div id="cartItems" class="space-y-4"></div>
       <div class="flex justify-between items-center mt-6 border-t pt-4">
+        <span class="text-lg font-semibold">Subtotal:</span>
+        <span id="subtotalAmount" class="text-lg font-bold text-orange-500">R0.00</span>
+      </div>
+      <div id="discountInfo" class="discount-info hidden"></div>
+      <div class="flex justify-between items-center mt-2 border-t pt-2">
         <span class="text-lg font-semibold">Total:</span>
         <span id="totalAmount" class="text-lg font-bold text-orange-500">R0.00</span>
       </div>
@@ -127,7 +136,9 @@
 
     const storeName = document.getElementById('storeName');
     const cartItemsContainer = document.getElementById('cartItems');
+    const subtotalAmountEl = document.getElementById('subtotalAmount');
     const totalAmountEl = document.getElementById('totalAmount');
+    const discountInfo = document.getElementById('discountInfo');
     const deliveryForm = document.getElementById('deliveryForm');
     const placeOrderBtn = document.getElementById('placeOrderBtn');
     const whatsappOrderBtn = document.getElementById('whatsappOrderBtn');
@@ -136,6 +147,7 @@
     let cart = [];
     let storeId = null;
     let storeType = null; // 'restaurant' or 'shop'
+    let isMyTwoPassActive = false;
 
     // Parse URL Parameters
     const urlParams = new URLSearchParams(window.location.search);
@@ -151,6 +163,7 @@
       if (user) {
         userId = user.uid;
         loadStoreDetails();
+        loadUserProfile(); // Load MyTwoPass status
         renderCartItems();
       } else {
         window.location.href = 'login.html';
@@ -184,21 +197,36 @@
       });
     }
 
+    function loadUserProfile() {
+      const userRef = ref(db, `users/${userId}`);
+      onValue(userRef, (snapshot) => {
+        const userData = snapshot.val() || {};
+        isMyTwoPassActive = userData.myTwoPassActive || false;
+        renderCartItems(); // Re-render to apply MyTwoPass benefits
+      }, (error) => {
+        console.error('Error loading user profile:', error);
+        showToast('Failed to load user profile.');
+      });
+    }
+
     function renderCartItems() {
       cartItemsContainer.innerHTML = '';
-      let totalAmount = 0;
+      let subtotalAmount = 0;
       if (cart.length === 0) {
         cartItemsContainer.innerHTML = '<p class="text-gray-600">Your cart is empty.</p>';
+        subtotalAmountEl.textContent = 'R0.00';
         totalAmountEl.textContent = 'R0.00';
+        discountInfo.classList.add('hidden');
         return;
       }
       cart.forEach((c, index) => {
         const el = document.createElement('div');
         el.className = 'flex justify-between items-center mb-4 border-b pb-4';
+        const itemTotal = c.item.price * c.quantity;
         el.innerHTML = `
           <div>
             <h4 class="text-lg font-semibold text-gray-800">${c.item.name} (x${c.quantity})</h4>
-            <p class="text-orange-500 font-bold">R${(c.item.price * c.quantity).toFixed(2)}</p>
+            <p class="text-orange-500 font-bold">R${itemTotal.toFixed(2)}</p>
           </div>
           <button class="text-red-500 hover:text-red-600" data-index="${index}">
             <i class="fas fa-trash"></i>
@@ -209,9 +237,21 @@
           saveCart();
           renderCartItems();
         });
-        totalAmount += c.item.price * c.quantity;
+        subtotalAmount += itemTotal;
         cartItemsContainer.appendChild(el);
       });
+      subtotalAmountEl.textContent = `R${subtotalAmount.toFixed(2)}`;
+
+      let totalAmount = subtotalAmount;
+      if (isMyTwoPassActive) {
+        const discount = subtotalAmount * 0.15;
+        totalAmount -= discount;
+        discountInfo.textContent = `MyTwoPass Discount (15%): -R${discount.toFixed(2)} | Free Delivery Applied`;
+        discountInfo.classList.remove('hidden');
+        if (totalAmount > 0) totalAmount -= 20; // Free delivery (R20 waived)
+      } else if (totalAmount > 0) {
+        totalAmount += 20; // Standard delivery fee
+      }
       totalAmountEl.textContent = `R${totalAmount.toFixed(2)}`;
     }
 
@@ -244,7 +284,7 @@
         items: cart,
         deliveryDetails: { name, phone, address, notes },
         paymentMethod,
-        total: cart.reduce((sum, c) => sum + c.item.price * c.quantity, 0),
+        total: isMyTwoPassActive ? cart.reduce((sum, c) => sum + c.item.price * c.quantity, 0) * 0.85 : cart.reduce((sum, c) => sum + c.item.price * c.quantity, 0) + (cart.length > 0 ? 20 : 0),
         status: 'pending',
         timestamp: Date.now()
       };
@@ -280,9 +320,10 @@
         return;
       }
 
+      const subtotal = cart.reduce((sum, c) => sum + c.item.price * c.quantity, 0);
+      const total = isMyTwoPassActive ? subtotal * 0.85 : subtotal + (cart.length > 0 ? 20 : 0);
       const orderDetails = cart.map(c => `${c.item.name} (x${c.quantity}) - R${(c.item.price * c.quantity).toFixed(2)}`).join('\n');
-      const total = cart.reduce((sum, c) => sum + c.item.price * c.quantity, 0).toFixed(2);
-      const message = `New ${storeType} Order from ${name}\nPhone: ${phone}\nAddress: ${address}\nNotes: ${notes || 'None'}\n\nItems:\n${orderDetails}\n\nTotal: R${total}`;
+      const message = `New ${storeType} Order from ${name}\nPhone: ${phone}\nAddress: ${address}\nNotes: ${notes || 'None'}\n\nItems:\n${orderDetails}\n\nSubtotal: R${subtotal.toFixed(2)}${isMyTwoPassActive ? '\nMyTwoPass Discount (15%): -R' + (subtotal * 0.15).toFixed(2) + '\nFree Delivery Applied' : '\nDelivery Fee: +R20'}\nTotal: R${total.toFixed(2)}`;
       const whatsappNumber = '+27681774253'; // Replace with your store's WhatsApp number
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
