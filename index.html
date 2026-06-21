@@ -157,9 +157,8 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
             <button class="filter-pill active" data-filter="all" onclick="setFilter('all')">All</button>
             <button class="filter-pill" data-filter="pending" onclick="setFilter('pending')">Pending review</button>
             <button class="filter-pill" data-filter="needs_verification" onclick="setFilter('needs_verification')">Needs verification</button>
-            <button class="filter-pill" data-filter="in_review" onclick="setFilter('in_review')">In review (Didit)</button>
+            <button class="filter-pill" data-filter="sent" onclick="setFilter('sent')">Link sent</button>
             <button class="filter-pill" data-filter="verified" onclick="setFilter('verified')">Verified</button>
-            <button class="filter-pill" data-filter="declined" onclick="setFilter('declined')">Declined</button>
             <button class="filter-pill" data-filter="approved" onclick="setFilter('approved')">Approved</button>
             <button class="filter-pill" data-filter="rejected" onclick="setFilter('rejected')">Rejected</button>
         </div>
@@ -216,15 +215,12 @@ const firebaseConfig = {
 
 // Only these signed-in Google accounts can access this dashboard
 const ADMIN_EMAILS = [
-    "lordmade100@gmail.com"   // ← replace with your actual admin email(s)
+    "lordmade100@gmail.com"
 ];
 
-// Didit (https://business.didit.me) — Settings → API Keys / Workflows
-const DIDIT_API_KEY     = "k37LE7vRrgadVG0raqCHVGJvZTYY-xIwzztmOIZzjhA";
-const DIDIT_WORKFLOW_ID = "https://verify.didit.me/u/aSfXcMBVRjiFst6QwGpUvA";
-const DIDIT_BASE        = "https://verification.didit.me/v3";
-// Page the driver lands on after finishing the Didit flow (can be a simple "thanks" page)
-const DIDIT_CALLBACK_URL = "https://example.com/verification-complete.html";
+// Didit (https://business.didit.me) -- you create each verification session manually
+// on Didit's own dashboard (workflow: https://verify.didit.me/u/aSfXcMBVRjiFst6QwGpUvA),
+// then paste the resulting link into this admin dashboard. No Didit API key is used here.
 
 // EmailJS (https://emailjs.com) — used to send the verification link, no backend required
 const EMAILJS_PUBLIC_KEY  = "GNdk7XXIPtFVWGjsV";
@@ -297,10 +293,9 @@ function matchesFilter(app, filter) {
     switch(filter) {
         case 'all': return true;
         case 'pending': return app.status === 'pending';
-        case 'needs_verification': return v === 'not_started';
-        case 'in_review': return v === 'sent' || v === 'in_review';
+        case 'needs_verification': return v === 'not_started' || v === 'declined';
+        case 'sent': return v === 'sent';
         case 'verified': return v === 'approved';
-        case 'declined': return v === 'declined';
         case 'approved': return app.status === 'approved';
         case 'rejected': return app.status === 'rejected';
         default: return true;
@@ -396,11 +391,10 @@ function renderDetail(uid) {
     document.getElementById('dd-sub').textContent  = `Applied ${fmtDate(app.timestamp)} · ${app.vehicleType || '—'}`;
 
     const bannerMeta = {
-        not_started: { cls:'notstarted', text:'No verification has been sent yet.' },
-        sent:         { cls:'sent',       text:'Verification link sent — waiting for the driver to complete it.' },
-        in_review:    { cls:'inreview',   text:'Driver submitted their ID — Didit is reviewing it.' },
-        approved:     { cls:'approved',   text:'Identity verified by Didit.' },
-        declined:     { cls:'declined',   text:'Didit declined this driver\u2019s submitted ID.' }
+        not_started: { cls:'notstarted', text:'No verification link has been sent yet. Create a session on Didit\u2019s dashboard using the details below, paste the link, then send it.' },
+        sent:         { cls:'sent',       text:'Verification link sent — check Didit\u2019s dashboard for the outcome, then mark it below.' },
+        approved:     { cls:'approved',   text:'You marked this driver\u2019s ID as verified.' },
+        declined:     { cls:'declined',   text:'You marked this driver\u2019s ID as declined.' }
     }[v];
 
     document.getElementById('dd-body').innerHTML = `
@@ -421,57 +415,59 @@ function renderDetail(uid) {
         <div class="dd-row"><span class="dd-row-label">Plate</span><span class="dd-row-val">${app.licensePlate || '—'}</span></div>
         <div class="dd-row"><span class="dd-row-label">City / area</span><span class="dd-row-val">${app.city || '—'}</span></div>
 
-        <div class="dd-section-title">Didit verification</div>
+        <div class="dd-section-title">Identity verification</div>
         <div class="dd-row"><span class="dd-row-label">Status</span><span class="dd-row-val">${veriBadge(app)}</span></div>
-        <div class="dd-row"><span class="dd-row-label">Sent</span><span class="dd-row-val">${app.verification?.emailSentAt ? fmtDate(app.verification.emailSentAt) : '—'}</span></div>
-        <div class="dd-row"><span class="dd-row-label">Last checked</span><span class="dd-row-val">${app.verification?.lastCheckedAt ? fmtDate(app.verification.lastCheckedAt) : '—'}</span></div>
+        <div class="dd-row"><span class="dd-row-label">Link sent</span><span class="dd-row-val">${app.verification?.emailSentAt ? fmtDate(app.verification.emailSentAt) : '—'}</span></div>
+        <div class="dd-row"><span class="dd-row-label">Last decided</span><span class="dd-row-val">${app.verification?.decidedAt ? fmtDate(app.verification.decidedAt) : '—'}</span></div>
+
+        ${(v === 'not_started' || v === 'declined') ? `
+        <div class="dd-section-title">Paste Didit verification link</div>
+        <input id="dd-link-input" class="phone-field" style="padding:12px 14px;border:2px solid #e4e4e7;border-radius:12px;font-size:12.5px;width:100%;font-family:'Inter',sans-serif;" type="url" placeholder="https://verify.didit.me/s/..." value="${app.verification?.sessionUrl || ''}">
+        <p style="font-size:11px;color:#a1a1aa;margin-top:8px;line-height:1.5;">Create the session for this driver on business.didit.me, copy the link it gives you, paste it here, then send.</p>
+        ` : ''}
     `;
 
-    const canSend  = v === 'not_started' || v === 'declined';
-    const canCheck = v === 'sent' || v === 'in_review';
-    const canDecide = v === 'approved' && app.status === 'pending';
+    const canSend = v === 'not_started' || v === 'declined';
+    const canDecideVerification = v === 'sent';
+    const canApproveDriver = v === 'approved' && app.status === 'pending';
 
     document.getElementById('dd-footer').innerHTML = `
-        ${canSend ? `<button class="dd-btn dd-btn-primary" id="btn-send" onclick="sendVerification('${uid}')"><i class="fa-solid fa-paper-plane"></i> Send verification email</button>` : ''}
-        ${canCheck ? `<button class="dd-btn dd-btn-secondary" id="btn-check" onclick="checkVerification('${uid}')"><i class="fa-solid fa-rotate"></i> Check verification status</button>` : ''}
+        ${canSend ? `<button class="dd-btn dd-btn-primary" id="btn-send" onclick="sendLinkToDriver('${uid}')"><i class="fa-solid fa-paper-plane"></i> Send link to driver</button>` : ''}
+        ${canDecideVerification ? `
+            <button class="dd-btn dd-btn-approve" onclick="markVerification('${uid}','approved')"><i class="fa-solid fa-check"></i> Mark ID verified</button>
+            <button class="dd-btn dd-btn-reject" onclick="markVerification('${uid}','declined')"><i class="fa-solid fa-xmark"></i> Mark ID declined</button>
+        ` : ''}
         ${app.status === 'pending' ? `
-            <button class="dd-btn dd-btn-approve" ${canDecide ? '' : 'disabled'} onclick="decideDriver('${uid}','approved')">
-                <i class="fa-solid fa-check"></i> Approve driver ${canDecide ? '' : '(verify ID first)'}
+            <button class="dd-btn dd-btn-approve" ${canApproveDriver ? '' : 'disabled'} onclick="decideDriver('${uid}','approved')">
+                <i class="fa-solid fa-check"></i> Approve driver ${canApproveDriver ? '' : '(verify ID first)'}
             </button>
             <button class="dd-btn dd-btn-reject" onclick="decideDriver('${uid}','rejected')"><i class="fa-solid fa-xmark"></i> Reject driver</button>
         ` : `<div style="text-align:center;font-size:11.5px;color:#a1a1aa;font-weight:600;">Decision recorded: ${app.status}</div>`}
     `;
 }
 
-/* ── Didit + email actions ── */
-window.sendVerification = async function(uid) {
+/* ── Manual verification + email actions ── */
+window.sendLinkToDriver = async function(uid) {
     const app = applications[uid];
     const btn = document.getElementById('btn-send');
+    const linkInput = document.getElementById('dd-link-input');
+    const link = linkInput ? linkInput.value.trim() : '';
+
+    if (!link) { showToast('error', 'Paste the link first', 'Create the session on Didit\u2019s dashboard and paste the link before sending.'); return; }
+    if (!app.email) { showToast('error', 'No email on file', 'This applicant has no email address saved.'); return; }
+
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending…'; }
 
     try {
-        const sessionRes = await fetch(`${DIDIT_BASE}/session/`, {
-            method: 'POST',
-            headers: { 'x-api-key': DIDIT_API_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                workflow_id: DIDIT_WORKFLOW_ID,
-                vendor_data: uid,
-                callback: DIDIT_CALLBACK_URL
-            })
-        });
-        if (!sessionRes.ok) throw new Error(`Didit session create failed (${sessionRes.status})`);
-        const session = await sessionRes.json();
-
         if (!window.emailjs) throw new Error('EmailJS script did not load');
         await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
             to_email: app.email,
             to_name: app.name,
-            verification_link: session.url
+            verification_link: link
         });
 
         await update(ref(database, `driverApplications/${uid}/verification`), {
-            sessionId: session.session_id,
-            sessionUrl: session.url,
+            sessionUrl: link,
             status: 'sent',
             emailSentAt: Date.now()
         });
@@ -479,46 +475,20 @@ window.sendVerification = async function(uid) {
         showToast('success', 'Verification link sent', `Emailed to ${app.email}.`);
     } catch(e) {
         console.error(e);
-        showToast('error', 'Could not send verification', e.message + ' — check Didit/EmailJS keys and that this page can reach verification.didit.me (CORS).');
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send verification email'; }
+        showToast('error', 'Could not send email', e.message);
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send link to driver'; }
     }
 };
 
-window.checkVerification = async function(uid) {
-    const app = applications[uid];
-    const sessionId = app.verification?.sessionId;
-    if (!sessionId) { showToast('error', 'No session found', 'Send a verification link first.'); return; }
-
-    const btn = document.getElementById('btn-check');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking…'; }
-
+window.markVerification = async function(uid, decision) {
     try {
-        const res = await fetch(`${DIDIT_BASE}/session/${sessionId}/decision/`, {
-            headers: { 'x-api-key': DIDIT_API_KEY }
-        });
-        if (!res.ok) throw new Error(`Didit decision fetch failed (${res.status})`);
-        const decision = await res.json();
-
-        // Didit session statuses: Not Started, In Progress, In Review, Approved, Declined, Abandoned
-        const raw = (decision.status || '').toLowerCase().replace(/\s+/g, '_');
-        let mapped = 'sent';
-        if (raw === 'approved') mapped = 'approved';
-        else if (raw === 'declined' || raw === 'abandoned') mapped = 'declined';
-        else if (raw === 'in_review') mapped = 'in_review';
-        else if (raw === 'in_progress' || raw === 'not_started') mapped = 'sent';
-
         await update(ref(database, `driverApplications/${uid}/verification`), {
-            status: mapped,
-            lastCheckedAt: Date.now(),
-            rawStatus: decision.status || null
+            status: decision,
+            decidedAt: Date.now()
         });
-
-        showToast('info', 'Status updated', `Didit status: ${decision.status || 'unknown'}.`);
+        showToast('success', decision === 'approved' ? 'Marked as verified' : 'Marked as declined');
     } catch(e) {
-        console.error(e);
-        showToast('error', 'Could not check status', e.message);
-    } finally {
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Check verification status'; }
+        showToast('error', 'Could not save', e.message);
     }
 };
 
