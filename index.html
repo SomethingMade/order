@@ -1,250 +1,536 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Customer Login | My Two Minutes Food</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-    }
-    .bg-gradient {
-      background: linear-gradient(135deg, #f97316 0%, #f59e0b 100%);
-    }
-    .input-icon {
-      position: relative;
-    }
-    .input-icon svg {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      color: #6b7280;
-    }
-    .input-icon input {
-      padding-left: 40px;
-    }
-    .spinner {
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-top: 4px solid #ffffff;
-      border-radius: 50%;
-      width: 48px;
-      height: 48px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    .google-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #ffffff;
-      border: 1px solid #d1d5db;
-      color: #1f2937;
-      padding: 10px;
-      border-radius: 8px;
-      font-weight: 600;
-      transition: background-color 0.2s;
-    }
-    .google-btn:hover {
-      background-color: #f3f4f6;
-    }
-    .google-btn svg {
-      width: 20px;
-      height: 20px;
-      margin-right: 8px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CourierGo Admin · Driver Verification</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{font-family:'Inter',sans-serif;background:#f4f4f5;color:#18181b;}
+button{font-family:inherit;}
+
+/* ── Sign in ── */
+#signin-gate{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;z-index:300;}
+.signin-logo{width:64px;height:64px;border-radius:16px;background:#18181b;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.signin-logo i{color:#fff;font-size:26px;}
+.signin-title{font-size:22px;font-weight:900;letter-spacing:-0.4px;}
+.signin-sub{font-size:13px;color:#71717a;margin:8px 0 28px;text-align:center;max-width:280px;line-height:1.5;}
+.google-btn{display:flex;align-items:center;gap:10px;background:#18181b;color:#fff;padding:13px 22px;border-radius:12px;font-size:13px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.18);}
+.google-btn img{width:18px;height:18px;filter:brightness(0) invert(1);}
+
+/* ── App shell ── */
+#app{display:none;min-height:100vh;}
+header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #e4e4e7;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-icon{width:34px;height:34px;border-radius:9px;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;}
+.brand-text{font-size:14.5px;font-weight:800;letter-spacing:-0.2px;}
+.brand-sub{font-size:10.5px;color:#a1a1aa;font-weight:600;letter-spacing:0.3px;}
+.admin-area{display:flex;align-items:center;gap:10px;}
+.admin-email{font-size:11.5px;color:#71717a;font-weight:600;}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid #e4e4e7;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#52525b;font-size:12px;}
+
+main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px;}
+.stat-card{background:#fff;border-radius:14px;padding:13px;border:1px solid #e4e4e7;}
+.stat-val{font-size:19px;font-weight:800;}
+.stat-lbl{font-size:9.5px;color:#a1a1aa;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;margin-top:2px;}
+
+/* Filter pills */
+.filters{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;padding-bottom:2px;-ms-overflow-style:none;scrollbar-width:none;}
+.filters::-webkit-scrollbar{display:none;}
+.filter-pill{flex-shrink:0;padding:8px 14px;border-radius:999px;border:1.5px solid #e4e4e7;background:#fff;font-size:11.5px;font-weight:700;color:#71717a;cursor:pointer;white-space:nowrap;}
+.filter-pill.active{background:#18181b;border-color:#18181b;color:#fff;}
+
+/* Application cards */
+.app-card{background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .12s;}
+.app-card:hover{border-color:#a1a1aa;}
+.app-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.app-name{font-size:14px;font-weight:800;}
+.app-meta{font-size:11px;color:#a1a1aa;margin-top:2px;}
+.badge-row{display:flex;gap:6px;flex-wrap:wrap;}
+.badge{font-size:9px;font-weight:800;letter-spacing:0.2px;text-transform:uppercase;padding:4px 8px;border-radius:999px;}
+.badge-pending{background:#fffbeb;color:#b45309;}
+.badge-approved{background:#f0fdf4;color:#15803d;}
+.badge-rejected{background:#fef2f2;color:#b91c1c;}
+.badge-notstarted{background:#f1f5f9;color:#475569;}
+.badge-sent{background:#eff6ff;color:#1d4ed8;}
+.badge-inreview{background:#fef9c3;color:#854d0e;}
+.badge-verified{background:#f0fdf4;color:#15803d;}
+.badge-declined{background:#fef2f2;color:#b91c1c;}
+.app-bottom{display:flex;align-items:center;gap:14px;font-size:11px;color:#71717a;font-weight:500;}
+.app-bottom i{width:13px;text-align:center;color:#a1a1aa;}
+
+.empty-state{text-align:center;padding:60px 20px;color:#a1a1aa;}
+.empty-state i{font-size:30px;opacity:0.3;margin-bottom:10px;display:block;}
+.empty-state p{font-size:13px;}
+
+/* ── Detail drawer ── */
+#detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:150;opacity:0;pointer-events:none;transition:opacity .25s;}
+#detail-overlay.open{opacity:1;pointer-events:auto;}
+#detail-drawer{position:fixed;top:0;right:-100%;bottom:0;width:min(420px,92vw);background:#fff;z-index:160;transition:right .32s cubic-bezier(.32,0,.67,0);display:flex;flex-direction:column;overflow:hidden;}
+#detail-drawer.open{right:0;}
+.dd-header{padding:20px;border-bottom:1px solid #f1f1f4;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.dd-name{font-size:17px;font-weight:800;}
+.dd-sub{font-size:11.5px;color:#a1a1aa;margin-top:3px;}
+.dd-close{width:30px;height:30px;border-radius:50%;background:#f4f4f5;border:none;cursor:pointer;color:#52525b;font-size:12px;}
+.dd-body{flex:1;overflow-y:auto;padding:20px;}
+.dd-section-title{font-size:10.5px;font-weight:700;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.4px;margin:18px 0 10px;}
+.dd-section-title:first-child{margin-top:0;}
+.dd-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f4f4f5;font-size:12.5px;}
+.dd-row:last-child{border-bottom:none;}
+.dd-row-label{color:#a1a1aa;font-weight:500;}
+.dd-row-val{font-weight:700;text-align:right;max-width:60%;}
+.dd-footer{padding:16px 20px 28px;border-top:1px solid #f1f1f4;flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
+.dd-btn{width:100%;padding:13px;border-radius:13px;border:none;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.dd-btn-primary{background:#18181b;color:#fff;}
+.dd-btn-secondary{background:#f4f4f5;color:#18181b;}
+.dd-btn-approve{background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;}
+.dd-btn-reject{background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca;}
+.dd-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.verif-banner{padding:12px 14px;border-radius:12px;font-size:11.5px;font-weight:600;line-height:1.5;margin-bottom:4px;}
+.verif-banner.notstarted{background:#f1f5f9;color:#475569;}
+.verif-banner.sent{background:#eff6ff;color:#1d4ed8;}
+.verif-banner.inreview{background:#fef9c3;color:#854d0e;}
+.verif-banner.approved{background:#f0fdf4;color:#15803d;}
+.verif-banner.declined{background:#fef2f2;color:#b91c1c;}
+
+/* Toasts */
+#toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:380px;z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
+.toast{width:100%;padding:13px 15px;border-radius:14px;font-size:12.5px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 6px 24px rgba(0,0,0,0.14);opacity:0;transform:translateY(8px);transition:opacity .28s,transform .28s;pointer-events:auto;background:#fff;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.hide{opacity:0;transform:translateY(8px);}
+.toast-success{border:1.5px solid #bbf7d0;color:#15803d;}
+.toast-error{border:1.5px solid #fecaca;color:#b91c1c;}
+.toast-info{border:1.5px solid #bfdbfe;color:#1d4ed8;}
+.toast-title{font-weight:700;}
+.toast-msg{opacity:0.8;margin-top:2px;}
+</style>
 </head>
-<body class="bg-gray-50">
+<body>
 
-  <!-- Header -->
-  <header class="bg-white shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-orange-600">My Two Minutes Food</h1>
-      <a href="signup.html" class="text-orange-600 hover:text-orange-700 font-medium flex items-center">
-        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-        </svg>
-        Sign Up
-      </a>
+<div id="toast-container"></div>
+
+<!-- ══ Sign-in ══ -->
+<div id="signin-gate">
+    <div class="signin-logo"><i class="fa-solid fa-shield-halved"></i></div>
+    <div class="signin-title">CourierGo Admin</div>
+    <div class="signin-sub">Review driver applications and run identity verification.</div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continue with Google
+    </button>
+</div>
+
+<!-- ══ App ══ -->
+<div id="app">
+    <header>
+        <div class="brand">
+            <div class="brand-icon"><i class="fa-solid fa-truck-fast"></i></div>
+            <div>
+                <div class="brand-text">CourierGo Admin</div>
+                <div class="brand-sub">DRIVER VERIFICATION</div>
+            </div>
+        </div>
+        <div class="admin-area">
+            <span class="admin-email" id="admin-email">—</span>
+            <button class="icon-btn" onclick="signOutAdmin()" title="Sign out"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+        </div>
+    </header>
+
+    <main>
+        <div class="stats-row">
+            <div class="stat-card"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Total</div></div>
+            <div class="stat-card"><div class="stat-val" id="stat-pending">0</div><div class="stat-lbl">Pending</div></div>
+            <div class="stat-card"><div class="stat-val" id="stat-verified">0</div><div class="stat-lbl">Verified</div></div>
+            <div class="stat-card"><div class="stat-val" id="stat-approved">0</div><div class="stat-lbl">Approved</div></div>
+        </div>
+
+        <div class="filters" id="filters">
+            <button class="filter-pill active" data-filter="all" onclick="setFilter('all')">All</button>
+            <button class="filter-pill" data-filter="pending" onclick="setFilter('pending')">Pending review</button>
+            <button class="filter-pill" data-filter="needs_verification" onclick="setFilter('needs_verification')">Needs verification</button>
+            <button class="filter-pill" data-filter="in_review" onclick="setFilter('in_review')">In review (Didit)</button>
+            <button class="filter-pill" data-filter="verified" onclick="setFilter('verified')">Verified</button>
+            <button class="filter-pill" data-filter="declined" onclick="setFilter('declined')">Declined</button>
+            <button class="filter-pill" data-filter="approved" onclick="setFilter('approved')">Approved</button>
+            <button class="filter-pill" data-filter="rejected" onclick="setFilter('rejected')">Rejected</button>
+        </div>
+
+        <div id="list"></div>
+        <div id="empty-state" class="empty-state" style="display:none;">
+            <i class="fa-solid fa-inbox"></i>
+            <p>No applications in this view.</p>
+        </div>
+    </main>
+</div>
+
+<!-- ══ Detail drawer ══ -->
+<div id="detail-overlay" onclick="closeDetail()"></div>
+<div id="detail-drawer">
+    <div class="dd-header">
+        <div>
+            <div class="dd-name" id="dd-name">—</div>
+            <div class="dd-sub" id="dd-sub">—</div>
+        </div>
+        <button class="dd-close" onclick="closeDetail()"><i class="fa-solid fa-xmark"></i></button>
     </div>
-  </header>
-
-  <!-- Main Content -->
-  <div class="min-h-screen flex items-center justify-center bg-gradient py-12">
-    <!-- Spinner Overlay -->
-    <div id="spinner-overlay" class="fixed inset-0 bg-orange-500 bg-opacity-90 flex items-center justify-center z-50 hidden">
-      <div class="spinner"></div>
+    <div class="dd-body" id="dd-body">
+        <!-- populated by renderDetail() -->
     </div>
-
-    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md relative z-10">
-      <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center">
-        <svg class="w-6 h-6 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-        </svg>
-        Customer Login
-      </h2>
-      <p class="text-gray-600 text-center mb-6">Sign in to order delicious meals in just two minutes!</p>
-
-      <form id="login-form" class="space-y-5">
-        <div class="input-icon">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-          </svg>
-          <input id="email" type="email" placeholder="Email" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required />
-        </div>
-        <div class="input-icon">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.104-.896-2-2-2s-2 .896-2 2v6c0 1.104.896 2 2 2h6c1.104 0 2-.896 2-2v-6c0-1.104-.896-2-2-2h-6z"/>
-          </svg>
-          <input id="password" type="password" placeholder="Password" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required />
-        </div>
-
-        <p id="login-error" class="text-red-500 text-sm text-center mt-2"></p>
-
-        <button id="login-btn" type="submit" class="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 font-semibold transition flex items-center justify-center">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14"/>
-          </svg>
-          Log In
-        </button>
-      </form>
-
-      <div class="relative my-6">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-white text-gray-500">Or continue with</span>
-        </div>
-      </div>
-
-      <button id="google-login-btn" class="w-full google-btn">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1.02.68-2.31 1.08-3.71 1.08-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Sign in with Google
-      </button>
-
-      <p class="text-sm text-center text-gray-600 mt-6 flex items-center justify-center">
-        <svg class="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-        </svg>
-        Don't have an account? <a href="signup.html" class="text-orange-600 underline hover:text-orange-700 ml-1">Sign up</a>
-      </p>
+    <div class="dd-footer" id="dd-footer">
+        <!-- populated by renderDetail() -->
     </div>
-  </div>
+</div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
-      authDomain: "fire-b-a8878.firebaseapp.com",
-      databaseURL: "https://fire-b-a8878.firebaseio.com",
-      projectId: "fire-b-a8878",
-      storageBucket: "fire-b-a8878.appspot.com",
-      messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
-      measurementId: "G-V4W97VMSKL"
-    };
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import {
+    getDatabase, ref, onValue, update
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+/* ════════════════════════════════════════════════════
+   CONFIG — replace the placeholders below
+════════════════════════════════════════════════════ */
 
-    // Email/Password Login
-    const loginForm = document.getElementById("login-form");
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const loginError = document.getElementById("login-error");
-    const spinnerOverlay = document.getElementById("spinner-overlay");
+// Same Firebase project as CourierGo
+const firebaseConfig = {
+    apiKey:            "AIzaSyBQSPwpVbGrdCuOoyitAeWQHIeipj2MgIY",
+    authDomain:        "newstart-64c43.firebaseapp.com",
+    databaseURL:       "https://newstart-64c43-default-rtdb.firebaseio.com",
+    projectId:         "newstart-64c43",
+    storageBucket:     "newstart-64c43.firebasestorage.app",
+    messagingSenderId: "941619830061",
+    appId:             "1:941619830061:web:de9e0f791eb8f6eacf87a4"
+};
 
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
+// Only these signed-in Google accounts can access this dashboard
+const ADMIN_EMAILS = [
+    "lordmade100@gmail.com"   // ← replace with your actual admin email(s)
+];
 
-      loginError.textContent = "";
+// Didit (https://business.didit.me) — Settings → API Keys / Workflows
+const DIDIT_API_KEY     = "k37LE7vRrgadVG0raqCHVGJvZTYY-xIwzztmOIZzjhA";
+const DIDIT_WORKFLOW_ID = "YOUR_DIDIT_WORKFLOW_ID";
+const DIDIT_BASE        = "https://verification.didit.me/v3";
+// Page the driver lands on after finishing the Didit flow (can be a simple "thanks" page)
+const DIDIT_CALLBACK_URL = "https://example.com/verification-complete.html";
 
-      if (!email || !password) {
-        loginError.textContent = "Please enter both email and password.";
+// EmailJS (https://emailjs.com) — used to send the verification link, no backend required
+const EMAILJS_PUBLIC_KEY  = "YOUR_EMAILJS_PUBLIC_KEY";
+const EMAILJS_SERVICE_ID  = "YOUR_EMAILJS_SERVICE_ID";
+const EMAILJS_TEMPLATE_ID = "YOUR_EMAILJS_TEMPLATE_ID";
+// Your EmailJS template should use these variables: {{to_email}} {{to_name}} {{verification_link}}
+
+/* ════════════════════════════════════════════════════ */
+
+const fbApp    = initializeApp(firebaseConfig);
+const auth     = getAuth(fbApp);
+const database = getDatabase(fbApp);
+const provider = new GoogleAuthProvider();
+
+if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+let applications = {};   // uid -> application object
+let currentFilter = 'all';
+let activeDetailUid = null;
+
+function showToast(type, title, msg, duration = 4200) {
+    const icons = { success:'fa-circle-check', error:'fa-circle-xmark', info:'fa-circle-info' };
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.innerHTML = `<i class="fa-solid ${icons[type]} toast-icon" style="margin-top:1px;"></i>
+        <div><div class="toast-title">${title}</div>${msg ? `<div class="toast-msg">${msg}</div>` : ''}</div>`;
+    document.getElementById('toast-container').appendChild(t);
+    requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+    setTimeout(() => { t.classList.add('hide'); t.addEventListener('transitionend', () => t.remove(), { once:true }); }, duration);
+}
+
+/* ── Auth ── */
+window.signInWithGoogle = async function() {
+    try { await signInWithPopup(auth, provider); }
+    catch(e) { if (e.code !== 'auth/popup-closed-by-user') showToast('error','Sign-in failed', e.message); }
+};
+window.signOutAdmin = async function() { await fbSignOut(auth); };
+
+onAuthStateChanged(auth, (user) => {
+    if (user && ADMIN_EMAILS.includes((user.email||'').toLowerCase())) {
+        document.getElementById('signin-gate').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('admin-email').textContent = user.email;
+        attachApplicationsListener();
+    } else if (user) {
+        showToast('error', 'Not authorized', 'This Google account is not on the admin list.');
+        fbSignOut(auth);
+    } else {
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('signin-gate').style.display = 'flex';
+    }
+});
+
+/* ── Data ── */
+function attachApplicationsListener() {
+    onValue(ref(database, 'driverApplications'), (snap) => {
+        applications = snap.val() || {};
+        renderStats();
+        renderList();
+        if (activeDetailUid) renderDetail(activeDetailUid);
+    });
+}
+
+function veriStatus(app) {
+    return (app.verification && app.verification.status) || 'not_started';
+}
+
+function matchesFilter(app, filter) {
+    const v = veriStatus(app);
+    switch(filter) {
+        case 'all': return true;
+        case 'pending': return app.status === 'pending';
+        case 'needs_verification': return v === 'not_started';
+        case 'in_review': return v === 'sent' || v === 'in_review';
+        case 'verified': return v === 'approved';
+        case 'declined': return v === 'declined';
+        case 'approved': return app.status === 'approved';
+        case 'rejected': return app.status === 'rejected';
+        default: return true;
+    }
+}
+
+window.setFilter = function(f) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.toggle('active', p.dataset.filter === f));
+    renderList();
+};
+
+function renderStats() {
+    const list = Object.values(applications);
+    document.getElementById('stat-total').textContent    = list.length;
+    document.getElementById('stat-pending').textContent   = list.filter(a => a.status === 'pending').length;
+    document.getElementById('stat-verified').textContent  = list.filter(a => veriStatus(a) === 'approved').length;
+    document.getElementById('stat-approved').textContent  = list.filter(a => a.status === 'approved').length;
+}
+
+function veriBadge(app) {
+    const v = veriStatus(app);
+    const meta = {
+        not_started: { cls:'badge-notstarted', label:'Not verified' },
+        sent:         { cls:'badge-sent',       label:'Verification sent' },
+        in_review:    { cls:'badge-inreview',   label:'In review' },
+        approved:     { cls:'badge-verified',   label:'ID verified' },
+        declined:     { cls:'badge-declined',   label:'ID declined' }
+    }[v] || { cls:'badge-notstarted', label:'Not verified' };
+    return `<span class="badge ${meta.cls}">${meta.label}</span>`;
+}
+
+function statusBadge(app) {
+    const cls = { pending:'badge-pending', approved:'badge-approved', rejected:'badge-rejected' }[app.status] || 'badge-pending';
+    return `<span class="badge ${cls}">${app.status || 'pending'}</span>`;
+}
+
+function fmtDate(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function renderList() {
+    const listEl  = document.getElementById('list');
+    const emptyEl = document.getElementById('empty-state');
+    const entries = Object.entries(applications)
+        .filter(([uid, app]) => matchesFilter(app, currentFilter))
+        .sort((a,b) => (b[1].timestamp||0) - (a[1].timestamp||0));
+
+    if (!entries.length) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = 'block';
         return;
-      }
+    }
+    emptyEl.style.display = 'none';
 
-      spinnerOverlay.classList.remove("hidden");
+    listEl.innerHTML = entries.map(([uid, app]) => `
+        <div class="app-card" onclick="openDetail('${uid}')">
+            <div class="app-top">
+                <div>
+                    <div class="app-name">${app.name || 'Unnamed applicant'}</div>
+                    <div class="app-meta">${app.vehicleType || '—'} · ${app.city || '—'} · Applied ${fmtDate(app.timestamp)}</div>
+                </div>
+                <div class="badge-row">${statusBadge(app)}${veriBadge(app)}</div>
+            </div>
+            <div class="app-bottom">
+                <span><i class="fa-solid fa-phone"></i> ${app.phone || '—'}</span>
+                <span><i class="fa-solid fa-id-card"></i> ${app.licensePlate || '—'}</span>
+            </div>
+        </div>
+    `).join('');
+}
 
-      try {
-        const result = await auth.signInWithEmailAndPassword(email, password);
+/* ── Detail drawer ── */
+window.openDetail = function(uid) {
+    activeDetailUid = uid;
+    renderDetail(uid);
+    document.getElementById('detail-overlay').classList.add('open');
+    document.getElementById('detail-drawer').classList.add('open');
+};
+window.closeDetail = function() {
+    activeDetailUid = null;
+    document.getElementById('detail-overlay').classList.remove('open');
+    document.getElementById('detail-drawer').classList.remove('open');
+};
 
-        const userRef = db.ref("users/" + result.user.uid);
-        const snapshot = await userRef.get();
+function renderDetail(uid) {
+    const app = applications[uid];
+    if (!app) { closeDetail(); return; }
+    const v = veriStatus(app);
 
-        if (snapshot.exists() && snapshot.val().accountType !== "business") {
-          window.location.href = "food.html";
-        } else {
-          loginError.textContent = "Access denied. This is for customer accounts only.";
-          await auth.signOut();
-        }
-      } catch (error) {
-        loginError.textContent = error.message;
-      } finally {
-        spinnerOverlay.classList.add("hidden");
-      }
-    });
+    document.getElementById('dd-name').textContent = app.name || 'Unnamed applicant';
+    document.getElementById('dd-sub').textContent  = `Applied ${fmtDate(app.timestamp)} · ${app.vehicleType || '—'}`;
 
-    // Google Login
-    const googleLoginBtn = document.getElementById("google-login-btn");
+    const bannerMeta = {
+        not_started: { cls:'notstarted', text:'No verification has been sent yet.' },
+        sent:         { cls:'sent',       text:'Verification link sent — waiting for the driver to complete it.' },
+        in_review:    { cls:'inreview',   text:'Driver submitted their ID — Didit is reviewing it.' },
+        approved:     { cls:'approved',   text:'Identity verified by Didit.' },
+        declined:     { cls:'declined',   text:'Didit declined this driver\u2019s submitted ID.' }
+    }[v];
 
-    googleLoginBtn.addEventListener("click", async () => {
-      loginError.textContent = "";
-      spinnerOverlay.classList.remove("hidden");
+    document.getElementById('dd-body').innerHTML = `
+        <div class="verif-banner ${bannerMeta.cls}">
+            <i class="fa-solid fa-shield-halved" style="margin-right:6px;"></i>${bannerMeta.text}
+        </div>
 
-      const provider = new firebase.auth.GoogleAuthProvider();
+        <div class="dd-section-title">Applicant</div>
+        <div class="dd-row"><span class="dd-row-label">Full name</span><span class="dd-row-val">${app.name || '—'}</span></div>
+        <div class="dd-row"><span class="dd-row-label">Email</span><span class="dd-row-val">${app.email || '—'}</span></div>
+        <div class="dd-row"><span class="dd-row-label">Mobile</span><span class="dd-row-val">${app.phone || '—'}</span></div>
+        <div class="dd-row"><span class="dd-row-label">SA ID number</span><span class="dd-row-val">${app.idNumber || '—'}</span></div>
+        <div class="dd-row"><span class="dd-row-label">Driver's license</span><span class="dd-row-val">${app.license || '—'}</span></div>
 
-      try {
-        const result = await auth.signInWithPopup(provider);
-        const user = result.user;
-        const uid = user.uid;
+        <div class="dd-section-title">Vehicle</div>
+        <div class="dd-row"><span class="dd-row-label">Type</span><span class="dd-row-val">${app.vehicleType || '—'}</span></div>
+        <div class="dd-row"><span class="dd-row-label">Make &amp; model</span><span class="dd-row-val">${app.vehicleModel || '—'}</span></div>
+        <div class="dd-row"><span class="dd-row-label">Plate</span><span class="dd-row-val">${app.licensePlate || '—'}</span></div>
+        <div class="dd-row"><span class="dd-row-label">City / area</span><span class="dd-row-val">${app.city || '—'}</span></div>
 
-        const userRef = db.ref("users/" + uid);
-        const snapshot = await userRef.get();
+        <div class="dd-section-title">Didit verification</div>
+        <div class="dd-row"><span class="dd-row-label">Status</span><span class="dd-row-val">${veriBadge(app)}</span></div>
+        <div class="dd-row"><span class="dd-row-label">Sent</span><span class="dd-row-val">${app.verification?.emailSentAt ? fmtDate(app.verification.emailSentAt) : '—'}</span></div>
+        <div class="dd-row"><span class="dd-row-label">Last checked</span><span class="dd-row-val">${app.verification?.lastCheckedAt ? fmtDate(app.verification.lastCheckedAt) : '—'}</span></div>
+    `;
 
-        if (snapshot.exists()) {
-          // Existing user, check account type
-          if (snapshot.val().accountType !== "business") {
-            window.location.href = "food.html";
-          } else {
-            loginError.textContent = "Access denied. This is for customer accounts only.";
-            await auth.signOut();
-          }
-        } else {
-          // New user, create customer account
-          await db.ref("users/" + uid).set({
-            accountType: "customer",
-            fullName: user.displayName || "Customer",
-            email: user.email
-          });
-          window.location.href = "food.html";
-        }
-      } catch (error) {
-        loginError.textContent = error.message;
-      } finally {
-        spinnerOverlay.classList.add("hidden");
-      }
-    });
-  </script>
+    const canSend  = v === 'not_started' || v === 'declined';
+    const canCheck = v === 'sent' || v === 'in_review';
+    const canDecide = v === 'approved' && app.status === 'pending';
+
+    document.getElementById('dd-footer').innerHTML = `
+        ${canSend ? `<button class="dd-btn dd-btn-primary" id="btn-send" onclick="sendVerification('${uid}')"><i class="fa-solid fa-paper-plane"></i> Send verification email</button>` : ''}
+        ${canCheck ? `<button class="dd-btn dd-btn-secondary" id="btn-check" onclick="checkVerification('${uid}')"><i class="fa-solid fa-rotate"></i> Check verification status</button>` : ''}
+        ${app.status === 'pending' ? `
+            <button class="dd-btn dd-btn-approve" ${canDecide ? '' : 'disabled'} onclick="decideDriver('${uid}','approved')">
+                <i class="fa-solid fa-check"></i> Approve driver ${canDecide ? '' : '(verify ID first)'}
+            </button>
+            <button class="dd-btn dd-btn-reject" onclick="decideDriver('${uid}','rejected')"><i class="fa-solid fa-xmark"></i> Reject driver</button>
+        ` : `<div style="text-align:center;font-size:11.5px;color:#a1a1aa;font-weight:600;">Decision recorded: ${app.status}</div>`}
+    `;
+}
+
+/* ── Didit + email actions ── */
+window.sendVerification = async function(uid) {
+    const app = applications[uid];
+    const btn = document.getElementById('btn-send');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending…'; }
+
+    try {
+        const sessionRes = await fetch(`${DIDIT_BASE}/session/`, {
+            method: 'POST',
+            headers: { 'x-api-key': DIDIT_API_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                workflow_id: DIDIT_WORKFLOW_ID,
+                vendor_data: uid,
+                callback: DIDIT_CALLBACK_URL
+            })
+        });
+        if (!sessionRes.ok) throw new Error(`Didit session create failed (${sessionRes.status})`);
+        const session = await sessionRes.json();
+
+        if (!window.emailjs) throw new Error('EmailJS script did not load');
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            to_email: app.email,
+            to_name: app.name,
+            verification_link: session.url
+        });
+
+        await update(ref(database, `driverApplications/${uid}/verification`), {
+            sessionId: session.session_id,
+            sessionUrl: session.url,
+            status: 'sent',
+            emailSentAt: Date.now()
+        });
+
+        showToast('success', 'Verification link sent', `Emailed to ${app.email}.`);
+    } catch(e) {
+        console.error(e);
+        showToast('error', 'Could not send verification', e.message + ' — check Didit/EmailJS keys and that this page can reach verification.didit.me (CORS).');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send verification email'; }
+    }
+};
+
+window.checkVerification = async function(uid) {
+    const app = applications[uid];
+    const sessionId = app.verification?.sessionId;
+    if (!sessionId) { showToast('error', 'No session found', 'Send a verification link first.'); return; }
+
+    const btn = document.getElementById('btn-check');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking…'; }
+
+    try {
+        const res = await fetch(`${DIDIT_BASE}/session/${sessionId}/decision/`, {
+            headers: { 'x-api-key': DIDIT_API_KEY }
+        });
+        if (!res.ok) throw new Error(`Didit decision fetch failed (${res.status})`);
+        const decision = await res.json();
+
+        // Didit session statuses: Not Started, In Progress, In Review, Approved, Declined, Abandoned
+        const raw = (decision.status || '').toLowerCase().replace(/\s+/g, '_');
+        let mapped = 'sent';
+        if (raw === 'approved') mapped = 'approved';
+        else if (raw === 'declined' || raw === 'abandoned') mapped = 'declined';
+        else if (raw === 'in_review') mapped = 'in_review';
+        else if (raw === 'in_progress' || raw === 'not_started') mapped = 'sent';
+
+        await update(ref(database, `driverApplications/${uid}/verification`), {
+            status: mapped,
+            lastCheckedAt: Date.now(),
+            rawStatus: decision.status || null
+        });
+
+        showToast('info', 'Status updated', `Didit status: ${decision.status || 'unknown'}.`);
+    } catch(e) {
+        console.error(e);
+        showToast('error', 'Could not check status', e.message);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Check verification status'; }
+    }
+};
+
+window.decideDriver = async function(uid, decision) {
+    try {
+        await update(ref(database, `driverApplications/${uid}`), { status: decision, decidedAt: Date.now() });
+        showToast('success', decision === 'approved' ? 'Driver approved' : 'Driver rejected');
+        closeDetail();
+    } catch(e) {
+        showToast('error', 'Could not save decision', e.message);
+    }
+};
+</script>
 </body>
 </html>
