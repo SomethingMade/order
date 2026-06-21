@@ -8,8 +8,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{font-family:'Inter',sans-serif;background:#f4f4f5;color:#18181b;}
@@ -60,11 +58,7 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
 .badge-pending{background:#fffbeb;color:#b45309;}
 .badge-approved{background:#f0fdf4;color:#15803d;}
 .badge-rejected{background:#fef2f2;color:#b91c1c;}
-.badge-notstarted{background:#f1f5f9;color:#475569;}
-.badge-sent{background:#eff6ff;color:#1d4ed8;}
-.badge-inreview{background:#fef9c3;color:#854d0e;}
-.badge-verified{background:#f0fdf4;color:#15803d;}
-.badge-declined{background:#fef2f2;color:#b91c1c;}
+.badge-suspended{background:#f3e8ff;color:#7c3aed;}
 .app-bottom{display:flex;align-items:center;gap:14px;font-size:11px;color:#71717a;font-weight:500;}
 .app-bottom i{width:13px;text-align:center;color:#a1a1aa;}
 
@@ -94,13 +88,8 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
 .dd-btn-secondary{background:#f4f4f5;color:#18181b;}
 .dd-btn-approve{background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;}
 .dd-btn-reject{background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca;}
+.dd-btn-suspend{background:#faf5ff;color:#7c3aed;border:1.5px solid #e9d5ff;}
 .dd-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.verif-banner{padding:12px 14px;border-radius:12px;font-size:11.5px;font-weight:600;line-height:1.5;margin-bottom:4px;}
-.verif-banner.notstarted{background:#f1f5f9;color:#475569;}
-.verif-banner.sent{background:#eff6ff;color:#1d4ed8;}
-.verif-banner.inreview{background:#fef9c3;color:#854d0e;}
-.verif-banner.approved{background:#f0fdf4;color:#15803d;}
-.verif-banner.declined{background:#fef2f2;color:#b91c1c;}
 
 /* Toasts */
 #toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:380px;z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
@@ -122,7 +111,7 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
 <div id="signin-gate">
     <div class="signin-logo"><i class="fa-solid fa-shield-halved"></i></div>
     <div class="signin-title">CourierGo Admin</div>
-    <div class="signin-sub">Review driver applications and run identity verification.</div>
+    <div class="signin-sub">Review driver applications and manage their status.</div>
     <button class="google-btn" onclick="signInWithGoogle()">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
         Continue with Google
@@ -149,17 +138,15 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
         <div class="stats-row">
             <div class="stat-card"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Total</div></div>
             <div class="stat-card"><div class="stat-val" id="stat-pending">0</div><div class="stat-lbl">Pending</div></div>
-            <div class="stat-card"><div class="stat-val" id="stat-verified">0</div><div class="stat-lbl">Verified</div></div>
             <div class="stat-card"><div class="stat-val" id="stat-approved">0</div><div class="stat-lbl">Approved</div></div>
+            <div class="stat-card"><div class="stat-val" id="stat-suspended">0</div><div class="stat-lbl">Suspended</div></div>
         </div>
 
         <div class="filters" id="filters">
             <button class="filter-pill active" data-filter="all" onclick="setFilter('all')">All</button>
-            <button class="filter-pill" data-filter="pending" onclick="setFilter('pending')">Pending review</button>
-            <button class="filter-pill" data-filter="needs_verification" onclick="setFilter('needs_verification')">Needs verification</button>
-            <button class="filter-pill" data-filter="sent" onclick="setFilter('sent')">Link sent</button>
-            <button class="filter-pill" data-filter="verified" onclick="setFilter('verified')">Verified</button>
+            <button class="filter-pill" data-filter="pending" onclick="setFilter('pending')">Pending</button>
             <button class="filter-pill" data-filter="approved" onclick="setFilter('approved')">Approved</button>
+            <button class="filter-pill" data-filter="suspended" onclick="setFilter('suspended')">Suspended</button>
             <button class="filter-pill" data-filter="rejected" onclick="setFilter('rejected')">Rejected</button>
         </div>
 
@@ -218,24 +205,12 @@ const ADMIN_EMAILS = [
     "lordmade100@gmail.com"
 ];
 
-// Didit (https://business.didit.me) -- you create each verification session manually
-// on Didit's own dashboard (workflow: https://verify.didit.me/u/aSfXcMBVRjiFst6QwGpUvA),
-// then paste the resulting link into this admin dashboard. No Didit API key is used here.
-
-// EmailJS (https://emailjs.com) — used to send the verification link, no backend required
-const EMAILJS_PUBLIC_KEY  = "GNdk7XXIPtFVWGjsV";
-const EMAILJS_SERVICE_ID  = "service_lt6v0kd";
-const EMAILJS_TEMPLATE_ID = "template_9b1pvc9";
-// Your EmailJS template should use these variables: {{to_email}} {{to_name}} {{verification_link}}
-
 /* ════════════════════════════════════════════════════ */
 
 const fbApp    = initializeApp(firebaseConfig);
 const auth     = getAuth(fbApp);
 const database = getDatabase(fbApp);
 const provider = new GoogleAuthProvider();
-
-if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
 let applications = {};   // uid -> application object
 let currentFilter = 'all';
@@ -284,22 +259,9 @@ function attachApplicationsListener() {
     });
 }
 
-function veriStatus(app) {
-    return (app.verification && app.verification.status) || 'not_started';
-}
-
 function matchesFilter(app, filter) {
-    const v = veriStatus(app);
-    switch(filter) {
-        case 'all': return true;
-        case 'pending': return app.status === 'pending';
-        case 'needs_verification': return v === 'not_started' || v === 'declined';
-        case 'sent': return v === 'sent';
-        case 'verified': return v === 'approved';
-        case 'approved': return app.status === 'approved';
-        case 'rejected': return app.status === 'rejected';
-        default: return true;
-    }
+    if (filter === 'all') return true;
+    return (app.status || 'pending') === filter;
 }
 
 window.setFilter = function(f) {
@@ -310,27 +272,16 @@ window.setFilter = function(f) {
 
 function renderStats() {
     const list = Object.values(applications);
-    document.getElementById('stat-total').textContent    = list.length;
-    document.getElementById('stat-pending').textContent   = list.filter(a => a.status === 'pending').length;
-    document.getElementById('stat-verified').textContent  = list.filter(a => veriStatus(a) === 'approved').length;
-    document.getElementById('stat-approved').textContent  = list.filter(a => a.status === 'approved').length;
-}
-
-function veriBadge(app) {
-    const v = veriStatus(app);
-    const meta = {
-        not_started: { cls:'badge-notstarted', label:'Not verified' },
-        sent:         { cls:'badge-sent',       label:'Verification sent' },
-        in_review:    { cls:'badge-inreview',   label:'In review' },
-        approved:     { cls:'badge-verified',   label:'ID verified' },
-        declined:     { cls:'badge-declined',   label:'ID declined' }
-    }[v] || { cls:'badge-notstarted', label:'Not verified' };
-    return `<span class="badge ${meta.cls}">${meta.label}</span>`;
+    document.getElementById('stat-total').textContent     = list.length;
+    document.getElementById('stat-pending').textContent    = list.filter(a => (a.status || 'pending') === 'pending').length;
+    document.getElementById('stat-approved').textContent   = list.filter(a => a.status === 'approved').length;
+    document.getElementById('stat-suspended').textContent  = list.filter(a => a.status === 'suspended').length;
 }
 
 function statusBadge(app) {
-    const cls = { pending:'badge-pending', approved:'badge-approved', rejected:'badge-rejected' }[app.status] || 'badge-pending';
-    return `<span class="badge ${cls}">${app.status || 'pending'}</span>`;
+    const status = app.status || 'pending';
+    const cls = { pending:'badge-pending', approved:'badge-approved', rejected:'badge-rejected', suspended:'badge-suspended' }[status] || 'badge-pending';
+    return `<span class="badge ${cls}">${status}</span>`;
 }
 
 function fmtDate(ts) {
@@ -359,7 +310,7 @@ function renderList() {
                     <div class="app-name">${app.name || 'Unnamed applicant'}</div>
                     <div class="app-meta">${app.vehicleType || '—'} · ${app.city || '—'} · Applied ${fmtDate(app.timestamp)}</div>
                 </div>
-                <div class="badge-row">${statusBadge(app)}${veriBadge(app)}</div>
+                <div class="badge-row">${statusBadge(app)}</div>
             </div>
             <div class="app-bottom">
                 <span><i class="fa-solid fa-phone"></i> ${app.phone || '—'}</span>
@@ -385,23 +336,12 @@ window.closeDetail = function() {
 function renderDetail(uid) {
     const app = applications[uid];
     if (!app) { closeDetail(); return; }
-    const v = veriStatus(app);
+    const status = app.status || 'pending';
 
     document.getElementById('dd-name').textContent = app.name || 'Unnamed applicant';
     document.getElementById('dd-sub').textContent  = `Applied ${fmtDate(app.timestamp)} · ${app.vehicleType || '—'}`;
 
-    const bannerMeta = {
-        not_started: { cls:'notstarted', text:'No verification link has been sent yet. Create a session on Didit\u2019s dashboard using the details below, paste the link, then send it.' },
-        sent:         { cls:'sent',       text:'Verification link sent — check Didit\u2019s dashboard for the outcome, then mark it below.' },
-        approved:     { cls:'approved',   text:'You marked this driver\u2019s ID as verified.' },
-        declined:     { cls:'declined',   text:'You marked this driver\u2019s ID as declined.' }
-    }[v];
-
     document.getElementById('dd-body').innerHTML = `
-        <div class="verif-banner ${bannerMeta.cls}">
-            <i class="fa-solid fa-shield-halved" style="margin-right:6px;"></i>${bannerMeta.text}
-        </div>
-
         <div class="dd-section-title">Applicant</div>
         <div class="dd-row"><span class="dd-row-label">Full name</span><span class="dd-row-val">${app.name || '—'}</span></div>
         <div class="dd-row"><span class="dd-row-label">Email</span><span class="dd-row-val">${app.email || '—'}</span></div>
@@ -415,88 +355,24 @@ function renderDetail(uid) {
         <div class="dd-row"><span class="dd-row-label">Plate</span><span class="dd-row-val">${app.licensePlate || '—'}</span></div>
         <div class="dd-row"><span class="dd-row-label">City / area</span><span class="dd-row-val">${app.city || '—'}</span></div>
 
-        <div class="dd-section-title">Identity verification</div>
-        <div class="dd-row"><span class="dd-row-label">Status</span><span class="dd-row-val">${veriBadge(app)}</span></div>
-        <div class="dd-row"><span class="dd-row-label">Link sent</span><span class="dd-row-val">${app.verification?.emailSentAt ? fmtDate(app.verification.emailSentAt) : '—'}</span></div>
-        <div class="dd-row"><span class="dd-row-label">Last decided</span><span class="dd-row-val">${app.verification?.decidedAt ? fmtDate(app.verification.decidedAt) : '—'}</span></div>
-
-        ${(v === 'not_started' || v === 'declined') ? `
-        <div class="dd-section-title">Paste Didit verification link</div>
-        <input id="dd-link-input" class="phone-field" style="padding:12px 14px;border:2px solid #e4e4e7;border-radius:12px;font-size:12.5px;width:100%;font-family:'Inter',sans-serif;" type="url" placeholder="https://verify.didit.me/s/..." value="${app.verification?.sessionUrl || ''}">
-        <p style="font-size:11px;color:#a1a1aa;margin-top:8px;line-height:1.5;">Create the session for this driver on business.didit.me, copy the link it gives you, paste it here, then send.</p>
-        ` : ''}
+        <div class="dd-section-title">Status</div>
+        <div class="dd-row"><span class="dd-row-label">Current</span><span class="dd-row-val">${statusBadge(app)}</span></div>
+        <div class="dd-row"><span class="dd-row-label">Last decided</span><span class="dd-row-val">${app.decidedAt ? fmtDate(app.decidedAt) : '—'}</span></div>
     `;
 
-    const canSend = v === 'not_started' || v === 'declined';
-    const canDecideVerification = v === 'sent';
-    const canApproveDriver = v === 'approved' && app.status === 'pending';
-
     document.getElementById('dd-footer').innerHTML = `
-        ${canSend ? `<button class="dd-btn dd-btn-primary" id="btn-send" onclick="sendLinkToDriver('${uid}')"><i class="fa-solid fa-paper-plane"></i> Send link to driver</button>` : ''}
-        ${canDecideVerification ? `
-            <button class="dd-btn dd-btn-approve" onclick="markVerification('${uid}','approved')"><i class="fa-solid fa-check"></i> Mark ID verified</button>
-            <button class="dd-btn dd-btn-reject" onclick="markVerification('${uid}','declined')"><i class="fa-solid fa-xmark"></i> Mark ID declined</button>
-        ` : ''}
-        ${app.status === 'pending' ? `
-            <button class="dd-btn dd-btn-approve" ${canApproveDriver ? '' : 'disabled'} onclick="decideDriver('${uid}','approved')">
-                <i class="fa-solid fa-check"></i> Approve driver ${canApproveDriver ? '' : '(verify ID first)'}
-            </button>
-            <button class="dd-btn dd-btn-reject" onclick="decideDriver('${uid}','rejected')"><i class="fa-solid fa-xmark"></i> Reject driver</button>
-        ` : `<div style="text-align:center;font-size:11.5px;color:#a1a1aa;font-weight:600;">Decision recorded: ${app.status}</div>`}
+        <button class="dd-btn dd-btn-approve" ${status === 'approved' ? 'disabled' : ''} onclick="decideDriver('${uid}','approved')"><i class="fa-solid fa-check"></i> Approve driver</button>
+        <button class="dd-btn dd-btn-suspend" ${status === 'suspended' ? 'disabled' : ''} onclick="decideDriver('${uid}','suspended')"><i class="fa-solid fa-pause"></i> Suspend driver</button>
+        <button class="dd-btn dd-btn-reject" ${status === 'rejected' ? 'disabled' : ''} onclick="decideDriver('${uid}','rejected')"><i class="fa-solid fa-xmark"></i> Reject driver</button>
     `;
 }
 
-/* ── Manual verification + email actions ── */
-window.sendLinkToDriver = async function(uid) {
-    const app = applications[uid];
-    const btn = document.getElementById('btn-send');
-    const linkInput = document.getElementById('dd-link-input');
-    const link = linkInput ? linkInput.value.trim() : '';
-
-    if (!link) { showToast('error', 'Paste the link first', 'Create the session on Didit\u2019s dashboard and paste the link before sending.'); return; }
-    if (!app.email) { showToast('error', 'No email on file', 'This applicant has no email address saved.'); return; }
-
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending…'; }
-
-    try {
-        if (!window.emailjs) throw new Error('EmailJS script did not load');
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-            to_email: app.email,
-            to_name: app.name,
-            verification_link: link
-        });
-
-        await update(ref(database, `driverApplications/${uid}/verification`), {
-            sessionUrl: link,
-            status: 'sent',
-            emailSentAt: Date.now()
-        });
-
-        showToast('success', 'Verification link sent', `Emailed to ${app.email}.`);
-    } catch(e) {
-        console.error(e);
-        showToast('error', 'Could not send email', e.message);
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send link to driver'; }
-    }
-};
-
-window.markVerification = async function(uid, decision) {
-    try {
-        await update(ref(database, `driverApplications/${uid}/verification`), {
-            status: decision,
-            decidedAt: Date.now()
-        });
-        showToast('success', decision === 'approved' ? 'Marked as verified' : 'Marked as declined');
-    } catch(e) {
-        showToast('error', 'Could not save', e.message);
-    }
-};
-
 window.decideDriver = async function(uid, decision) {
+    const labels = { approved:'Driver approved', suspended:'Driver suspended', rejected:'Driver rejected' };
     try {
         await update(ref(database, `driverApplications/${uid}`), { status: decision, decidedAt: Date.now() });
-        showToast('success', decision === 'approved' ? 'Driver approved' : 'Driver rejected');
-        closeDetail();
+        showToast('success', labels[decision] || 'Status updated');
+        renderDetail(uid);
     } catch(e) {
         showToast('error', 'Could not save decision', e.message);
     }
