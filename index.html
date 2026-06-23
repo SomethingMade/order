@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CourierGo Admin · Driver Verification</title>
+<title>CourierGo Admin</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{font-family:'Inter',sans-serif;background:#f4f4f5;color:#18181b;}
+html,body{font-family:'Inter',sans-serif;background:#f4f4f5;color:#18181b;min-height:100vh;}
 button{font-family:inherit;}
+input{font-family:inherit;}
 
 /* ── Sign in ── */
 #signin-gate{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;z-index:300;}
@@ -33,21 +34,27 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 .admin-email{font-size:11.5px;color:#71717a;font-weight:600;}
 .icon-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid #e4e4e7;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#52525b;font-size:12px;}
 
-main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
+main{max-width:980px;margin:0 auto;padding:20px 16px 80px;}
 
-/* Stats */
+/* ── Page-level tabs ── */
+.page-tabs{display:flex;gap:0;border-bottom:2px solid #e4e4e7;margin-bottom:22px;}
+.page-tab{padding:10px 18px;font-size:12.5px;font-weight:700;color:#71717a;cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .12s,border-color .12s;display:flex;align-items:center;gap:7px;}
+.page-tab.active{color:#18181b;border-bottom-color:#18181b;}
+.page-tab i{font-size:11px;}
+
+/* ── Stats ── */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px;}
 .stat-card{background:#fff;border-radius:14px;padding:13px;border:1px solid #e4e4e7;}
 .stat-val{font-size:19px;font-weight:800;}
 .stat-lbl{font-size:9.5px;color:#a1a1aa;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;margin-top:2px;}
 
-/* Filter pills */
+/* ── Filter pills ── */
 .filters{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;padding-bottom:2px;-ms-overflow-style:none;scrollbar-width:none;}
 .filters::-webkit-scrollbar{display:none;}
 .filter-pill{flex-shrink:0;padding:8px 14px;border-radius:999px;border:1.5px solid #e4e4e7;background:#fff;font-size:11.5px;font-weight:700;color:#71717a;cursor:pointer;white-space:nowrap;}
 .filter-pill.active{background:#18181b;border-color:#18181b;color:#fff;}
 
-/* Application cards */
+/* ── Application cards ── */
 .app-card{background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .12s;}
 .app-card:hover{border-color:#a1a1aa;}
 .app-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;}
@@ -61,7 +68,6 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
 .badge-suspended{background:#f3e8ff;color:#7c3aed;}
 .app-bottom{display:flex;align-items:center;gap:14px;font-size:11px;color:#71717a;font-weight:500;}
 .app-bottom i{width:13px;text-align:center;color:#a1a1aa;}
-
 .empty-state{text-align:center;padding:60px 20px;color:#a1a1aa;}
 .empty-state i{font-size:30px;opacity:0.3;margin-bottom:10px;display:block;}
 .empty-state p{font-size:13px;}
@@ -91,7 +97,59 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
 .dd-btn-suspend{background:#faf5ff;color:#7c3aed;border:1.5px solid #e9d5ff;}
 .dd-btn:disabled{opacity:0.5;cursor:not-allowed;}
 
-/* Toasts */
+/* ── Subscriptions page ── */
+#page-subscriptions{display:none;}
+.sub-search-bar{display:flex;gap:8px;margin-bottom:18px;}
+.sub-search-input{flex:1;padding:11px 16px;border:1.5px solid #e4e4e7;border-radius:12px;font-size:13px;font-weight:500;color:#18181b;outline:none;transition:border-color .15s;background:#fff;}
+.sub-search-input:focus{border-color:#18181b;}
+.sub-search-btn{padding:11px 18px;background:#18181b;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;}
+.sub-search-btn:hover{opacity:0.88;}
+.sub-search-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+.user-card{background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.user-card-left{display:flex;align-items:center;gap:12px;}
+.user-avatar{width:40px;height:40px;border-radius:50%;background:#18181b;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0;overflow:hidden;}
+.user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.user-name{font-size:13.5px;font-weight:800;color:#18181b;}
+.user-email{font-size:11px;color:#a1a1aa;margin-top:2px;}
+.user-meta-row{display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap;}
+.user-meta-tag{font-size:9.5px;font-weight:700;letter-spacing:0.2px;padding:3px 8px;border-radius:999px;}
+.tag-pro{background:#eff6ff;color:#1d4ed8;border:1.5px solid #bfdbfe;}
+.tag-free{background:#f4f4f5;color:#71717a;}
+.tag-deliveries{background:#fafafa;color:#52525b;border:1.5px solid #e4e4e7;}
+
+.sub-toggle-btn{padding:9px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s;white-space:nowrap;flex-shrink:0;}
+.sub-toggle-btn.grant{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;}
+.sub-toggle-btn.grant:hover{background:#dbeafe;border-color:#93c5fd;}
+.sub-toggle-btn.revoke{background:#fef2f2;color:#b91c1c;border-color:#fecaca;}
+.sub-toggle-btn.revoke:hover{background:#fee2e2;border-color:#fca5a5;}
+.sub-toggle-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+.sub-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
+
+/* ── Pricing page ── */
+#page-pricing{display:none;}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px;}
+.pricing-card{background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:18px;}
+.pricing-card-header{display:flex;align-items:center;gap:11px;margin-bottom:16px;}
+.pricing-card-icon{width:36px;height:36px;border-radius:10px;background:#f4f4f5;display:flex;align-items:center;justify-content:center;font-size:15px;color:#52525b;}
+.pricing-card-name{font-size:13.5px;font-weight:800;color:#18181b;}
+.pricing-card-desc{font-size:11px;color:#a1a1aa;margin-top:1px;}
+.pricing-input-row{display:flex;align-items:center;gap:8px;}
+.pricing-prefix{font-size:14px;font-weight:700;color:#18181b;}
+.pricing-input{flex:1;padding:10px 12px;border:2px solid #e4e4e7;border-radius:10px;font-size:15px;font-weight:700;color:#18181b;outline:none;transition:border-color .15s;background:#fff;}
+.pricing-input:focus{border-color:#18181b;}
+.pricing-save-btn{padding:10px 14px;background:#18181b;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s;white-space:nowrap;}
+.pricing-save-btn:hover{opacity:0.85;}
+.pricing-save-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.pricing-last-updated{font-size:10.5px;color:#a1a1aa;margin-top:8px;}
+.pricing-section-title{font-size:11.5px;font-weight:800;color:#18181b;letter-spacing:0.1px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #e4e4e7;}
+
+.km-card{background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:18px;margin-bottom:12px;}
+.km-card-header{display:flex;align-items:center;gap:11px;margin-bottom:16px;}
+.km-card-icon{width:36px;height:36px;border-radius:10px;background:#18181b;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;}
+
+/* ── Toasts ── */
 #toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:380px;z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
 .toast{width:100%;padding:13px 15px;border-radius:14px;font-size:12.5px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 6px 24px rgba(0,0,0,0.14);opacity:0;transform:translateY(8px);transition:opacity .28s,transform .28s;pointer-events:auto;background:#fff;}
 .toast.show{opacity:1;transform:translateY(0);}
@@ -101,17 +159,45 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
 .toast-info{border:1.5px solid #bfdbfe;color:#1d4ed8;}
 .toast-title{font-weight:700;}
 .toast-msg{opacity:0.8;margin-top:2px;}
+
+/* ── Confirm modal ── */
+#confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;opacity:0;pointer-events:none;transition:opacity .2s;display:flex;align-items:center;justify-content:center;padding:16px;}
+#confirm-overlay.open{opacity:1;pointer-events:auto;}
+#confirm-modal{background:#fff;border-radius:20px;padding:24px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+.confirm-title{font-size:16px;font-weight:800;margin-bottom:6px;}
+.confirm-msg{font-size:13px;color:#71717a;line-height:1.55;margin-bottom:20px;}
+.confirm-btns{display:flex;gap:8px;}
+.confirm-btn{flex:1;padding:12px;border-radius:12px;border:none;font-size:13px;font-weight:700;cursor:pointer;}
+.confirm-cancel{background:#f4f4f5;color:#18181b;}
+.confirm-ok{background:#18181b;color:#fff;}
+.confirm-ok.danger{background:#dc2626;}
+
+/* ── Search result hint ── */
+.search-hint{font-size:11.5px;color:#a1a1aa;margin-bottom:14px;font-weight:500;}
+.search-hint b{color:#18181b;}
 </style>
 </head>
 <body>
 
 <div id="toast-container"></div>
 
+<!-- ══ Confirm modal ══ -->
+<div id="confirm-overlay">
+    <div id="confirm-modal">
+        <div class="confirm-title" id="confirm-title">Are you sure?</div>
+        <div class="confirm-msg" id="confirm-msg">This action cannot be undone.</div>
+        <div class="confirm-btns">
+            <button class="confirm-btn confirm-cancel" onclick="closeConfirm()">Cancel</button>
+            <button class="confirm-btn confirm-ok" id="confirm-ok-btn" onclick="runConfirmAction()">Confirm</button>
+        </div>
+    </div>
+</div>
+
 <!-- ══ Sign-in ══ -->
 <div id="signin-gate">
     <div class="signin-logo"><i class="fa-solid fa-shield-halved"></i></div>
     <div class="signin-title">CourierGo Admin</div>
-    <div class="signin-sub">Review driver applications and manage their status.</div>
+    <div class="signin-sub">Manage drivers, subscriptions, and platform pricing.</div>
     <button class="google-btn" onclick="signInWithGoogle()">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
         Continue with Google
@@ -125,7 +211,7 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
             <div class="brand-icon"><i class="fa-solid fa-truck-fast"></i></div>
             <div>
                 <div class="brand-text">CourierGo Admin</div>
-                <div class="brand-sub">DRIVER VERIFICATION</div>
+                <div class="brand-sub">OPERATIONS CONSOLE</div>
             </div>
         </div>
         <div class="admin-area">
@@ -135,30 +221,149 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
     </header>
 
     <main>
-        <div class="stats-row">
-            <div class="stat-card"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Total</div></div>
-            <div class="stat-card"><div class="stat-val" id="stat-pending">0</div><div class="stat-lbl">Pending</div></div>
-            <div class="stat-card"><div class="stat-val" id="stat-approved">0</div><div class="stat-lbl">Approved</div></div>
-            <div class="stat-card"><div class="stat-val" id="stat-suspended">0</div><div class="stat-lbl">Suspended</div></div>
+        <!-- Page-level navigation tabs -->
+        <div class="page-tabs">
+            <button class="page-tab active" id="ptab-drivers" onclick="showPage('drivers')">
+                <i class="fa-solid fa-id-card"></i> Driver Verification
+            </button>
+            <button class="page-tab" id="ptab-subscriptions" onclick="showPage('subscriptions')">
+                <i class="fa-solid fa-gem"></i> Subscriptions
+            </button>
+            <button class="page-tab" id="ptab-pricing" onclick="showPage('pricing')">
+                <i class="fa-solid fa-tags"></i> Pricing
+            </button>
         </div>
 
-        <div class="filters" id="filters">
-            <button class="filter-pill active" data-filter="all" onclick="setFilter('all')">All</button>
-            <button class="filter-pill" data-filter="pending" onclick="setFilter('pending')">Pending</button>
-            <button class="filter-pill" data-filter="approved" onclick="setFilter('approved')">Approved</button>
-            <button class="filter-pill" data-filter="suspended" onclick="setFilter('suspended')">Suspended</button>
-            <button class="filter-pill" data-filter="rejected" onclick="setFilter('rejected')">Rejected</button>
+        <!-- ════ DRIVERS PAGE ════ -->
+        <div id="page-drivers">
+            <div class="stats-row">
+                <div class="stat-card"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Total</div></div>
+                <div class="stat-card"><div class="stat-val" id="stat-pending">0</div><div class="stat-lbl">Pending</div></div>
+                <div class="stat-card"><div class="stat-val" id="stat-approved">0</div><div class="stat-lbl">Approved</div></div>
+                <div class="stat-card"><div class="stat-val" id="stat-suspended">0</div><div class="stat-lbl">Suspended</div></div>
+            </div>
+            <div class="filters">
+                <button class="filter-pill active" data-filter="all" onclick="setFilter('all')">All</button>
+                <button class="filter-pill" data-filter="pending" onclick="setFilter('pending')">Pending</button>
+                <button class="filter-pill" data-filter="approved" onclick="setFilter('approved')">Approved</button>
+                <button class="filter-pill" data-filter="suspended" onclick="setFilter('suspended')">Suspended</button>
+                <button class="filter-pill" data-filter="rejected" onclick="setFilter('rejected')">Rejected</button>
+            </div>
+            <div id="list"></div>
+            <div id="empty-state" class="empty-state" style="display:none;">
+                <i class="fa-solid fa-inbox"></i>
+                <p>No applications in this view.</p>
+            </div>
         </div>
 
-        <div id="list"></div>
-        <div id="empty-state" class="empty-state" style="display:none;">
-            <i class="fa-solid fa-inbox"></i>
-            <p>No applications in this view.</p>
+        <!-- ════ SUBSCRIPTIONS PAGE ════ -->
+        <div id="page-subscriptions">
+            <div class="sub-stats-row">
+                <div class="stat-card"><div class="stat-val" id="sub-stat-total">0</div><div class="stat-lbl">Total Users</div></div>
+                <div class="stat-card"><div class="stat-val" id="sub-stat-pro">0</div><div class="stat-lbl">Pro Subscribers</div></div>
+                <div class="stat-card"><div class="stat-val" id="sub-stat-free">0</div><div class="stat-lbl">Free Users</div></div>
+            </div>
+            <div class="sub-search-bar">
+                <input id="user-search-input" class="sub-search-input" type="text" placeholder="Search by name or email…" onkeydown="if(event.key==='Enter')searchUsers()">
+                <button class="sub-search-btn" id="user-search-btn" onclick="searchUsers()">
+                    <i class="fa-solid fa-magnifying-glass"></i> Search
+                </button>
+            </div>
+            <div id="sub-search-hint" class="search-hint" style="display:none;"></div>
+            <div id="users-list"></div>
+            <div id="sub-empty-state" class="empty-state" style="display:none;">
+                <i class="fa-solid fa-users"></i>
+                <p id="sub-empty-msg">Search for a user above to manage their Pro subscription.</p>
+            </div>
+        </div>
+
+        <!-- ════ PRICING PAGE ════ -->
+        <div id="page-pricing">
+            <div class="km-card">
+                <div class="km-card-header">
+                    <div class="km-card-icon"><i class="fa-solid fa-route"></i></div>
+                    <div>
+                        <div class="pricing-card-name">Per-kilometre rate</div>
+                        <div class="pricing-card-desc">Added on top of the base fare based on route distance</div>
+                    </div>
+                </div>
+                <div class="pricing-input-row">
+                    <span class="pricing-prefix">R</span>
+                    <input id="price-perKmRate" class="pricing-input" type="number" min="0" step="0.5" placeholder="3.50">
+                    <span style="font-size:12px;color:#a1a1aa;font-weight:600;white-space:nowrap;">/ km</span>
+                    <button class="pricing-save-btn" onclick="savePricing('perKmRate')">Save</button>
+                </div>
+                <div class="pricing-last-updated" id="pricing-perKmRate-updated"></div>
+            </div>
+
+            <div class="pricing-section-title">Package base prices</div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-card-header">
+                        <div class="pricing-card-icon"><i class="fa-solid fa-utensils"></i></div>
+                        <div><div class="pricing-card-name">Food Delivery</div><div class="pricing-card-desc">Restaurant orders · max 10 km</div></div>
+                    </div>
+                    <div class="pricing-input-row">
+                        <span class="pricing-prefix">R</span>
+                        <input id="price-food" class="pricing-input" type="number" min="0" step="1" placeholder="45">
+                        <button class="pricing-save-btn" onclick="savePricing('food')">Save</button>
+                    </div>
+                    <div class="pricing-last-updated" id="pricing-food-updated"></div>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-card-header">
+                        <div class="pricing-card-icon"><i class="fa-solid fa-envelope"></i></div>
+                        <div><div class="pricing-card-name">Document</div><div class="pricing-card-desc">Up to 1 kg</div></div>
+                    </div>
+                    <div class="pricing-input-row">
+                        <span class="pricing-prefix">R</span>
+                        <input id="price-document" class="pricing-input" type="number" min="0" step="1" placeholder="40">
+                        <button class="pricing-save-btn" onclick="savePricing('document')">Save</button>
+                    </div>
+                    <div class="pricing-last-updated" id="pricing-document-updated"></div>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-card-header">
+                        <div class="pricing-card-icon"><i class="fa-solid fa-box-open"></i></div>
+                        <div><div class="pricing-card-name">Small Parcel</div><div class="pricing-card-desc">Up to 5 kg</div></div>
+                    </div>
+                    <div class="pricing-input-row">
+                        <span class="pricing-prefix">R</span>
+                        <input id="price-small" class="pricing-input" type="number" min="0" step="1" placeholder="65">
+                        <button class="pricing-save-btn" onclick="savePricing('small')">Save</button>
+                    </div>
+                    <div class="pricing-last-updated" id="pricing-small-updated"></div>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-card-header">
+                        <div class="pricing-card-icon"><i class="fa-solid fa-box"></i></div>
+                        <div><div class="pricing-card-name">Medium Box</div><div class="pricing-card-desc">Up to 15 kg</div></div>
+                    </div>
+                    <div class="pricing-input-row">
+                        <span class="pricing-prefix">R</span>
+                        <input id="price-medium" class="pricing-input" type="number" min="0" step="1" placeholder="110">
+                        <button class="pricing-save-btn" onclick="savePricing('medium')">Save</button>
+                    </div>
+                    <div class="pricing-last-updated" id="pricing-medium-updated"></div>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-card-header">
+                        <div class="pricing-card-icon"><i class="fa-solid fa-pallet"></i></div>
+                        <div><div class="pricing-card-name">Large Freight</div><div class="pricing-card-desc">Up to 30 kg</div></div>
+                    </div>
+                    <div class="pricing-input-row">
+                        <span class="pricing-prefix">R</span>
+                        <input id="price-large" class="pricing-input" type="number" min="0" step="1" placeholder="180">
+                        <button class="pricing-save-btn" onclick="savePricing('large')">Save</button>
+                    </div>
+                    <div class="pricing-last-updated" id="pricing-large-updated"></div>
+                </div>
+            </div>
         </div>
     </main>
 </div>
 
-<!-- ══ Detail drawer ══ -->
+<!-- ══ Driver Detail drawer ══ -->
 <div id="detail-overlay" onclick="closeDetail()"></div>
 <div id="detail-drawer">
     <div class="dd-header">
@@ -168,12 +373,8 @@ main{max-width:920px;margin:0 auto;padding:18px 16px 80px;}
         </div>
         <button class="dd-close" onclick="closeDetail()"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="dd-body" id="dd-body">
-        <!-- populated by renderDetail() -->
-    </div>
-    <div class="dd-footer" id="dd-footer">
-        <!-- populated by renderDetail() -->
-    </div>
+    <div class="dd-body" id="dd-body"></div>
+    <div class="dd-footer" id="dd-footer"></div>
 </div>
 
 <script type="module">
@@ -182,14 +383,9 @@ import {
     getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import {
-    getDatabase, ref, onValue, update
+    getDatabase, ref, onValue, update, get, set, remove, query, orderByChild
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-/* ════════════════════════════════════════════════════
-   CONFIG — replace the placeholders below
-════════════════════════════════════════════════════ */
-
-// Same Firebase project as CourierGo
 const firebaseConfig = {
     apiKey:            "AIzaSyBQSPwpVbGrdCuOoyitAeWQHIeipj2MgIY",
     authDomain:        "newstart-64c43.firebaseapp.com",
@@ -200,37 +396,67 @@ const firebaseConfig = {
     appId:             "1:941619830061:web:de9e0f791eb8f6eacf87a4"
 };
 
-// Only these signed-in Google accounts can access this dashboard
-const ADMIN_EMAILS = [
-    "lordmade100@gmail.com"
-];
-
-/* ════════════════════════════════════════════════════ */
+const ADMIN_EMAILS = ["lordmade100@gmail.com"];
 
 const fbApp    = initializeApp(firebaseConfig);
 const auth     = getAuth(fbApp);
 const database = getDatabase(fbApp);
 const provider = new GoogleAuthProvider();
 
-let applications = {};   // uid -> application object
-let currentFilter = 'all';
+/* ── State ── */
+let applications   = {};
+let allUsers       = {};
+let currentFilter  = 'all';
 let activeDetailUid = null;
+let pricingData    = {};
 
+/* ── Toast ── */
 function showToast(type, title, msg, duration = 4200) {
     const icons = { success:'fa-circle-check', error:'fa-circle-xmark', info:'fa-circle-info' };
     const t = document.createElement('div');
     t.className = `toast toast-${type}`;
-    t.innerHTML = `<i class="fa-solid ${icons[type]} toast-icon" style="margin-top:1px;"></i>
+    t.innerHTML = `<i class="fa-solid ${icons[type]}" style="margin-top:1px;font-size:14px;flex-shrink:0;"></i>
         <div><div class="toast-title">${title}</div>${msg ? `<div class="toast-msg">${msg}</div>` : ''}</div>`;
     document.getElementById('toast-container').appendChild(t);
     requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
     setTimeout(() => { t.classList.add('hide'); t.addEventListener('transitionend', () => t.remove(), { once:true }); }, duration);
 }
+window.showToast = showToast;
+
+/* ── Confirm modal ── */
+let confirmAction = null;
+window.openConfirm = function(title, msg, okLabel, okDanger, fn) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-msg').textContent   = msg;
+    const okBtn = document.getElementById('confirm-ok-btn');
+    okBtn.textContent = okLabel;
+    okBtn.className = 'confirm-btn confirm-ok' + (okDanger ? ' danger' : '');
+    confirmAction = fn;
+    document.getElementById('confirm-overlay').classList.add('open');
+};
+window.closeConfirm = function() {
+    document.getElementById('confirm-overlay').classList.remove('open');
+    confirmAction = null;
+};
+window.runConfirmAction = function() {
+    if (confirmAction) confirmAction();
+    closeConfirm();
+};
+
+/* ── Page navigation ── */
+window.showPage = function(page) {
+    ['drivers','subscriptions','pricing'].forEach(p => {
+        document.getElementById(`page-${p}`).style.display = p === page ? 'block' : 'none';
+        document.getElementById(`ptab-${p}`).classList.toggle('active', p === page);
+    });
+    if (page === 'subscriptions' && Object.keys(allUsers).length === 0) loadAllUsers();
+    if (page === 'pricing') loadPricingData();
+};
 
 /* ── Auth ── */
 window.signInWithGoogle = async function() {
     try { await signInWithPopup(auth, provider); }
-    catch(e) { if (e.code !== 'auth/popup-closed-by-user') showToast('error','Sign-in failed', e.message); }
+    catch(e) { if (e.code !== 'auth/popup-closed-by-user') showToast('error', 'Sign-in failed', e.message); }
 };
 window.signOutAdmin = async function() { await fbSignOut(auth); };
 
@@ -241,7 +467,7 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById('admin-email').textContent = user.email;
         attachApplicationsListener();
     } else if (user) {
-        showToast('error', 'Not authorized', 'This Google account is not on the admin list.');
+        showToast('error', 'Not authorized', 'This account is not on the admin list.');
         fbSignOut(auth);
     } else {
         document.getElementById('app').style.display = 'none';
@@ -249,7 +475,9 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-/* ── Data ── */
+/* ════════════════════════════════════════
+   DRIVERS
+════════════════════════════════════════ */
 function attachApplicationsListener() {
     onValue(ref(database, 'driverApplications'), (snap) => {
         applications = snap.val() || {};
@@ -273,9 +501,9 @@ window.setFilter = function(f) {
 function renderStats() {
     const list = Object.values(applications);
     document.getElementById('stat-total').textContent     = list.length;
-    document.getElementById('stat-pending').textContent    = list.filter(a => (a.status || 'pending') === 'pending').length;
-    document.getElementById('stat-approved').textContent   = list.filter(a => a.status === 'approved').length;
-    document.getElementById('stat-suspended').textContent  = list.filter(a => a.status === 'suspended').length;
+    document.getElementById('stat-pending').textContent   = list.filter(a => (a.status || 'pending') === 'pending').length;
+    document.getElementById('stat-approved').textContent  = list.filter(a => a.status === 'approved').length;
+    document.getElementById('stat-suspended').textContent = list.filter(a => a.status === 'suspended').length;
 }
 
 function statusBadge(app) {
@@ -293,16 +521,11 @@ function renderList() {
     const listEl  = document.getElementById('list');
     const emptyEl = document.getElementById('empty-state');
     const entries = Object.entries(applications)
-        .filter(([uid, app]) => matchesFilter(app, currentFilter))
-        .sort((a,b) => (b[1].timestamp||0) - (a[1].timestamp||0));
+        .filter(([, app]) => matchesFilter(app, currentFilter))
+        .sort((a, b) => (b[1].timestamp||0) - (a[1].timestamp||0));
 
-    if (!entries.length) {
-        listEl.innerHTML = '';
-        emptyEl.style.display = 'block';
-        return;
-    }
+    if (!entries.length) { listEl.innerHTML = ''; emptyEl.style.display = 'block'; return; }
     emptyEl.style.display = 'none';
-
     listEl.innerHTML = entries.map(([uid, app]) => `
         <div class="app-card" onclick="openDetail('${uid}')">
             <div class="app-top">
@@ -320,7 +543,6 @@ function renderList() {
     `).join('');
 }
 
-/* ── Detail drawer ── */
 window.openDetail = function(uid) {
     activeDetailUid = uid;
     renderDetail(uid);
@@ -337,10 +559,8 @@ function renderDetail(uid) {
     const app = applications[uid];
     if (!app) { closeDetail(); return; }
     const status = app.status || 'pending';
-
     document.getElementById('dd-name').textContent = app.name || 'Unnamed applicant';
     document.getElementById('dd-sub').textContent  = `Applied ${fmtDate(app.timestamp)} · ${app.vehicleType || '—'}`;
-
     document.getElementById('dd-body').innerHTML = `
         <div class="dd-section-title">Applicant</div>
         <div class="dd-row"><span class="dd-row-label">Full name</span><span class="dd-row-val">${app.name || '—'}</span></div>
@@ -348,22 +568,20 @@ function renderDetail(uid) {
         <div class="dd-row"><span class="dd-row-label">Mobile</span><span class="dd-row-val">${app.phone || '—'}</span></div>
         <div class="dd-row"><span class="dd-row-label">SA ID number</span><span class="dd-row-val">${app.idNumber || '—'}</span></div>
         <div class="dd-row"><span class="dd-row-label">Driver's license</span><span class="dd-row-val">${app.license || '—'}</span></div>
-
         <div class="dd-section-title">Vehicle</div>
         <div class="dd-row"><span class="dd-row-label">Type</span><span class="dd-row-val">${app.vehicleType || '—'}</span></div>
         <div class="dd-row"><span class="dd-row-label">Make &amp; model</span><span class="dd-row-val">${app.vehicleModel || '—'}</span></div>
         <div class="dd-row"><span class="dd-row-label">Plate</span><span class="dd-row-val">${app.licensePlate || '—'}</span></div>
         <div class="dd-row"><span class="dd-row-label">City / area</span><span class="dd-row-val">${app.city || '—'}</span></div>
-
         <div class="dd-section-title">Status</div>
         <div class="dd-row"><span class="dd-row-label">Current</span><span class="dd-row-val">${statusBadge(app)}</span></div>
+        <div class="dd-row"><span class="dd-row-label">POPIA consent</span><span class="dd-row-val">${app.popiaConcsentGiven ? '<span style="color:#15803d;font-weight:700;">Given</span>' : '<span style="color:#b91c1c;">Not given</span>'}</span></div>
         <div class="dd-row"><span class="dd-row-label">Last decided</span><span class="dd-row-val">${app.decidedAt ? fmtDate(app.decidedAt) : '—'}</span></div>
     `;
-
     document.getElementById('dd-footer').innerHTML = `
         <button class="dd-btn dd-btn-approve" ${status === 'approved' ? 'disabled' : ''} onclick="decideDriver('${uid}','approved')"><i class="fa-solid fa-check"></i> Approve driver</button>
         <button class="dd-btn dd-btn-suspend" ${status === 'suspended' ? 'disabled' : ''} onclick="decideDriver('${uid}','suspended')"><i class="fa-solid fa-pause"></i> Suspend driver</button>
-        <button class="dd-btn dd-btn-reject" ${status === 'rejected' ? 'disabled' : ''} onclick="decideDriver('${uid}','rejected')"><i class="fa-solid fa-xmark"></i> Reject driver</button>
+        <button class="dd-btn dd-btn-reject"  ${status === 'rejected' ? 'disabled' : ''} onclick="decideDriver('${uid}','rejected')"><i class="fa-solid fa-xmark"></i> Reject driver</button>
     `;
 }
 
@@ -377,6 +595,228 @@ window.decideDriver = async function(uid, decision) {
         showToast('error', 'Could not save decision', e.message);
     }
 };
+
+/* ════════════════════════════════════════
+   SUBSCRIPTIONS
+════════════════════════════════════════ */
+async function loadAllUsers() {
+    try {
+        const snap = await get(ref(database, 'users'));
+        allUsers = snap.val() || {};
+        renderSubStats();
+        renderSubEmpty();
+    } catch(e) {
+        showToast('error', 'Could not load users', e.message);
+    }
+}
+
+function renderSubStats() {
+    const list  = Object.values(allUsers);
+    const proCount  = list.filter(u => u.isSubscribed).length;
+    document.getElementById('sub-stat-total').textContent = list.length;
+    document.getElementById('sub-stat-pro').textContent   = proCount;
+    document.getElementById('sub-stat-free').textContent  = list.length - proCount;
+}
+
+function renderSubEmpty() {
+    document.getElementById('sub-empty-state').style.display = 'block';
+    document.getElementById('users-list').innerHTML = '';
+    document.getElementById('sub-search-hint').style.display = 'none';
+}
+
+window.searchUsers = async function() {
+    const q = document.getElementById('user-search-input').value.trim().toLowerCase();
+    const btn = document.getElementById('user-search-btn');
+    if (!q) { showToast('info', 'Enter a search term', 'Type a name or email to find a user.'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+
+    // Reload from DB to get latest
+    try {
+        const snap = await get(ref(database, 'users'));
+        allUsers = snap.val() || {};
+        renderSubStats();
+    } catch(e) {}
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Search';
+
+    const results = Object.entries(allUsers).filter(([, u]) => {
+        const name  = (u.name  || '').toLowerCase();
+        const email = (u.email || '').toLowerCase();
+        return name.includes(q) || email.includes(q);
+    });
+
+    const hint = document.getElementById('sub-search-hint');
+    hint.style.display = 'block';
+    hint.innerHTML = `Found <b>${results.length}</b> user${results.length !== 1 ? 's' : ''} matching "<b>${escHtml(q)}</b>"`;
+
+    if (!results.length) {
+        document.getElementById('users-list').innerHTML = '';
+        document.getElementById('sub-empty-state').style.display = 'block';
+        document.getElementById('sub-empty-msg').textContent = 'No users matched that search. Try a different name or email.';
+        return;
+    }
+
+    document.getElementById('sub-empty-state').style.display = 'none';
+    renderUserCards(results);
+};
+
+function renderUserCards(entries) {
+    document.getElementById('users-list').innerHTML = entries.map(([uid, u]) => {
+        const isSub    = !!u.isSubscribed;
+        const used     = u.freeDeliveriesUsed || 0;
+        const initials = (u.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        const avatarEl = u.photoURL
+            ? `<div class="user-avatar"><img src="${escHtml(u.photoURL)}" onerror="this.parentElement.textContent='${initials}'"></div>`
+            : `<div class="user-avatar">${initials}</div>`;
+        const proTag   = isSub
+            ? `<span class="user-meta-tag tag-pro"><i class="fa-solid fa-gem" style="font-size:8px;margin-right:3px;"></i>Pro</span>`
+            : `<span class="user-meta-tag tag-free">Free</span>`;
+        const delivTag = isSub
+            ? `<span class="user-meta-tag tag-deliveries">${used}/4 free this month</span>`
+            : '';
+        const toggleBtn = isSub
+            ? `<button class="sub-toggle-btn revoke" onclick="toggleSubscription('${uid}', false, '${escHtml(u.name||'this user')}')">Revoke Pro</button>`
+            : `<button class="sub-toggle-btn grant"  onclick="toggleSubscription('${uid}', true,  '${escHtml(u.name||'this user')}')">Grant Pro</button>`;
+        return `
+            <div class="user-card" id="user-card-${uid}">
+                <div class="user-card-left">
+                    ${avatarEl}
+                    <div>
+                        <div class="user-name">${escHtml(u.name || 'Unknown')}</div>
+                        <div class="user-email">${escHtml(u.email || '—')}</div>
+                        <div class="user-meta-row">${proTag}${delivTag}</div>
+                    </div>
+                </div>
+                ${toggleBtn}
+            </div>`;
+    }).join('');
+}
+
+window.toggleSubscription = function(uid, grant, userName) {
+    const title  = grant ? `Grant Pro to ${userName}?` : `Revoke Pro from ${userName}?`;
+    const msg    = grant
+        ? 'They will immediately get access to 4 free deliveries per month and a verified badge.'
+        : 'Their Pro access and verified badge will be removed immediately.';
+    const label  = grant ? 'Grant Pro' : 'Revoke Pro';
+    openConfirm(title, msg, label, !grant, async () => {
+        const btn = document.querySelector(`#user-card-${uid} .sub-toggle-btn`);
+        if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+        try {
+            const updates = { isSubscribed: grant };
+            if (grant) {
+                // Reset free deliveries on grant so they start fresh
+                updates.freeDeliveriesUsed  = 0;
+                updates.lastDeliveryMonth   = new Date().toISOString().slice(0, 7);
+                updates.proGrantedAt        = Date.now();
+                updates.proGrantedBy        = 'admin';
+            } else {
+                updates.proRevokedAt = Date.now();
+                updates.proGrantedAt = null;
+            }
+            await update(ref(database, `users/${uid}`), updates);
+            allUsers[uid] = { ...allUsers[uid], ...updates };
+            renderSubStats();
+            // Re-render just this card
+            const entry = [[uid, allUsers[uid]]];
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = renderUserCardHTML(uid, allUsers[uid]);
+            const card = document.getElementById(`user-card-${uid}`);
+            if (card) card.outerHTML = tempDiv.innerHTML;
+            showToast('success', grant ? `Pro granted to ${userName}` : `Pro revoked from ${userName}`);
+        } catch(e) {
+            showToast('error', 'Could not update subscription', e.message);
+            if (btn) { btn.disabled = false; btn.textContent = grant ? 'Grant Pro' : 'Revoke Pro'; }
+        }
+    });
+};
+
+function renderUserCardHTML(uid, u) {
+    const isSub    = !!u.isSubscribed;
+    const used     = u.freeDeliveriesUsed || 0;
+    const initials = (u.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const avatarEl = u.photoURL
+        ? `<div class="user-avatar"><img src="${escHtml(u.photoURL)}" onerror="this.parentElement.textContent='${initials}'"></div>`
+        : `<div class="user-avatar">${initials}</div>`;
+    const proTag   = isSub
+        ? `<span class="user-meta-tag tag-pro"><i class="fa-solid fa-gem" style="font-size:8px;margin-right:3px;"></i>Pro</span>`
+        : `<span class="user-meta-tag tag-free">Free</span>`;
+    const delivTag = isSub
+        ? `<span class="user-meta-tag tag-deliveries">${used}/4 free this month</span>`
+        : '';
+    const toggleBtn = isSub
+        ? `<button class="sub-toggle-btn revoke" onclick="toggleSubscription('${uid}', false, '${escHtml(u.name||'this user')}')">Revoke Pro</button>`
+        : `<button class="sub-toggle-btn grant"  onclick="toggleSubscription('${uid}', true,  '${escHtml(u.name||'this user')}')">Grant Pro</button>`;
+    return `
+        <div class="user-card" id="user-card-${uid}">
+            <div class="user-card-left">
+                ${avatarEl}
+                <div>
+                    <div class="user-name">${escHtml(u.name || 'Unknown')}</div>
+                    <div class="user-email">${escHtml(u.email || '—')}</div>
+                    <div class="user-meta-row">${proTag}${delivTag}</div>
+                </div>
+            </div>
+            ${toggleBtn}
+        </div>`;
+}
+
+/* ════════════════════════════════════════
+   PRICING
+════════════════════════════════════════ */
+const PRICING_KEYS = ['food','document','small','medium','large'];
+const PRICING_DEFAULTS = { food:45, document:40, small:65, medium:110, large:180, perKmRate:3.5 };
+
+async function loadPricingData() {
+    try {
+        const snap = await get(ref(database, 'pricing/packages'));
+        pricingData = snap.exists() ? snap.val() : {};
+        PRICING_KEYS.forEach(key => {
+            const el = document.getElementById(`price-${key}`);
+            if (el) el.value = pricingData[key] !== undefined ? pricingData[key] : PRICING_DEFAULTS[key];
+            renderPricingUpdated(key, pricingData[`${key}_updatedAt`]);
+        });
+        const kmEl = document.getElementById('price-perKmRate');
+        if (kmEl) kmEl.value = pricingData.perKmRate !== undefined ? pricingData.perKmRate : PRICING_DEFAULTS.perKmRate;
+        renderPricingUpdated('perKmRate', pricingData['perKmRate_updatedAt']);
+    } catch(e) {
+        showToast('error', 'Could not load pricing', e.message);
+    }
+}
+
+function renderPricingUpdated(key, ts) {
+    const el = document.getElementById(`pricing-${key}-updated`);
+    if (!el) return;
+    el.textContent = ts ? `Last updated ${fmtDate(ts)}` : 'Not yet set — using app default';
+}
+
+window.savePricing = async function(key) {
+    const input = document.getElementById(`price-${key}`);
+    if (!input) return;
+    const val = parseFloat(input.value);
+    if (isNaN(val) || val < 0) { showToast('error', 'Invalid value', 'Enter a valid positive number.'); return; }
+    const btn = input.closest('.pricing-card, .km-card').querySelector('.pricing-save-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+        const updates = { [key]: val, [`${key}_updatedAt`]: Date.now() };
+        await update(ref(database, 'pricing/packages'), updates);
+        pricingData = { ...pricingData, ...updates };
+        renderPricingUpdated(key, Date.now());
+        const labels = { food:'Food Delivery', document:'Document', small:'Small Parcel', medium:'Medium Box', large:'Large Freight', perKmRate:'Per-km rate' };
+        showToast('success', `${labels[key] || key} updated`, `New value: R${val}${key === 'perKmRate' ? '/km' : ''}`);
+    } catch(e) {
+        showToast('error', 'Could not save pricing', e.message);
+    } finally {
+        btn.disabled = false; btn.textContent = 'Save';
+    }
+};
+
+/* ── Util ── */
+function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 </script>
 </body>
 </html>
