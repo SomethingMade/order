@@ -37,8 +37,9 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 main{max-width:980px;margin:0 auto;padding:20px 16px 80px;}
 
 /* ── Page-level tabs ── */
-.page-tabs{display:flex;gap:0;border-bottom:2px solid #e4e4e7;margin-bottom:22px;}
-.page-tab{padding:10px 18px;font-size:12.5px;font-weight:700;color:#71717a;cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .12s,border-color .12s;display:flex;align-items:center;gap:7px;}
+.page-tabs{display:flex;gap:0;border-bottom:2px solid #e4e4e7;margin-bottom:22px;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;}
+.page-tabs::-webkit-scrollbar{display:none;}
+.page-tab{padding:10px 18px;font-size:12.5px;font-weight:700;color:#71717a;cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .12s,border-color .12s;display:flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0;}
 .page-tab.active{color:#18181b;border-bottom-color:#18181b;}
 .page-tab i{font-size:11px;}
 
@@ -149,6 +150,49 @@ main{max-width:980px;margin:0 auto;padding:20px 16px 80px;}
 .km-card-header{display:flex;align-items:center;gap:11px;margin-bottom:16px;}
 .km-card-icon{width:36px;height:36px;border-radius:10px;background:#18181b;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;}
 
+/* ── Vouchers page ── */
+#page-vouchers{display:none;}
+.voucher-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
+.voucher-gen-card{background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:18px;margin-bottom:22px;}
+.voucher-gen-title{font-size:13.5px;font-weight:800;color:#18181b;margin-bottom:3px;display:flex;align-items:center;gap:8px;}
+.voucher-gen-title i{font-size:13px;color:#52525b;}
+.voucher-gen-sub{font-size:11.5px;color:#a1a1aa;margin-bottom:16px;}
+.voucher-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px;}
+.vf-field{display:flex;flex-direction:column;gap:6px;}
+.vf-label{font-size:10.5px;font-weight:700;color:#52525b;}
+.vf-input,.vf-select{padding:11px 12px;border:1.5px solid #e4e4e7;border-radius:10px;font-size:13px;font-weight:600;color:#18181b;outline:none;transition:border-color .15s;background:#fff;width:100%;}
+.vf-input:focus,.vf-select:focus{border-color:#18181b;}
+.voucher-type-row{display:flex;gap:8px;}
+.voucher-type-pill{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;border:1.5px solid #e4e4e7;border-radius:11px;cursor:pointer;transition:all .15s;background:#fff;}
+.voucher-type-pill i{font-size:15px;color:#71717a;}
+.voucher-type-pill span{font-size:11px;font-weight:700;color:#52525b;}
+.voucher-type-pill.active{border-color:#18181b;background:#fafafa;}
+.voucher-type-pill.active i,.voucher-type-pill.active span{color:#18181b;}
+.voucher-gen-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.voucher-gen-btn{padding:12px 22px;background:#18181b;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:opacity .15s;}
+.voucher-gen-btn:hover{opacity:0.88;}
+.voucher-gen-btn:disabled{opacity:0.45;cursor:not-allowed;}
+.voucher-result-box{display:none;align-items:center;justify-content:space-between;gap:10px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px 14px;margin-top:6px;}
+.voucher-result-code{font-size:16px;font-weight:800;color:#15803d;letter-spacing:1px;font-family:monospace;}
+.voucher-copy-btn{background:#fff;border:1.5px solid #bbf7d0;color:#15803d;padding:8px 12px;border-radius:9px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.voucher-filters{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;-ms-overflow-style:none;scrollbar-width:none;}
+.voucher-filters::-webkit-scrollbar{display:none;}
+.voucher-card{background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.vc-left{display:flex;align-items:center;gap:12px;min-width:0;}
+.vc-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.vc-icon.discount{background:#eff6ff;color:#1d4ed8;}
+.vc-icon.topup{background:#faf5ff;color:#7c3aed;}
+.vc-info{min-width:0;}
+.vc-code{font-size:13px;font-weight:800;font-family:monospace;letter-spacing:0.5px;}
+.vc-meta{font-size:10.5px;color:#a1a1aa;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vc-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.vc-value{font-size:13px;font-weight:800;color:#18181b;}
+.vc-status{font-size:9px;font-weight:800;letter-spacing:0.2px;text-transform:uppercase;padding:4px 8px;border-radius:999px;}
+.vc-status.active{background:#f0fdf4;color:#15803d;}
+.vc-status.used{background:#f4f4f5;color:#71717a;}
+.vc-status.expired{background:#fef2f2;color:#b91c1c;}
+.vc-del-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid #fecaca;background:#fff;color:#b91c1c;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+
 /* ── Toasts ── */
 #toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:380px;z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
 .toast{width:100%;padding:13px 15px;border-radius:14px;font-size:12.5px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 6px 24px rgba(0,0,0,0.14);opacity:0;transform:translateY(8px);transition:opacity .28s,transform .28s;pointer-events:auto;background:#fff;}
@@ -231,6 +275,9 @@ main{max-width:980px;margin:0 auto;padding:20px 16px 80px;}
             </button>
             <button class="page-tab" id="ptab-pricing" onclick="showPage('pricing')">
                 <i class="fa-solid fa-tags"></i> Pricing
+            </button>
+            <button class="page-tab" id="ptab-vouchers" onclick="showPage('vouchers')">
+                <i class="fa-solid fa-ticket"></i> Vouchers
             </button>
         </div>
 
@@ -360,6 +407,76 @@ main{max-width:980px;margin:0 auto;padding:20px 16px 80px;}
                 </div>
             </div>
         </div>
+
+        <!-- ════ VOUCHERS PAGE ════ -->
+        <div id="page-vouchers">
+            <div class="voucher-stats-row">
+                <div class="stat-card"><div class="stat-val" id="voucher-stat-total">0</div><div class="stat-lbl">Total Vouchers</div></div>
+                <div class="stat-card"><div class="stat-val" id="voucher-stat-active">0</div><div class="stat-lbl">Active</div></div>
+                <div class="stat-card"><div class="stat-val" id="voucher-stat-used">0</div><div class="stat-lbl">Redeemed</div></div>
+            </div>
+
+            <div class="voucher-gen-card">
+                <div class="voucher-gen-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate voucher</div>
+                <div class="voucher-gen-sub">Create a discount code or wallet top-up code customers can redeem in the app.</div>
+
+                <div class="vf-field" style="margin-bottom:14px;">
+                    <span class="vf-label">Voucher type</span>
+                    <div class="voucher-type-row">
+                        <div class="voucher-type-pill active" id="vtype-discount" onclick="setVoucherType('discount')">
+                            <i class="fa-solid fa-tag"></i><span>Discount</span>
+                        </div>
+                        <div class="voucher-type-pill" id="vtype-topup" onclick="setVoucherType('topup')">
+                            <i class="fa-solid fa-wallet"></i><span>Wallet Top-Up</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="voucher-form-grid">
+                    <div class="vf-field">
+                        <span class="vf-label">Value (ZAR)</span>
+                        <input id="voucher-value" class="vf-input" type="number" min="1" step="1" placeholder="e.g. 50">
+                    </div>
+                    <div class="vf-field">
+                        <span class="vf-label">Custom code (optional)</span>
+                        <input id="voucher-code-input" class="vf-input" type="text" placeholder="Auto-generated if blank" style="text-transform:uppercase;letter-spacing:0.5px;">
+                    </div>
+                    <div class="vf-field">
+                        <span class="vf-label">Expires in (days)</span>
+                        <input id="voucher-expiry" class="vf-input" type="number" min="0" step="1" placeholder="e.g. 30 (blank = never)">
+                    </div>
+                    <div class="vf-field">
+                        <span class="vf-label">Quantity</span>
+                        <input id="voucher-qty" class="vf-input" type="number" min="1" max="50" step="1" value="1">
+                    </div>
+                </div>
+
+                <div class="voucher-gen-actions">
+                    <button class="voucher-gen-btn" id="voucher-gen-btn" onclick="generateVouchers()">
+                        <i class="fa-solid fa-plus"></i> Generate
+                    </button>
+                </div>
+
+                <div class="voucher-result-box" id="voucher-result-box">
+                    <span class="voucher-result-code" id="voucher-result-code">—</span>
+                    <button class="voucher-copy-btn" onclick="copyVoucherResult()"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+            </div>
+
+            <div class="voucher-filters">
+                <button class="filter-pill active" data-vfilter="all" onclick="setVoucherFilter('all')">All</button>
+                <button class="filter-pill" data-vfilter="active" onclick="setVoucherFilter('active')">Active</button>
+                <button class="filter-pill" data-vfilter="used" onclick="setVoucherFilter('used')">Redeemed</button>
+                <button class="filter-pill" data-vfilter="expired" onclick="setVoucherFilter('expired')">Expired</button>
+                <button class="filter-pill" data-vfilter="discount" onclick="setVoucherFilter('discount')">Discount type</button>
+                <button class="filter-pill" data-vfilter="topup" onclick="setVoucherFilter('topup')">Top-up type</button>
+            </div>
+            <div id="vouchers-list"></div>
+            <div id="vouchers-empty-state" class="empty-state" style="display:none;">
+                <i class="fa-solid fa-ticket"></i>
+                <p>No vouchers in this view yet.</p>
+            </div>
+        </div>
     </main>
 </div>
 
@@ -409,6 +526,10 @@ let allUsers       = {};
 let currentFilter  = 'all';
 let activeDetailUid = null;
 let pricingData    = {};
+let vouchers        = {};
+let currentVoucherFilter = 'all';
+let selectedVoucherType  = 'discount';
+let vouchersListenerAttached = false;
 
 /* ── Toast ── */
 function showToast(type, title, msg, duration = 4200) {
@@ -445,12 +566,13 @@ window.runConfirmAction = function() {
 
 /* ── Page navigation ── */
 window.showPage = function(page) {
-    ['drivers','subscriptions','pricing'].forEach(p => {
+    ['drivers','subscriptions','pricing','vouchers'].forEach(p => {
         document.getElementById(`page-${p}`).style.display = p === page ? 'block' : 'none';
         document.getElementById(`ptab-${p}`).classList.toggle('active', p === page);
     });
     if (page === 'subscriptions' && Object.keys(allUsers).length === 0) loadAllUsers();
     if (page === 'pricing') loadPricingData();
+    if (page === 'vouchers') attachVouchersListener();
 };
 
 /* ── Auth ── */
@@ -494,7 +616,7 @@ function matchesFilter(app, filter) {
 
 window.setFilter = function(f) {
     currentFilter = f;
-    document.querySelectorAll('.filter-pill').forEach(p => p.classList.toggle('active', p.dataset.filter === f));
+    document.querySelectorAll('#page-drivers .filter-pill').forEach(p => p.classList.toggle('active', p.dataset.filter === f));
     renderList();
 };
 
@@ -811,6 +933,190 @@ window.savePricing = async function(key) {
     } finally {
         btn.disabled = false; btn.textContent = 'Save';
     }
+};
+
+/* ════════════════════════════════════════
+   VOUCHERS
+════════════════════════════════════════ */
+function attachVouchersListener() {
+    if (vouchersListenerAttached) return;
+    vouchersListenerAttached = true;
+    onValue(ref(database, 'vouchers'), (snap) => {
+        vouchers = snap.val() || {};
+        renderVoucherStats();
+        renderVouchersList();
+    });
+}
+
+window.setVoucherType = function(type) {
+    selectedVoucherType = type;
+    document.getElementById('vtype-discount').classList.toggle('active', type === 'discount');
+    document.getElementById('vtype-topup').classList.toggle('active', type === 'topup');
+};
+
+function genRandomCode(len = 8) {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars
+    let s = '';
+    for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    return s;
+}
+
+let lastGeneratedCodes = [];
+
+window.generateVouchers = async function() {
+    const valueInput  = document.getElementById('voucher-value');
+    const codeInput    = document.getElementById('voucher-code-input');
+    const expiryInput  = document.getElementById('voucher-expiry');
+    const qtyInput      = document.getElementById('voucher-qty');
+    const btn = document.getElementById('voucher-gen-btn');
+
+    const value = parseFloat(valueInput.value);
+    if (isNaN(value) || value <= 0) { showToast('error', 'Invalid value', 'Enter a voucher value greater than 0.'); return; }
+
+    let qty = parseInt(qtyInput.value, 10);
+    if (isNaN(qty) || qty < 1) qty = 1;
+    if (qty > 50) qty = 50;
+
+    const customCode = codeInput.value.trim().toUpperCase();
+    if (customCode && qty > 1) { showToast('error', 'Custom code with quantity', 'A custom code can only be used when generating a single voucher.'); return; }
+
+    const expiryDays = parseFloat(expiryInput.value);
+    const expiresAt = (!isNaN(expiryDays) && expiryDays > 0) ? Date.now() + expiryDays * 86400000 : null;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating…';
+
+    try {
+        const codesCreated = [];
+        for (let i = 0; i < qty; i++) {
+            let code = customCode || genRandomCode();
+            // Ensure uniqueness against existing vouchers and this batch
+            let attempts = 0;
+            while ((vouchers[code] || codesCreated.includes(code)) && attempts < 10) {
+                code = genRandomCode();
+                attempts++;
+            }
+            const voucherData = {
+                type: selectedVoucherType,
+                value: value,
+                used: false,
+                createdAt: Date.now(),
+                createdBy: 'admin'
+            };
+            if (expiresAt) voucherData.expiresAt = expiresAt;
+            await set(ref(database, `vouchers/${code}`), voucherData);
+            codesCreated.push(code);
+        }
+
+        lastGeneratedCodes = codesCreated;
+        const resultBox  = document.getElementById('voucher-result-box');
+        const resultCode = document.getElementById('voucher-result-code');
+        resultCode.textContent = codesCreated.length === 1 ? codesCreated[0] : `${codesCreated.length} codes generated`;
+        resultBox.style.display = 'flex';
+
+        showToast('success', codesCreated.length === 1 ? 'Voucher generated' : `${codesCreated.length} vouchers generated`,
+            codesCreated.length === 1 ? `Code: ${codesCreated[0]}` : 'Click Copy to copy all codes.');
+
+        // Reset form (keep type selection)
+        valueInput.value = '';
+        codeInput.value = '';
+        expiryInput.value = '';
+        qtyInput.value = '1';
+    } catch(e) {
+        showToast('error', 'Could not generate voucher', e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-plus"></i> Generate';
+    }
+};
+
+window.copyVoucherResult = function() {
+    const text = lastGeneratedCodes.join('\n');
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('success', 'Copied to clipboard');
+    }).catch(() => {
+        showToast('error', 'Could not copy', 'Please copy the code manually.');
+    });
+};
+
+window.setVoucherFilter = function(f) {
+    currentVoucherFilter = f;
+    document.querySelectorAll('#page-vouchers .filter-pill').forEach(p => p.classList.toggle('active', p.dataset.vfilter === f));
+    renderVouchersList();
+};
+
+function voucherStatus(v) {
+    if (v.used) return 'used';
+    if (v.expiresAt && Date.now() > v.expiresAt) return 'expired';
+    return 'active';
+}
+
+function matchesVoucherFilter(v, filter) {
+    if (filter === 'all') return true;
+    if (filter === 'discount' || filter === 'topup') return v.type === filter;
+    return voucherStatus(v) === filter;
+}
+
+function renderVoucherStats() {
+    const list = Object.values(vouchers);
+    document.getElementById('voucher-stat-total').textContent  = list.length;
+    document.getElementById('voucher-stat-active').textContent = list.filter(v => voucherStatus(v) === 'active').length;
+    document.getElementById('voucher-stat-used').textContent   = list.filter(v => v.used).length;
+}
+
+function fmtDateTime(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-ZA', { day:'numeric', month:'short' }) + ' ' + d.toLocaleTimeString('en-ZA', { hour:'2-digit', minute:'2-digit' });
+}
+
+function renderVouchersList() {
+    const listEl  = document.getElementById('vouchers-list');
+    const emptyEl = document.getElementById('vouchers-empty-state');
+    const entries = Object.entries(vouchers)
+        .filter(([, v]) => matchesVoucherFilter(v, currentVoucherFilter))
+        .sort((a, b) => (b[1].createdAt||0) - (a[1].createdAt||0));
+
+    if (!entries.length) { listEl.innerHTML = ''; emptyEl.style.display = 'block'; return; }
+    emptyEl.style.display = 'none';
+
+    listEl.innerHTML = entries.map(([code, v]) => {
+        const status = voucherStatus(v);
+        const isTopup = v.type === 'topup';
+        const icon = isTopup ? 'fa-wallet' : 'fa-tag';
+        const usedByCount = v.usedBy ? Object.keys(v.usedBy).length : 0;
+        const metaParts = [`Created ${fmtDateTime(v.createdAt)}`];
+        if (v.expiresAt) metaParts.push(`Expires ${fmtDateTime(v.expiresAt)}`);
+        if (usedByCount) metaParts.push(`Redeemed by ${usedByCount} user${usedByCount !== 1 ? 's' : ''}`);
+        return `
+            <div class="voucher-card">
+                <div class="vc-left">
+                    <div class="vc-icon ${isTopup ? 'topup' : 'discount'}"><i class="fa-solid ${icon}"></i></div>
+                    <div class="vc-info">
+                        <div class="vc-code">${escHtml(code)}</div>
+                        <div class="vc-meta">${metaParts.join(' · ')}</div>
+                    </div>
+                </div>
+                <div class="vc-right">
+                    <span class="vc-value">R${Number(v.value||0).toFixed(0)}</span>
+                    <span class="vc-status ${status}">${status}</span>
+                    <button class="vc-del-btn" onclick="deleteVoucher('${escHtml(code)}')" title="Delete voucher"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+window.deleteVoucher = function(code) {
+    openConfirm(`Delete voucher ${code}?`, 'This will permanently remove the voucher. This cannot be undone.', 'Delete', true, async () => {
+        try {
+            await remove(ref(database, `vouchers/${code}`));
+            showToast('success', 'Voucher deleted', code);
+        } catch(e) {
+            showToast('error', 'Could not delete voucher', e.message);
+        }
+    });
 };
 
 /* ── Util ── */
